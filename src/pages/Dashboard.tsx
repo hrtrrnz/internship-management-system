@@ -1,4 +1,4 @@
-import { Clock, CheckSquare, FileText, Users, LogIn, LogOut, ExternalLink } from "lucide-react";
+import { Clock, CheckSquare, FileText, Users, LogIn, LogOut, ExternalLink, Building2, MapPin, Link2, Smile } from "lucide-react";
 import { useState, useEffect } from "react";
 
 function StatCard({ icon: Icon, value, label, sub, colorClass, bgClass }: {
@@ -40,12 +40,34 @@ function LiveClock() {
   );
 }
 
+function ProgressBar({ label, value, colorClass }: { label: string; value: number; colorClass: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-foreground">{label}</span>
+        <span className="text-xs text-muted-foreground">{value}%</span>
+      </div>
+      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+        <div className="h-full rounded-full transition-all" style={{ width: `${value}%`, background: `hsl(var(${colorClass}))` }} />
+      </div>
+    </div>
+  );
+}
+
 const attendanceEntries = [
   { date: "Mar 21", time: "8:02 AM – 5:14 PM", status: "In" },
   { date: "Mar 20", time: "8:15 AM – 5:30 PM", status: "Out" },
   { date: "Mar 19", time: "7:58 AM – 5:00 PM", status: "In" },
   { date: "Mar 18", time: "8:30 AM – 5:45 PM", status: "Out" },
   { date: "Mar 17", time: "8:00 AM – 5:00 PM", status: "In" },
+];
+
+const todayTasks = [
+  { label: "Submit morning report", time: "9:00 AM", done: true },
+  { label: "Team standup meeting", time: "10:00 AM", done: true },
+  { label: "Review client proposal", time: "11:00 AM", done: true },
+  { label: "Finish module 3 quiz", time: "Due today", done: false },
+  { label: "Upload accomplishment report", time: "5:00 PM", done: false },
 ];
 
 export default function Dashboard() {
@@ -61,7 +83,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-3 gap-6">
         {/* Daily Log */}
-        <div className="col-span-2 space-y-4">
+        <div className="col-span-2">
           <div className="bg-card rounded-xl border border-border p-6">
             <div className="flex items-center justify-between mb-1">
               <h3 className="text-lg font-display font-bold text-foreground">Dream Academy · Daily Log</h3>
@@ -95,18 +117,58 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-2 gap-4 mt-5">
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Full Name</label>
+                <label className="text-xs font-semibold text-foreground">Full Name</label>
                 <div className="mt-1 px-3 py-2.5 rounded-lg bg-muted text-sm text-foreground flex items-center gap-2">
                   <Users className="w-4 h-4 text-muted-foreground" /> Juan dela Cruz
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground">Assigned Unit</label>
+                <label className="text-xs font-semibold text-foreground">Assigned Unit</label>
                 <div className="mt-1 px-3 py-2.5 rounded-lg bg-muted text-sm text-foreground flex items-center gap-2">
-                  <Users className="w-4 h-4 text-muted-foreground" /> Technology & Innovation
+                  <Building2 className="w-4 h-4 text-muted-foreground" /> Technology & Innovation
                 </div>
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div>
+                <label className="text-xs font-semibold text-foreground">Assigned Company <span className="text-destructive">*</span></label>
+                <select className="mt-1 w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                  <option>Select company...</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-foreground">Office Location <span className="text-destructive">*</span></label>
+                <select className="mt-1 w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+                  <option>Select location...</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="text-xs font-semibold text-foreground">Accomplishment Report <span className="text-destructive">*</span></label>
+              <input
+                type="text"
+                placeholder="Paste Google Drive link here..."
+                className="mt-1 w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Share the link with talent.dreamacademy@gmail.com and hr.dreamacademy@gmail.com · If clocking in, type CLOCK-IN
+              </p>
+            </div>
+
+            <div className="mt-4">
+              <label className="text-xs font-semibold text-foreground">How's your day today? <Smile className="w-3.5 h-3.5 inline text-stat-orange" /></label>
+              <textarea
+                placeholder="Share something about your day (optional)..."
+                rows={3}
+                className="mt-1 w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-y"
+              />
+            </div>
+
+            <button className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-stat-orange text-white font-semibold text-sm hover:opacity-90 transition-opacity">
+              <LogIn className="w-4 h-4" /> Submit Clock-In
+            </button>
           </div>
         </div>
 
@@ -128,14 +190,34 @@ export default function Dashboard() {
           </div>
 
           <div className="bg-card rounded-xl border border-border p-5">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="font-display font-bold text-foreground">Internship Progress</h3>
               <span className="text-xs text-muted-foreground">Week 7 of 12</span>
             </div>
-            <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-accent rounded-full" style={{ width: '58%' }} />
+            <div className="space-y-3">
+              <ProgressBar label="Attendance" value={92} colorClass="--stat-green" />
+              <ProgressBar label="Tasks Completed" value={78} colorClass="--stat-blue" />
+              <ProgressBar label="Reports Submitted" value={85} colorClass="--stat-emerald" />
+              <ProgressBar label="Learning Modules" value={60} colorClass="--stat-orange" />
             </div>
-            <p className="text-xs text-muted-foreground mt-2">58% complete</p>
+          </div>
+
+          <div className="bg-card rounded-xl border border-border p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-display font-bold text-foreground">Today's Tasks</h3>
+              <span className="text-xs text-muted-foreground">{todayTasks.filter(t => t.done).length} of {todayTasks.length} done</span>
+            </div>
+            <ul className="space-y-2.5">
+              {todayTasks.map((t) => (
+                <li key={t.label} className={`flex items-center gap-3 text-sm px-3 py-2 rounded-lg ${t.done ? 'bg-stat-green-bg' : 'bg-muted'}`}>
+                  <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${t.done ? 'bg-stat-green' : 'border border-border'}`}>
+                    {t.done && <CheckSquare className="w-3.5 h-3.5 text-white" />}
+                  </div>
+                  <span className={`flex-1 ${t.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{t.label}</span>
+                  <span className={`text-xs shrink-0 ${t.done ? 'text-muted-foreground' : 'text-destructive font-medium'}`}>{t.time}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
