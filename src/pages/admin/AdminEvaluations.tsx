@@ -1,19 +1,25 @@
-import { ClipboardCheck, Star, Download } from "lucide-react";
+import { Star, Download, TrendingUp, Users } from "lucide-react";
 
 const evaluations = [
-  { intern: "Juan dela Cruz", mentor: "Maria Reyes", period: "Week 6", score: 4.5, date: "Mar 17", status: "Completed" },
-  { intern: "Ana Santos", mentor: "Maria Reyes", period: "Week 6", score: 4.7, date: "Mar 17", status: "Completed" },
-  { intern: "Mark Rivera", mentor: "Maria Reyes", period: "Week 6", score: 3.2, date: "Mar 17", status: "Completed" },
-  { intern: "Lisa Tan", mentor: "James Cruz", period: "Week 4", score: 4.3, date: "Mar 3", status: "Completed" },
-  { intern: "Peter Lim", mentor: "Elena Torres", period: "Week 4", score: 4.1, date: "Mar 3", status: "Completed" },
-  { intern: "Juan dela Cruz", mentor: "Maria Reyes", period: "Week 7", score: 0, date: "Mar 28", status: "Pending" },
-  { intern: "Ana Santos", mentor: "Maria Reyes", period: "Week 7", score: 0, date: "Mar 28", status: "Pending" },
+  { intern: "Ana Santos", mentor: "Maria Reyes", period: "Week 6", score: 4.7, date: "Mar 17", status: "Completed", dept: "Tech & Innovation" },
+  { intern: "Juan dela Cruz", mentor: "Maria Reyes", period: "Week 6", score: 4.5, date: "Mar 17", status: "Completed", dept: "Tech & Innovation" },
+  { intern: "Lisa Tan", mentor: "James Cruz", period: "Week 4", score: 4.3, date: "Mar 3", status: "Completed", dept: "Marketing" },
+  { intern: "Peter Lim", mentor: "Elena Torres", period: "Week 4", score: 4.1, date: "Mar 3", status: "Completed", dept: "Operations" },
+  { intern: "Mark Rivera", mentor: "Maria Reyes", period: "Week 6", score: 3.2, date: "Mar 17", status: "Completed", dept: "Tech & Innovation" },
+  { intern: "Juan dela Cruz", mentor: "Maria Reyes", period: "Week 7", score: 0, date: "Mar 28", status: "Pending", dept: "Tech & Innovation" },
+  { intern: "Ana Santos", mentor: "Maria Reyes", period: "Week 7", score: 0, date: "Mar 28", status: "Pending", dept: "Tech & Innovation" },
 ];
 
-const statusStyles: Record<string, string> = {
-  Completed: "text-stat-green bg-stat-green-bg",
-  Pending: "text-stat-orange bg-stat-orange-bg",
-};
+const completedEvals = evaluations.filter(e => e.status === "Completed");
+const avgScore = (completedEvals.reduce((a, e) => a + e.score, 0) / completedEvals.length).toFixed(1);
+
+// Score distribution
+const distribution = [
+  { range: "4.5–5.0", count: completedEvals.filter(e => e.score >= 4.5).length, color: "--stat-green" },
+  { range: "4.0–4.4", count: completedEvals.filter(e => e.score >= 4.0 && e.score < 4.5).length, color: "--stat-blue" },
+  { range: "3.5–3.9", count: completedEvals.filter(e => e.score >= 3.5 && e.score < 4.0).length, color: "--stat-orange" },
+  { range: "Below 3.5", count: completedEvals.filter(e => e.score < 3.5).length, color: "--destructive" },
+];
 
 export default function AdminEvaluations() {
   return (
@@ -28,40 +34,119 @@ export default function AdminEvaluations() {
         </button>
       </div>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Intern</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Mentor</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Period</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Score</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Due Date</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {evaluations.map((e, i) => (
-              <tr key={i} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                <td className="px-5 py-3 font-medium text-foreground">{e.intern}</td>
-                <td className="px-5 py-3 text-muted-foreground">{e.mentor}</td>
-                <td className="px-5 py-3 text-muted-foreground">{e.period}</td>
-                <td className="px-5 py-3">
-                  {e.score > 0 ? (
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3.5 h-3.5 text-stat-orange fill-stat-orange" />
-                      <span className="font-medium text-foreground">{e.score}/5.0</span>
+      <div className="grid grid-cols-3 gap-6">
+        {/* Score distribution + stats */}
+        <div className="space-y-4">
+          {/* Average score card */}
+          <div className="bg-card rounded-xl border border-border p-6 text-center">
+            <div className="w-24 h-24 mx-auto relative mb-3">
+              <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--stat-orange))" strokeWidth="3"
+                  strokeDasharray={`${(parseFloat(avgScore) / 5) * 97.4} 97.4`} strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <Star className="w-4 h-4 text-stat-orange fill-stat-orange mb-0.5" />
+                <span className="text-xl font-bold font-display text-foreground">{avgScore}</span>
+              </div>
+            </div>
+            <p className="text-sm font-medium text-foreground">Program Average</p>
+            <p className="text-xs text-muted-foreground">out of 5.0</p>
+          </div>
+
+          {/* Distribution */}
+          <div className="bg-card rounded-xl border border-border p-5">
+            <h3 className="font-display font-bold text-foreground mb-3">Score Distribution</h3>
+            <div className="space-y-2.5">
+              {distribution.map((d) => {
+                const maxCount = Math.max(...distribution.map(x => x.count));
+                return (
+                  <div key={d.range} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-16">{d.range}</span>
+                    <div className="flex-1 h-5 bg-muted rounded-md overflow-hidden">
+                      <div className="h-full rounded-md flex items-center pl-2" style={{
+                        width: `${maxCount > 0 ? (d.count / maxCount) * 100 : 0}%`,
+                        background: `hsl(var(${d.color}))`,
+                        minWidth: d.count > 0 ? '20px' : '0px',
+                      }}>
+                        <span className="text-[10px] font-bold text-white">{d.count}</span>
+                      </div>
                     </div>
-                  ) : <span className="text-muted-foreground">—</span>}
-                </td>
-                <td className="px-5 py-3 text-muted-foreground">{e.date}</td>
-                <td className="px-5 py-3">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusStyles[e.status]}`}>{e.status}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-card rounded-xl border border-border p-4 text-center">
+              <Users className="w-5 h-5 text-stat-blue mx-auto mb-1" />
+              <p className="text-lg font-bold font-display text-foreground">{completedEvals.length}</p>
+              <p className="text-[10px] text-muted-foreground">Completed</p>
+            </div>
+            <div className="bg-card rounded-xl border border-border p-4 text-center">
+              <TrendingUp className="w-5 h-5 text-stat-green mx-auto mb-1" />
+              <p className="text-lg font-bold font-display text-foreground">{evaluations.filter(e => e.status === "Pending").length}</p>
+              <p className="text-[10px] text-muted-foreground">Pending</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Evaluation list */}
+        <div className="col-span-2 space-y-3">
+          {/* Completed evaluations as ranked cards */}
+          {completedEvals.sort((a, b) => b.score - a.score).map((e, i) => (
+            <div key={`${e.intern}-${e.period}`} className="bg-card rounded-xl border border-border p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                i === 0 ? 'bg-stat-orange-bg text-stat-orange' : 'bg-muted text-muted-foreground'
+              }`}>
+                {i + 1}
+              </div>
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold flex-shrink-0">
+                {e.intern.split(" ").map(n => n[0]).join("")}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">{e.intern}</p>
+                <p className="text-[10px] text-muted-foreground">{e.dept} · {e.mentor} · {e.period}</p>
+              </div>
+              {/* Score bar */}
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full rounded-full" style={{
+                    width: `${(e.score / 5) * 100}%`,
+                    background: e.score >= 4.5 ? 'hsl(var(--stat-green))' : e.score >= 4.0 ? 'hsl(var(--stat-blue))' : e.score >= 3.5 ? 'hsl(var(--stat-orange))' : 'hsl(var(--destructive))'
+                  }} />
+                </div>
+                <div className="flex items-center gap-1 w-14">
+                  <Star className="w-3.5 h-3.5 text-stat-orange fill-stat-orange" />
+                  <span className="text-sm font-bold text-foreground">{e.score}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Pending evaluations */}
+          {evaluations.filter(e => e.status === "Pending").length > 0 && (
+            <>
+              <div className="flex items-center gap-3 pt-2">
+                <span className="text-sm font-semibold text-stat-orange">Pending</span>
+                <div className="flex-1 h-px bg-stat-orange/30" />
+              </div>
+              {evaluations.filter(e => e.status === "Pending").map((e, i) => (
+                <div key={`pending-${i}`} className="bg-card rounded-xl border border-dashed border-stat-orange/30 p-4 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs font-bold">
+                    {e.intern.split(" ").map(n => n[0]).join("")}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">{e.intern}</p>
+                    <p className="text-[10px] text-muted-foreground">{e.period} · Due {e.date}</p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium text-stat-orange bg-stat-orange-bg">Pending</span>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

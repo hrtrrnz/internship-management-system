@@ -1,91 +1,92 @@
-import { CheckSquare, Circle, Clock, AlertTriangle } from "lucide-react";
+import { CheckSquare, Circle, Clock, AlertTriangle, Flag } from "lucide-react";
 
 const tasks = [
-  { id: 1, title: "Complete React module assessment", category: "Learning", priority: "High", due: "Mar 25", status: "In Progress" },
-  { id: 2, title: "Submit weekly progress report", category: "Reports", priority: "High", due: "Mar 24", status: "Pending" },
-  { id: 3, title: "Review API documentation", category: "Learning", priority: "Medium", due: "Mar 26", status: "Pending" },
-  { id: 4, title: "Update project repository README", category: "Development", priority: "Low", due: "Mar 28", status: "Pending" },
-  { id: 5, title: "Attend team standup meeting", category: "Meetings", priority: "Medium", due: "Mar 24", status: "Completed" },
-  { id: 6, title: "Design dashboard wireframes", category: "Design", priority: "High", due: "Mar 22", status: "Completed" },
-  { id: 7, title: "Fix navigation bug", category: "Development", priority: "High", due: "Mar 21", status: "Completed" },
-  { id: 8, title: "Prepare presentation slides", category: "Reports", priority: "Medium", due: "Mar 27", status: "In Progress" },
+  { id: 1, title: "Complete React module assessment", category: "Learning", priority: "High", due: "Mar 25", status: "In Progress", description: "Finish all exercises in Module 3" },
+  { id: 2, title: "Submit weekly progress report", category: "Reports", priority: "High", due: "Mar 24", status: "Pending", description: "Week 7 summary with accomplishments" },
+  { id: 3, title: "Review API documentation", category: "Learning", priority: "Medium", due: "Mar 26", status: "Pending", description: "Read through REST API design patterns" },
+  { id: 4, title: "Update project README", category: "Development", priority: "Low", due: "Mar 28", status: "Pending", description: "Add setup instructions and screenshots" },
+  { id: 5, title: "Attend team standup", category: "Meetings", priority: "Medium", due: "Mar 24", status: "Completed", description: "Daily sync with the dev team" },
+  { id: 6, title: "Design dashboard wireframes", category: "Design", priority: "High", due: "Mar 22", status: "Completed", description: "Low-fi wireframes for the intern portal" },
+  { id: 7, title: "Fix navigation bug", category: "Development", priority: "High", due: "Mar 21", status: "Completed", description: "Mobile sidebar not closing on route change" },
+  { id: 8, title: "Prepare presentation slides", category: "Reports", priority: "Medium", due: "Mar 27", status: "In Progress", description: "Sprint demo for stakeholders" },
 ];
 
-const priorityStyles: Record<string, string> = {
-  High: "text-destructive bg-destructive/10",
-  Medium: "text-stat-orange bg-stat-orange-bg",
-  Low: "text-stat-green bg-stat-green-bg",
+const columns = [
+  { key: "Pending", label: "To Do", icon: Circle, color: "--muted-foreground", borderColor: "border-muted-foreground/30" },
+  { key: "In Progress", label: "In Progress", icon: Clock, color: "--stat-blue", borderColor: "border-stat-blue/30" },
+  { key: "Completed", label: "Done", icon: CheckSquare, color: "--stat-green", borderColor: "border-stat-green/30" },
+];
+
+const priorityConfig: Record<string, { icon: string; style: string }> = {
+  High: { icon: "🔴", style: "text-destructive" },
+  Medium: { icon: "🟡", style: "text-stat-orange" },
+  Low: { icon: "🟢", style: "text-stat-green" },
 };
 
-const statusStyles: Record<string, string> = {
-  Completed: "text-stat-green bg-stat-green-bg",
-  "In Progress": "text-stat-blue bg-stat-blue-bg",
-  Pending: "text-muted-foreground bg-muted",
+const categoryStyles: Record<string, string> = {
+  Learning: "bg-stat-blue-bg text-stat-blue",
+  Reports: "bg-stat-orange-bg text-stat-orange",
+  Development: "bg-stat-green-bg text-stat-green",
+  Design: "bg-stat-emerald-bg text-stat-emerald",
+  Meetings: "bg-muted text-muted-foreground",
 };
 
 export default function Tasks() {
-  const completed = tasks.filter(t => t.status === "Completed").length;
-  const inProgress = tasks.filter(t => t.status === "In Progress").length;
-  const pending = tasks.filter(t => t.status === "Pending").length;
-
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-display font-bold text-foreground">Tasks</h2>
-        <p className="text-sm text-muted-foreground">Manage and track your assigned tasks</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-display font-bold text-foreground">Tasks</h2>
+          <p className="text-sm text-muted-foreground">Manage and track your assigned tasks</p>
+        </div>
+        <div className="flex items-center gap-3 text-xs">
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground font-medium">
+            <Flag className="w-3 h-3" /> {tasks.length} total
+          </span>
+        </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
-        <StatMini icon={CheckSquare} label="Total Tasks" value={tasks.length.toString()} color="--stat-blue" />
-        <StatMini icon={CheckSquare} label="Completed" value={completed.toString()} color="--stat-green" />
-        <StatMini icon={Clock} label="In Progress" value={inProgress.toString()} color="--stat-orange" />
-        <StatMini icon={AlertTriangle} label="Pending" value={pending.toString()} color="--destructive" />
-      </div>
+      {/* Kanban Board */}
+      <div className="grid grid-cols-3 gap-4 items-start">
+        {columns.map((col) => {
+          const colTasks = tasks.filter(t => t.status === col.key);
+          return (
+            <div key={col.key} className="space-y-3">
+              {/* Column header */}
+              <div className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border-l-[3px] bg-card border border-border`} style={{ borderLeftColor: `hsl(var(${col.color}))` }}>
+                <col.icon className="w-4 h-4" style={{ color: `hsl(var(${col.color}))` }} />
+                <span className="text-sm font-semibold text-foreground">{col.label}</span>
+                <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{colTasks.length}</span>
+              </div>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Task</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Category</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Priority</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Due Date</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tasks.map((t) => (
-              <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                <td className="px-5 py-3 font-medium text-foreground flex items-center gap-2">
-                  <Circle className={`w-4 h-4 ${t.status === "Completed" ? "text-stat-green" : "text-muted-foreground"}`} />
-                  {t.title}
-                </td>
-                <td className="px-5 py-3 text-muted-foreground">{t.category}</td>
-                <td className="px-5 py-3">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${priorityStyles[t.priority]}`}>{t.priority}</span>
-                </td>
-                <td className="px-5 py-3 text-foreground">{t.due}</td>
-                <td className="px-5 py-3">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusStyles[t.status]}`}>{t.status}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
+              {/* Task cards */}
+              {colTasks.map((task) => (
+                <div key={task.id} className="bg-card rounded-xl border border-border p-4 hover:shadow-md transition-all cursor-pointer group">
+                  <div className="flex items-start justify-between mb-2">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${categoryStyles[task.category]}`}>{task.category}</span>
+                    <span className="text-xs" title={task.priority}>{priorityConfig[task.priority].icon}</span>
+                  </div>
+                  <h4 className="text-sm font-semibold text-foreground mb-1 group-hover:text-primary transition-colors leading-snug">{task.title}</h4>
+                  <p className="text-xs text-muted-foreground mb-3 leading-relaxed">{task.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {task.due}
+                    </span>
+                    {col.key === "Completed" && (
+                      <CheckSquare className="w-4 h-4 text-stat-green" />
+                    )}
+                  </div>
+                </div>
+              ))}
 
-function StatMini({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string; color: string }) {
-  return (
-    <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-4">
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `hsl(var(${color}) / 0.15)` }}>
-        <Icon className="w-5 h-5" style={{ color: `hsl(var(${color}))` }} />
-      </div>
-      <div>
-        <p className="text-2xl font-bold font-display text-foreground">{value}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
+              {colTasks.length === 0 && (
+                <div className="rounded-xl border border-dashed border-border p-8 text-center">
+                  <p className="text-xs text-muted-foreground">No tasks</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
