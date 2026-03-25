@@ -1,24 +1,25 @@
-import { CheckSquare, Plus, User } from "lucide-react";
+import { CheckSquare, Clock, Circle, Plus, User } from "lucide-react";
 
 const assignments = [
-  { id: 1, title: "Complete TypeScript assessment", assignedTo: "Juan dela Cruz", due: "Mar 25", priority: "High", status: "In Progress" },
-  { id: 2, title: "Build user auth module", assignedTo: "Ana Santos", due: "Mar 26", priority: "High", status: "In Progress" },
-  { id: 3, title: "Write API documentation", assignedTo: "Mark Rivera", due: "Mar 27", priority: "Medium", status: "Pending" },
-  { id: 4, title: "Create unit tests for dashboard", assignedTo: "Juan dela Cruz", due: "Mar 28", priority: "Medium", status: "Pending" },
-  { id: 5, title: "Design mobile wireframes", assignedTo: "Lisa Tan", due: "Mar 25", priority: "High", status: "Completed" },
-  { id: 6, title: "Optimize database queries", assignedTo: "David Chen", due: "Mar 29", priority: "Low", status: "Pending" },
+  { id: 1, title: "Complete TypeScript assessment", assignedTo: "Juan dela Cruz", avatar: "JD", due: "Mar 25", priority: "High", status: "In Progress", description: "Finish all exercises in the TS module" },
+  { id: 2, title: "Build user auth module", assignedTo: "Ana Santos", avatar: "AS", due: "Mar 26", priority: "High", status: "In Progress", description: "Implement login, signup, and password reset" },
+  { id: 3, title: "Write API documentation", assignedTo: "Mark Rivera", avatar: "MR", due: "Mar 27", priority: "Medium", status: "Pending", description: "Document all REST endpoints" },
+  { id: 4, title: "Create unit tests for dashboard", assignedTo: "Juan dela Cruz", avatar: "JD", due: "Mar 28", priority: "Medium", status: "Pending", description: "Write tests for stat cards and chart widgets" },
+  { id: 5, title: "Design mobile wireframes", assignedTo: "Lisa Tan", avatar: "LT", due: "Mar 25", priority: "High", status: "Completed", description: "Low-fi wireframes for the mobile app" },
+  { id: 6, title: "Optimize database queries", assignedTo: "David Chen", avatar: "DC", due: "Mar 29", priority: "Low", status: "Pending", description: "Profile and optimize slow queries" },
+  { id: 7, title: "Brand style guide review", assignedTo: "Sofia Garcia", avatar: "SG", due: "Mar 26", priority: "Medium", status: "Completed", description: "Review and provide feedback on style guide" },
 ];
 
-const priorityStyles: Record<string, string> = {
-  High: "text-destructive bg-destructive/10",
-  Medium: "text-stat-orange bg-stat-orange-bg",
-  Low: "text-stat-green bg-stat-green-bg",
-};
+const columns = [
+  { key: "Pending", label: "To Do", icon: Circle, color: "--muted-foreground" },
+  { key: "In Progress", label: "In Progress", icon: Clock, color: "--stat-blue" },
+  { key: "Completed", label: "Done", icon: CheckSquare, color: "--stat-green" },
+];
 
-const statusStyles: Record<string, string> = {
-  Completed: "text-stat-green bg-stat-green-bg",
-  "In Progress": "text-stat-blue bg-stat-blue-bg",
-  Pending: "text-muted-foreground bg-muted",
+const priorityDot: Record<string, string> = {
+  High: "bg-destructive",
+  Medium: "bg-stat-orange",
+  Low: "bg-stat-green",
 };
 
 export default function MentorTaskAssignments() {
@@ -34,35 +35,42 @@ export default function MentorTaskAssignments() {
         </button>
       </div>
 
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Task</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Assigned To</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Due Date</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Priority</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assignments.map((t) => (
-              <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                <td className="px-5 py-3 font-medium text-foreground">{t.title}</td>
-                <td className="px-5 py-3 text-foreground flex items-center gap-2">
-                  <User className="w-3.5 h-3.5 text-muted-foreground" /> {t.assignedTo}
-                </td>
-                <td className="px-5 py-3 text-muted-foreground">{t.due}</td>
-                <td className="px-5 py-3">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${priorityStyles[t.priority]}`}>{t.priority}</span>
-                </td>
-                <td className="px-5 py-3">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusStyles[t.status]}`}>{t.status}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Kanban */}
+      <div className="grid grid-cols-3 gap-4 items-start">
+        {columns.map((col) => {
+          const colTasks = assignments.filter(t => t.status === col.key);
+          return (
+            <div key={col.key} className="space-y-3">
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-card border border-border" style={{ borderLeftWidth: '3px', borderLeftColor: `hsl(var(${col.color}))` }}>
+                <col.icon className="w-4 h-4" style={{ color: `hsl(var(${col.color}))` }} />
+                <span className="text-sm font-semibold text-foreground">{col.label}</span>
+                <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{colTasks.length}</span>
+              </div>
+
+              {colTasks.map((task) => (
+                <div key={task.id} className="bg-card rounded-xl border border-border p-4 hover:shadow-md transition-all cursor-pointer">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`w-2 h-2 rounded-full ${priorityDot[task.priority]}`} />
+                    <span className="text-[10px] text-muted-foreground font-medium">{task.priority}</span>
+                  </div>
+                  <h4 className="text-sm font-semibold text-foreground mb-1">{task.title}</h4>
+                  <p className="text-xs text-muted-foreground mb-3">{task.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[9px] font-bold">
+                        {task.avatar}
+                      </div>
+                      <span className="text-[11px] text-muted-foreground">{task.assignedTo.split(" ")[0]}</span>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {task.due}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
