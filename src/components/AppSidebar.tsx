@@ -2,11 +2,12 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Clock, CheckSquare, FileText, Trophy,
   BookOpen, Users, ClipboardCheck, User, FolderOpen, MoreVertical, Bell, Search,
-  ChevronDown, UserCog, BarChart3, Settings, Building, Shield, Star, Calendar,
-  GraduationCap
+  UserCog, BarChart3, Settings, Building, Shield, Star, Calendar,
+  GraduationCap, LogOut
 } from "lucide-react";
 import { useRole, UserRole } from "@/contexts/RoleContext";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import hytLogo from "@/assets/hyt-logo.png";
 
 type NavSection = {
   label: string;
@@ -18,8 +19,8 @@ const studentNav: NavSection[] = [
     label: "MAIN",
     items: [
       { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-      { to: "/attendance", icon: Clock, label: "Attendance", badge: 2 },
-      { to: "/tasks", icon: CheckSquare, label: "Tasks", badge: 5 },
+      { to: "/attendance", icon: Clock, label: "Attendance" },
+      { to: "/tasks", icon: CheckSquare, label: "Tasks" },
       { to: "/daily-reports", icon: FileText, label: "Daily Reports" },
       { to: "/accomplishments", icon: Trophy, label: "Accomplishments" },
     ],
@@ -27,9 +28,8 @@ const studentNav: NavSection[] = [
   {
     label: "LEARNING",
     items: [
-      { to: "/learning-modules", icon: BookOpen, label: "Learning Modules", badge: 3 },
       { to: "/my-mentor", icon: Users, label: "My Mentor" },
-      { to: "/evaluations", icon: ClipboardCheck, label: "Evaluations" },
+      { to: "/evaluations", icon: ClipboardCheck, label: "Evaluation" },
     ],
   },
   {
@@ -46,16 +46,16 @@ const mentorNav: NavSection[] = [
     label: "OVERVIEW",
     items: [
       { to: "/mentor", icon: LayoutDashboard, label: "Dashboard" },
-      { to: "/mentor/interns", icon: GraduationCap, label: "My Interns", badge: 8 },
+      { to: "/mentor/interns", icon: GraduationCap, label: "My Interns" },
     ],
   },
   {
     label: "MANAGEMENT",
     items: [
       { to: "/mentor/attendance-review", icon: Clock, label: "Attendance Review" },
-      { to: "/mentor/report-review", icon: FileText, label: "Report Review", badge: 3 },
+      { to: "/mentor/report-review", icon: FileText, label: "Report Review" },
       { to: "/mentor/task-assignments", icon: CheckSquare, label: "Task Assignments" },
-      { to: "/mentor/evaluations", icon: ClipboardCheck, label: "Evaluations", badge: 2 },
+      { to: "/mentor/evaluations", icon: ClipboardCheck, label: "Evaluations" },
     ],
   },
   {
@@ -84,10 +84,10 @@ const adminNav: NavSection[] = [
   {
     label: "MANAGEMENT",
     items: [
-      { to: "/admin/users", icon: Users, label: "User Management", badge: 42 },
+      { to: "/admin/users", icon: Users, label: "User Management" },
       { to: "/admin/departments", icon: Building, label: "Departments" },
       { to: "/admin/mentors", icon: Star, label: "Mentors" },
-      { to: "/admin/interns", icon: GraduationCap, label: "Interns", badge: 24 },
+      { to: "/admin/interns", icon: GraduationCap, label: "Interns" },
     ],
   },
   {
@@ -101,7 +101,6 @@ const adminNav: NavSection[] = [
   {
     label: "SYSTEM",
     items: [
-      { to: "/admin/settings", icon: Settings, label: "Settings" },
       { to: "/admin/roles", icon: Shield, label: "Roles & Permissions" },
     ],
   },
@@ -113,70 +112,52 @@ const navByRole: Record<UserRole, NavSection[]> = {
   admin: adminNav,
 };
 
-const roleColors: Record<UserRole, string> = {
-  student: "bg-stat-green",
-  mentor: "bg-stat-blue",
-  admin: "bg-stat-orange",
+const settingsRouteByRole: Record<UserRole, string> = {
+  student: "/my-profile",
+  mentor: "/mentor/profile",
+  admin: "/admin/settings",
 };
 
 export default function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { role, user, setRole } = useRole();
-  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
+  const { role, user } = useRole();
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const sections = navByRole[role];
 
-  const handleRoleSwitch = (newRole: UserRole) => {
-    setRole(newRole);
-    setRoleMenuOpen(false);
-    if (newRole === "student") navigate("/");
-    else if (newRole === "mentor") navigate("/mentor");
-    else navigate("/admin");
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleLogout = () => {
+    setProfileMenuOpen(false);
+    navigate("/signin");
+  };
+
+  const handleSettings = () => {
+    setProfileMenuOpen(false);
+    navigate(settingsRouteByRole[role]);
   };
 
   return (
     <aside className="w-60 min-h-screen bg-sidebar flex flex-col justify-between fixed left-0 top-0 z-40">
       <div>
-        <div className="px-5 pt-6 pb-4">
-          <h1 className="font-display text-lg font-bold text-sidebar-primary">
-            HYT <span className="text-sidebar-accent-foreground">FOUNDATION</span>
-          </h1>
-          <p className="text-xs text-sidebar-muted tracking-wider mt-0.5">DREAM ACADEMY PORTAL</p>
-        </div>
-
-        {/* Role switcher */}
-        <div className="px-3 mb-3">
-          <div className="relative">
-            <button
-              onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-sidebar-accent text-sidebar-accent-foreground text-sm font-medium hover:bg-sidebar-accent/80 transition-colors"
-            >
-              <span className={`w-2 h-2 rounded-full ${roleColors[role]}`} />
-              <span className="flex-1 text-left capitalize">{role} View</span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${roleMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {roleMenuOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-sidebar-accent rounded-lg border border-sidebar-border overflow-hidden z-50 shadow-lg">
-                {(["student", "mentor", "admin"] as UserRole[]).map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => handleRoleSwitch(r)}
-                    className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm text-left transition-colors ${
-                      role === r
-                        ? "text-sidebar-primary-foreground bg-sidebar-primary"
-                        : "text-sidebar-foreground hover:bg-sidebar-border"
-                    }`}
-                  >
-                    <span className={`w-2 h-2 rounded-full ${roleColors[r]}`} />
-                    <span className="capitalize">{r} View</span>
-                  </button>
-                ))}
-              </div>
-            )}
+        <div className="px-5 pt-5 pb-4 flex items-center gap-3">
+          <img src={hytLogo} alt="HYT Foundation" width={48} height={48} />
+          <div>
+            <p className="text-xs font-bold tracking-wider text-sidebar-accent-foreground leading-tight">HELPING YOUTH<br/>TRANSCEND</p>
+            <p className="text-[9px] text-sidebar-muted tracking-wider">DREAM ACADEMY PORTAL</p>
           </div>
         </div>
 
-        <nav className="px-3 space-y-5 mt-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 220px)' }}>
+        <nav className="px-3 space-y-5 mt-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
           {sections.map((section) => (
             <div key={section.label}>
               <p className="text-[10px] font-semibold tracking-widest text-sidebar-muted px-3 mb-1.5">
@@ -197,13 +178,6 @@ export default function AppSidebar() {
                       >
                         <item.icon className="w-4 h-4" />
                         <span className="flex-1">{item.label}</span>
-                        {item.badge !== undefined && (
-                          <span className={`text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold ${
-                            isActive ? "bg-sidebar-primary-foreground/20 text-sidebar-primary-foreground" : "bg-stat-orange text-card"
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
                       </NavLink>
                     </li>
                   );
@@ -214,8 +188,29 @@ export default function AppSidebar() {
         </nav>
       </div>
 
-      <div className="px-3 pb-4">
-        <div className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-sidebar-accent transition-colors cursor-pointer">
+      <div className="px-3 pb-4 relative" ref={menuRef}>
+        {profileMenuOpen && (
+          <div className="absolute bottom-16 left-3 right-3 bg-sidebar-accent rounded-lg border border-sidebar-border overflow-hidden z-50 shadow-xl">
+            <button
+              onClick={handleSettings}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-sidebar-foreground hover:bg-sidebar-border transition-colors text-left"
+            >
+              <Settings className="w-4 h-4" />
+              Settings
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-destructive hover:bg-sidebar-border transition-colors text-left"
+            >
+              <LogOut className="w-4 h-4" />
+              Log out
+            </button>
+          </div>
+        )}
+        <div
+          onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+          className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-sidebar-accent transition-colors cursor-pointer"
+        >
           <div className="w-9 h-9 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground text-xs font-bold">
             {user.initials}
           </div>

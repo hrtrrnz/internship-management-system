@@ -3,7 +3,13 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { RoleProvider } from "@/contexts/RoleContext";
 import AppLayout from "./components/AppLayout";
+
+// Auth pages
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import DemoSelect from "./pages/DemoSelect";
 
 // Student pages
 import Dashboard from "./pages/Dashboard";
@@ -51,46 +57,53 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route element={<AppLayout />}>
-            {/* Student routes */}
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/daily-reports" element={<DailyReports />} />
-            <Route path="/accomplishments" element={<Accomplishments />} />
-            <Route path="/learning-modules" element={<LearningModules />} />
-            <Route path="/my-mentor" element={<MyMentor />} />
-            <Route path="/evaluations" element={<Evaluations />} />
-            <Route path="/my-profile" element={<MyProfile />} />
-            <Route path="/documents" element={<Documents />} />
+        <RoleProvider>
+          <Routes>
+            {/* Auth routes (outside layout) */}
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/demo" element={<DemoSelect />} />
 
-            {/* Mentor routes */}
-            <Route path="/mentor" element={<MentorDashboard />} />
-            <Route path="/mentor/interns" element={<MentorInterns />} />
-            <Route path="/mentor/attendance-review" element={<MentorAttendanceReview />} />
-            <Route path="/mentor/report-review" element={<MentorReportReview />} />
-            <Route path="/mentor/task-assignments" element={<MentorTaskAssignments />} />
-            <Route path="/mentor/evaluations" element={<MentorEvaluations />} />
-            <Route path="/mentor/sessions" element={<MentorSessions />} />
-            <Route path="/mentor/learning-paths" element={<MentorLearningPaths />} />
-            <Route path="/mentor/profile" element={<MentorProfile />} />
+            <Route element={<AppLayout />}>
+              {/* Student routes */}
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/attendance" element={<Attendance />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/daily-reports" element={<DailyReports />} />
+              <Route path="/accomplishments" element={<Accomplishments />} />
+              <Route path="/learning-modules" element={<LearningModules />} />
+              <Route path="/my-mentor" element={<MyMentor />} />
+              <Route path="/evaluations" element={<Evaluations />} />
+              <Route path="/my-profile" element={<MyProfile />} />
+              <Route path="/documents" element={<Documents />} />
 
-            {/* Admin routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/departments" element={<AdminDepartments />} />
-            <Route path="/admin/mentors" element={<AdminMentors />} />
-            <Route path="/admin/interns" element={<AdminInterns />} />
-            <Route path="/admin/attendance" element={<AdminAttendanceLogs />} />
-            <Route path="/admin/reports" element={<AdminReports />} />
-            <Route path="/admin/evaluations" element={<AdminEvaluations />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="/admin/roles" element={<AdminRoles />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+              {/* Mentor routes */}
+              <Route path="/mentor" element={<MentorDashboard />} />
+              <Route path="/mentor/interns" element={<MentorInterns />} />
+              <Route path="/mentor/attendance-review" element={<MentorAttendanceReview />} />
+              <Route path="/mentor/report-review" element={<MentorReportReview />} />
+              <Route path="/mentor/task-assignments" element={<MentorTaskAssignments />} />
+              <Route path="/mentor/evaluations" element={<MentorEvaluations />} />
+              <Route path="/mentor/sessions" element={<MentorSessions />} />
+              <Route path="/mentor/learning-paths" element={<MentorLearningPaths />} />
+              <Route path="/mentor/profile" element={<MentorProfile />} />
+
+              {/* Admin routes */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/analytics" element={<AdminAnalytics />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/departments" element={<AdminDepartments />} />
+              <Route path="/admin/mentors" element={<AdminMentors />} />
+              <Route path="/admin/interns" element={<AdminInterns />} />
+              <Route path="/admin/attendance" element={<AdminAttendanceLogs />} />
+              <Route path="/admin/reports" element={<AdminReports />} />
+              <Route path="/admin/evaluations" element={<AdminEvaluations />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
+              <Route path="/admin/roles" element={<AdminRoles />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </RoleProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
