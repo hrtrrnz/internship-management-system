@@ -1,24 +1,23 @@
-import { Star, Download, TrendingUp, Users } from "lucide-react";
+import { Star, Download, CheckCircle2, Clock, Users } from "lucide-react";
 
 const evaluations = [
-  { intern: "Ana Santos", mentor: "Maria Reyes", period: "Week 6", score: 4.7, date: "Mar 17", status: "Completed", dept: "Tech & Innovation" },
-  { intern: "Juan dela Cruz", mentor: "Maria Reyes", period: "Week 6", score: 4.5, date: "Mar 17", status: "Completed", dept: "Tech & Innovation" },
-  { intern: "Lisa Tan", mentor: "James Cruz", period: "Week 4", score: 4.3, date: "Mar 3", status: "Completed", dept: "Marketing" },
-  { intern: "Peter Lim", mentor: "Elena Torres", period: "Week 4", score: 4.1, date: "Mar 3", status: "Completed", dept: "Operations" },
-  { intern: "Mark Rivera", mentor: "Maria Reyes", period: "Week 6", score: 3.2, date: "Mar 17", status: "Completed", dept: "Tech & Innovation" },
-  { intern: "Juan dela Cruz", mentor: "Maria Reyes", period: "Week 7", score: 0, date: "Mar 28", status: "Pending", dept: "Tech & Innovation" },
-  { intern: "Ana Santos", mentor: "Maria Reyes", period: "Week 7", score: 0, date: "Mar 28", status: "Pending", dept: "Tech & Innovation" },
+  { intern: "Ana Santos", mentor: "Maria Reyes", score: 4.7, date: "Apr 10, 2026", status: "Completed", dept: "Tech & Innovation", offboarding: "Apr 12, 2026" },
+  { intern: "Juan dela Cruz", mentor: "Maria Reyes", score: 4.38, date: "Apr 15, 2026", status: "Completed", dept: "Tech & Innovation", offboarding: "Apr 18, 2026" },
+  { intern: "Lisa Tan", mentor: "James Cruz", score: 4.3, date: "Apr 5, 2026", status: "Completed", dept: "Marketing", offboarding: "Apr 8, 2026" },
+  { intern: "Peter Lim", mentor: "Elena Torres", score: 4.1, date: "Apr 7, 2026", status: "Completed", dept: "Operations", offboarding: "Apr 10, 2026" },
+  { intern: "Mark Rivera", mentor: "Maria Reyes", score: 0, date: "", status: "Pending", dept: "Tech & Innovation", offboarding: "Apr 30, 2026" },
+  { intern: "Sara Kim", mentor: "James Cruz", score: 0, date: "", status: "Pending", dept: "Marketing", offboarding: "May 5, 2026" },
 ];
 
-const completedEvals = evaluations.filter(e => e.status === "Completed");
-const avgScore = (completedEvals.reduce((a, e) => a + e.score, 0) / completedEvals.length).toFixed(1);
+const completed = evaluations.filter(e => e.status === "Completed");
+const pending = evaluations.filter(e => e.status === "Pending");
+const avgScore = (completed.reduce((a, e) => a + e.score, 0) / completed.length).toFixed(1);
 
-// Score distribution
 const distribution = [
-  { range: "4.5–5.0", count: completedEvals.filter(e => e.score >= 4.5).length, color: "--stat-green" },
-  { range: "4.0–4.4", count: completedEvals.filter(e => e.score >= 4.0 && e.score < 4.5).length, color: "--stat-blue" },
-  { range: "3.5–3.9", count: completedEvals.filter(e => e.score >= 3.5 && e.score < 4.0).length, color: "--stat-orange" },
-  { range: "Below 3.5", count: completedEvals.filter(e => e.score < 3.5).length, color: "--destructive" },
+  { range: "4.5–5.0", count: completed.filter(e => e.score >= 4.5).length, color: "--stat-green" },
+  { range: "4.0–4.4", count: completed.filter(e => e.score >= 4.0 && e.score < 4.5).length, color: "--stat-blue" },
+  { range: "3.5–3.9", count: completed.filter(e => e.score >= 3.5 && e.score < 4.0).length, color: "--stat-orange" },
+  { range: "Below 3.5", count: completed.filter(e => e.score < 3.5).length, color: "--destructive" },
 ];
 
 export default function AdminEvaluations() {
@@ -26,8 +25,8 @@ export default function AdminEvaluations() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-display font-bold text-foreground">Evaluations</h2>
-          <p className="text-sm text-muted-foreground">All intern evaluations across the program</p>
+          <h2 className="text-2xl font-display font-bold text-foreground">Final Evaluations</h2>
+          <p className="text-sm text-muted-foreground">Pre-offboarding evaluations across the program</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors">
           <Download className="w-4 h-4" /> Export
@@ -35,9 +34,8 @@ export default function AdminEvaluations() {
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-        {/* Score distribution + stats */}
+        {/* Left: Stats */}
         <div className="space-y-4">
-          {/* Average score card */}
           <div className="bg-card rounded-xl border border-border p-6 text-center">
             <div className="w-24 h-24 mx-auto relative mb-3">
               <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
@@ -54,9 +52,8 @@ export default function AdminEvaluations() {
             <p className="text-xs text-muted-foreground">out of 5.0</p>
           </div>
 
-          {/* Distribution */}
           <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground mb-3">Score Distribution</h3>
+            <h3 className="font-display font-bold text-foreground text-sm mb-3">Score Distribution</h3>
             <div className="space-y-2.5">
               {distribution.map((d) => {
                 const maxCount = Math.max(...distribution.map(x => x.count));
@@ -80,25 +77,24 @@ export default function AdminEvaluations() {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-card rounded-xl border border-border p-4 text-center">
-              <Users className="w-5 h-5 text-stat-blue mx-auto mb-1" />
-              <p className="text-lg font-bold font-display text-foreground">{completedEvals.length}</p>
+              <CheckCircle2 className="w-5 h-5 text-stat-green mx-auto mb-1" />
+              <p className="text-lg font-bold font-display text-foreground">{completed.length}</p>
               <p className="text-[10px] text-muted-foreground">Completed</p>
             </div>
             <div className="bg-card rounded-xl border border-border p-4 text-center">
-              <TrendingUp className="w-5 h-5 text-stat-green mx-auto mb-1" />
-              <p className="text-lg font-bold font-display text-foreground">{evaluations.filter(e => e.status === "Pending").length}</p>
+              <Clock className="w-5 h-5 text-stat-orange mx-auto mb-1" />
+              <p className="text-lg font-bold font-display text-foreground">{pending.length}</p>
               <p className="text-[10px] text-muted-foreground">Pending</p>
             </div>
           </div>
         </div>
 
-        {/* Evaluation list */}
+        {/* Right: Evaluation list */}
         <div className="col-span-2 space-y-3">
-          {/* Completed evaluations as ranked cards */}
-          {completedEvals.sort((a, b) => b.score - a.score).map((e, i) => (
-            <div key={`${e.intern}-${e.period}`} className="bg-card rounded-xl border border-border p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
+          {completed.sort((a, b) => b.score - a.score).map((e, i) => (
+            <div key={`${e.intern}`} className="bg-card rounded-xl border border-border p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                i === 0 ? 'bg-stat-orange-bg text-stat-orange' : 'bg-muted text-muted-foreground'
+                i === 0 ? 'bg-stat-orange/10 text-stat-orange' : 'bg-muted text-muted-foreground'
               }`}>
                 {i + 1}
               </div>
@@ -107,9 +103,8 @@ export default function AdminEvaluations() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground">{e.intern}</p>
-                <p className="text-[10px] text-muted-foreground">{e.dept} · {e.mentor} · {e.period}</p>
+                <p className="text-[10px] text-muted-foreground">{e.dept} · {e.mentor} · Offboarded {e.offboarding}</p>
               </div>
-              {/* Score bar */}
               <div className="flex items-center gap-3 flex-shrink-0">
                 <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
                   <div className="h-full rounded-full" style={{
@@ -125,23 +120,22 @@ export default function AdminEvaluations() {
             </div>
           ))}
 
-          {/* Pending evaluations */}
-          {evaluations.filter(e => e.status === "Pending").length > 0 && (
+          {pending.length > 0 && (
             <>
               <div className="flex items-center gap-3 pt-2">
-                <span className="text-sm font-semibold text-stat-orange">Pending</span>
+                <span className="text-sm font-semibold text-stat-orange">Pending Evaluations</span>
                 <div className="flex-1 h-px bg-stat-orange/30" />
               </div>
-              {evaluations.filter(e => e.status === "Pending").map((e, i) => (
-                <div key={`pending-${i}`} className="bg-card rounded-xl border border-dashed border-stat-orange/30 p-4 flex items-center gap-4">
+              {pending.map((e) => (
+                <div key={e.intern} className="bg-card rounded-xl border border-dashed border-stat-orange/30 p-4 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs font-bold">
                     {e.intern.split(" ").map(n => n[0]).join("")}
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-foreground">{e.intern}</p>
-                    <p className="text-[10px] text-muted-foreground">{e.period} · Due {e.date}</p>
+                    <p className="text-[10px] text-muted-foreground">{e.dept} · {e.mentor} · Offboarding {e.offboarding}</p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-medium text-stat-orange bg-stat-orange-bg">Pending</span>
+                  <span className="px-3 py-1 rounded-full text-xs font-medium text-stat-orange bg-stat-orange/10">Pending</span>
                 </div>
               ))}
             </>
