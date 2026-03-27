@@ -21,7 +21,6 @@ export default function Accomplishments() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Accomplishments</h2>
-        <p className="text-sm text-muted-foreground">Your achievements and milestones throughout the internship</p>
       </div>
 
       <div className="grid grid-cols-3 gap-6">

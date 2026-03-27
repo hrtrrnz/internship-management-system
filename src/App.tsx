@@ -22,6 +22,7 @@ import MyMentor from "./pages/MyMentor";
 import Evaluations from "./pages/Evaluations";
 import MyProfile from "./pages/MyProfile";
 import Documents from "./pages/Documents";
+import Messages from "./pages/Messages";
 
 // Mentor pages
 import MentorDashboard from "./pages/mentor/MentorDashboard";
@@ -46,6 +47,7 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminEvaluations from "./pages/admin/AdminEvaluations";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminRoles from "./pages/admin/AdminRoles";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 import NotFound from "./pages/NotFound";
 
@@ -76,6 +78,7 @@ const App = () => (
               <Route path="/evaluations" element={<Evaluations />} />
               <Route path="/my-profile" element={<MyProfile />} />
               <Route path="/documents" element={<Documents />} />
+              <Route path="/messages" element={<Messages />} />
 
               {/* Mentor routes */}
               <Route path="/mentor" element={<MentorDashboard />} />
@@ -87,6 +90,7 @@ const App = () => (
               <Route path="/mentor/sessions" element={<MentorSessions />} />
               <Route path="/mentor/learning-paths" element={<MentorLearningPaths />} />
               <Route path="/mentor/profile" element={<MentorProfile />} />
+              <Route path="/mentor/messages" element={<Messages />} />
 
               {/* Admin routes */}
               <Route path="/admin" element={<AdminDashboard />} />
@@ -100,6 +104,8 @@ const App = () => (
               <Route path="/admin/evaluations" element={<AdminEvaluations />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
               <Route path="/admin/roles" element={<AdminRoles />} />
+              <Route path="/admin/profile" element={<AdminProfile />} />
+              <Route path="/admin/messages" element={<Messages />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

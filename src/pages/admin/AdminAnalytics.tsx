@@ -48,7 +48,6 @@ export default function AdminAnalytics() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Analytics</h2>
-        <p className="text-sm text-muted-foreground">Program-wide performance metrics and insights</p>
       </div>
 
       {/* KPI strip */}

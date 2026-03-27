@@ -21,7 +21,6 @@ export default function Documents() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Documents</h2>
-        <p className="text-sm text-muted-foreground">Access your internship documents and templates</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

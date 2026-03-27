@@ -5,7 +5,6 @@ export default function MyMentor() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">My Mentor</h2>
-        <p className="text-sm text-muted-foreground">Connect and track sessions with your assigned mentor</p>
       </div>
 
       <div className="grid grid-cols-3 gap-6">

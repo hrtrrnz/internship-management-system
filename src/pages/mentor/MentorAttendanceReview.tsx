@@ -27,7 +27,6 @@ export default function MentorAttendanceReview() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Attendance Review</h2>
-        <p className="text-sm text-muted-foreground">Monitor your interns' attendance for today — March 24, 2026</p>
       </div>
 
       {/* Live status board */}

@@ -28,7 +28,6 @@ export default function MentorReportReview() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">Report Review</h2>
-          <p className="text-sm text-muted-foreground">Review and provide feedback on intern daily reports</p>
         </div>
         {pendingCount > 0 && (
           <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-stat-orange-bg text-stat-orange text-sm font-medium">

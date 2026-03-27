@@ -158,7 +158,6 @@ export default function DailyReports() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Daily Reports</h2>
-        <p className="text-sm text-muted-foreground">One report per workday (summary of everything you did that day)</p>
       </div>
 
       {/* Stats strip */}

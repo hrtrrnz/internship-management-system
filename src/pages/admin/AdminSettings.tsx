@@ -5,7 +5,6 @@ export default function AdminSettings() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Settings</h2>
-        <p className="text-sm text-muted-foreground">Configure system preferences and defaults</p>
       </div>
 
       <div className="grid grid-cols-2 gap-6">

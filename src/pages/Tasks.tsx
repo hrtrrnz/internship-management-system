@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { CheckSquare, Circle, Clock, Flag, X, Paperclip } from "lucide-react";
 
 const tasks = [
@@ -98,7 +99,6 @@ export default function Tasks() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">Tasks</h2>
-          <p className="text-sm text-muted-foreground">Manage and track your assigned tasks</p>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted text-muted-foreground font-medium">
@@ -162,81 +162,83 @@ export default function Tasks() {
         })}
       </div>
 
-      {selectedTask && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setSelectedTask(null)}
-        >
+      {selectedTask &&
+        createPortal(
           <div
-            className="w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setSelectedTask(null)}
           >
-            <div className="flex items-start justify-between border-b border-border px-6 py-4">
-              <div>
-                <h3 className="text-lg font-display font-bold text-foreground">Task Preview</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Review task details before updating progress</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedTask(null)}
-                className="h-8 w-8 rounded-md border border-border hover:bg-muted transition-colors"
-                aria-label="Close preview"
-              >
-                <X className="h-4 w-4 mx-auto text-foreground" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5 space-y-4">
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${categoryStyles[selectedTask.category]}`}>{selectedTask.category}</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground">
-                  {selectedTask.status}
-                </span>
-              </div>
-
-              <div>
-                <h4 className="text-base font-semibold text-foreground">{selectedTask.title}</h4>
-                <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{selectedTask.description}</p>
-              </div>
-
-              {selectedTask.mentorDescription && (
-                <div className="rounded-lg border border-border bg-muted/20 p-3">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Mentor Notes</p>
-                  <p className="text-sm text-foreground leading-relaxed">{selectedTask.mentorDescription}</p>
+            <div
+              className="w-full max-w-2xl rounded-2xl border border-border bg-card shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between border-b border-border px-6 py-4">
+                <div>
+                  <h3 className="text-lg font-display font-bold text-foreground">Task Preview</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Review task details before updating progress</p>
                 </div>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedTask(null)}
+                  className="h-8 w-8 rounded-md border border-border hover:bg-muted transition-colors"
+                  aria-label="Close preview"
+                >
+                  <X className="h-4 w-4 mx-auto text-foreground" />
+                </button>
+              </div>
 
-              {selectedTask.mentorAttachments && selectedTask.mentorAttachments.length > 0 && (
-                <div className="rounded-lg border border-border bg-muted/20 p-3">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Mentor Attachments</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedTask.mentorAttachments.map((file) => (
-                      <span
-                        key={file}
-                        className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground"
-                      >
-                        <Paperclip className="h-3 w-3 text-muted-foreground" />
-                        {file}
-                      </span>
-                    ))}
+              <div className="px-6 py-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${categoryStyles[selectedTask.category]}`}>{selectedTask.category}</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground">
+                    {selectedTask.status}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-base font-semibold text-foreground">{selectedTask.title}</h4>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{selectedTask.description}</p>
+                </div>
+
+                {selectedTask.mentorDescription && (
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Mentor Notes</p>
+                    <p className="text-sm text-foreground leading-relaxed">{selectedTask.mentorDescription}</p>
+                  </div>
+                )}
+
+                {selectedTask.mentorAttachments && selectedTask.mentorAttachments.length > 0 && (
+                  <div className="rounded-lg border border-border bg-muted/20 p-3">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Mentor Attachments</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTask.mentorAttachments.map((file) => (
+                        <span
+                          key={file}
+                          className="inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground"
+                        >
+                          <Paperclip className="h-3 w-3 text-muted-foreground" />
+                          {file}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+                    <p className="text-[11px] text-muted-foreground">Due Date</p>
+                    <p className="text-sm font-semibold text-foreground mt-0.5">{selectedTask.due}</p>
+                  </div>
+                  <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+                    <p className="text-[11px] text-muted-foreground">Current Column</p>
+                    <p className="text-sm font-semibold text-foreground mt-0.5">{selectedTask.status}</p>
                   </div>
                 </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
-                  <p className="text-[11px] text-muted-foreground">Due Date</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{selectedTask.due}</p>
-                </div>
-                <div className="rounded-lg border border-border bg-muted/30 px-3 py-2">
-                  <p className="text-[11px] text-muted-foreground">Current Column</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{selectedTask.status}</p>
-                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

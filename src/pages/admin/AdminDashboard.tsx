@@ -4,10 +4,10 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-4 gap-4">
-        <StatCard icon={Users} value="42" label="Total Users" sub="↑4 this month" color="--stat-blue" bg="bg-stat-blue-bg" />
-        <StatCard icon={GraduationCap} value="24" label="Active Interns" sub="3 batches" color="--stat-green" bg="bg-stat-green-bg" />
-        <StatCard icon={Star} value="8" label="Mentors" sub="All active" color="--stat-orange" bg="bg-stat-orange-bg" />
-        <StatCard icon={Building} value="6" label="Departments" sub="2 with openings" color="--stat-emerald" bg="bg-stat-emerald-bg" />
+        <StatCard icon={Users} value="42" label="Total Users" sub="↑4 this month" color="--stat-blue" />
+        <StatCard icon={GraduationCap} value="24" label="Active Interns" sub="3 batches" color="--stat-green" />
+        <StatCard icon={Star} value="8" label="Mentors" sub="All active" color="--stat-orange" />
+        <StatCard icon={Building} value="6" label="Departments" sub="2 with openings" color="--stat-emerald" />
       </div>
 
       <div className="grid grid-cols-3 gap-6">
@@ -98,16 +98,15 @@ export default function AdminDashboard() {
   );
 }
 
-function StatCard({ icon: Icon, value, label, sub, color, bg }: {
-  icon: React.ElementType; value: string; label: string; sub: string; color: string; bg: string;
+function StatCard({ icon: Icon, value, label, sub, color }: {
+  icon: React.ElementType; value: string; label: string; sub: string; color: string;
 }) {
   return (
-    <div className={`rounded-xl p-5 border border-border ${bg} relative overflow-hidden`}>
-      <div className="absolute top-4 right-0 w-24 h-24 rounded-full opacity-20" style={{ background: `hsl(var(${color}))`, filter: 'blur(30px)' }} />
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: `hsl(var(${color}) / 0.15)` }}>
+    <div className="rounded-xl bg-card p-5 border border-border/80 relative overflow-hidden shadow-sm">
+      <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: `hsl(var(${color}) / 0.16)` }}>
         <Icon className="w-5 h-5" style={{ color: `hsl(var(${color}))` }} />
       </div>
-      <p className="text-3xl font-bold text-foreground font-display">{value}</p>
+      <p className="text-2xl font-bold text-foreground">{value}</p>
       <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
       <p className="text-xs mt-1" style={{ color: `hsl(var(${color}))` }}>{sub}</p>
     </div>

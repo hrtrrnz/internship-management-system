@@ -22,7 +22,6 @@ export default function MentorInterns() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">My Interns</h2>
-        <p className="text-sm text-muted-foreground">Manage and track your assigned interns</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

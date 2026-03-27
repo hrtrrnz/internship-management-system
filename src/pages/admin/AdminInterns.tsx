@@ -22,7 +22,6 @@ export default function AdminInterns() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Interns</h2>
-        <p className="text-sm text-muted-foreground">All active interns across departments</p>
       </div>
 
       <div className="bg-card rounded-xl border border-border overflow-hidden">

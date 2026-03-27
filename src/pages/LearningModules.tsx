@@ -23,7 +23,6 @@ export default function LearningModules() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Learning Modules</h2>
-        <p className="text-sm text-muted-foreground">Your assigned courses and learning materials</p>
       </div>
 
       {/* Hero: Current Module */}

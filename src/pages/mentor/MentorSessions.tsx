@@ -20,7 +20,6 @@ export default function MentorSessions() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">Mentorship Sessions</h2>
-          <p className="text-sm text-muted-foreground">Schedule and track mentoring sessions</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:opacity-90 transition-opacity">
           <Plus className="w-4 h-4" /> Schedule Session

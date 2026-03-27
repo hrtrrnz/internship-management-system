@@ -34,7 +34,6 @@ export default function AdminReports() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">All Reports</h2>
-          <p className="text-sm text-muted-foreground">View all daily reports across the program</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors">
           <Download className="w-4 h-4" /> Export

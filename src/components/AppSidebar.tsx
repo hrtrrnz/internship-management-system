@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Clock, CheckSquare, FileText, Trophy,
   BookOpen, Users, ClipboardCheck, User, FolderOpen, MoreVertical, Bell, Search,
   UserCog, BarChart3, Settings, Building, Shield, Star, Calendar,
-  GraduationCap, LogOut, PanelLeft, PanelRight
+  GraduationCap, LogOut, PanelLeft, PanelRight, MessageSquare
 } from "lucide-react";
 import { useRole, UserRole } from "@/contexts/RoleContext";
 import { useState, useRef, useEffect } from "react";
@@ -31,6 +31,7 @@ const studentNav: NavSection[] = [
     items: [
       { to: "/my-mentor", icon: Users, label: "My Mentor" },
       { to: "/evaluations", icon: ClipboardCheck, label: "Evaluation" },
+      { to: "/messages", icon: MessageSquare, label: "Messages" },
     ],
   },
   {
@@ -57,13 +58,7 @@ const mentorNav: NavSection[] = [
       { to: "/mentor/report-review", icon: FileText, label: "Report Review" },
       { to: "/mentor/task-assignments", icon: CheckSquare, label: "Task Assignments" },
       { to: "/mentor/evaluations", icon: ClipboardCheck, label: "Evaluations" },
-    ],
-  },
-  {
-    label: "SESSIONS",
-    items: [
-      { to: "/mentor/sessions", icon: Calendar, label: "Mentorship Sessions" },
-      { to: "/mentor/learning-paths", icon: BookOpen, label: "Learning Paths" },
+      { to: "/mentor/messages", icon: MessageSquare, label: "Messages" },
     ],
   },
   {
@@ -97,12 +92,14 @@ const adminNav: NavSection[] = [
       { to: "/admin/attendance", icon: Clock, label: "Attendance Logs" },
       { to: "/admin/reports", icon: FileText, label: "All Reports" },
       { to: "/admin/evaluations", icon: ClipboardCheck, label: "Evaluations" },
+      { to: "/admin/messages", icon: MessageSquare, label: "Messages" },
     ],
   },
   {
     label: "SYSTEM",
     items: [
       { to: "/admin/roles", icon: Shield, label: "Roles & Permissions" },
+      { to: "/admin/profile", icon: User, label: "My Profile" },
     ],
   },
 ];
@@ -117,6 +114,12 @@ const settingsRouteByRole: Record<UserRole, string> = {
   student: "/my-profile",
   mentor: "/mentor/profile",
   admin: "/admin/settings",
+};
+
+const sidebarRoleLabel: Record<UserRole, string> = {
+  student: "intern",
+  mentor: "mentor",
+  admin: "admin",
 };
 
 type AppSidebarProps = {
@@ -235,7 +238,7 @@ export default function AppSidebar({ collapsed = false }: AppSidebarProps) {
           </div>
           <div className={cn("min-w-0 flex-1", collapsed && "hidden")}>
             <p className="text-sm font-semibold text-sidebar-accent-foreground truncate">{user.name}</p>
-            <p className="text-xs text-sidebar-muted truncate">{user.department} · {user.roleLabel}</p>
+            <p className="text-xs text-sidebar-muted truncate">{sidebarRoleLabel[role]}</p>
           </div>
           <MoreVertical className={cn("h-4 w-4 text-sidebar-muted", collapsed && "hidden")} />
         </div>

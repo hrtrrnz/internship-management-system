@@ -52,7 +52,6 @@ export default function Evaluations() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Final Evaluation</h2>
-        <p className="text-sm text-muted-foreground">End-of-internship performance evaluation before offboarding</p>
       </div>
 
       {/* Status banner */}

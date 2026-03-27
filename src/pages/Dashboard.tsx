@@ -69,15 +69,46 @@ const todayTasks = [
   { label: "Upload accomplishment report", time: "5:00 PM", done: false },
 ];
 
+function formatDateTime(value: Date | null) {
+  if (!value) return "—";
+  return value.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export default function Dashboard() {
+  const [isClockedIn, setIsClockedIn] = useState(false);
+  const [activeTab, setActiveTab] = useState<"clock-in" | "clock-out">("clock-in");
+  const [clockInTime, setClockInTime] = useState<Date | null>(null);
+  const [clockOutTime, setClockOutTime] = useState<Date | null>(null);
+
+  const handleClockIn = () => {
+    if (isClockedIn) return;
+    setClockInTime(new Date());
+    setClockOutTime(null);
+    setIsClockedIn(true);
+    setActiveTab("clock-out");
+  };
+
+  const handleClockOut = () => {
+    if (!isClockedIn) return;
+    setClockOutTime(new Date());
+    setIsClockedIn(false);
+    setActiveTab("clock-in");
+  };
+
   return (
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <StatCard icon={Clock} value="34" label="Days Attended" sub="↑3 this week" colorClass="--stat-orange" />
-        <StatCard icon={CheckSquare} value="18" label="Tasks Completed" sub="↑5 pending" colorClass="--stat-green" />
-        <StatCard icon={FileText} value="12" label="Reports Submitted" sub="1 overdue" colorClass="--stat-blue" />
-        <StatCard icon={Users} value="78%" label="Overall Progress" sub="On track · 46 days left" colorClass="--stat-emerald" />
+        <StatCard icon={Clock} value="320 / 486" label="Training Hours" sub="Rendered Hours / Required Hours" colorClass="--stat-blue" />
+        <StatCard icon={Users} value="34" label="Days Attended" sub="3 this week" colorClass="--stat-orange" />
+        <StatCard icon={CheckSquare} value="18" label="Tasks Completed" sub="5 pending" colorClass="--stat-green" />
+        <StatCard icon={FileText} value="78%" label="Overall Progress" sub="On track · 46 days left" colorClass="--stat-emerald" />
       </div>
 
       <div className="grid grid-cols-3 gap-6">
@@ -86,8 +117,13 @@ export default function Dashboard() {
           <div className="bg-card rounded-xl border border-border/80 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-1">
               <h3 className="text-lg font-display font-bold text-foreground">Dream Academy · Daily Log</h3>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-2.5 py-1 text-xs text-destructive font-medium">
-                <span className="w-2 h-2 rounded-full bg-destructive" /> Not yet clocked in
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
+                  isClockedIn ? "bg-stat-green-bg text-stat-green" : "bg-destructive/10 text-destructive"
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${isClockedIn ? "bg-stat-green" : "bg-destructive"}`} />
+                {isClockedIn ? "Currently clocked in" : "Not yet clocked in"}
               </span>
             </div>
             <p className="text-sm text-muted-foreground mb-4">Please complete your attendance details for today.</p>
@@ -106,10 +142,26 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 mt-3">
-              <button className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity shadow-sm">
+              <button
+                onClick={handleClockIn}
+                disabled={isClockedIn}
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all shadow-sm ${
+                  activeTab === "clock-in"
+                    ? "bg-accent text-accent-foreground"
+                    : "border border-border text-foreground bg-background"
+                } ${isClockedIn ? "opacity-60 cursor-not-allowed" : "hover:opacity-90"}`}
+              >
                 <LogIn className="w-4 h-4" /> Clock In
               </button>
-              <button className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-border text-foreground font-medium text-sm hover:bg-muted transition-colors">
+              <button
+                onClick={handleClockOut}
+                disabled={!isClockedIn}
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all ${
+                  activeTab === "clock-out"
+                    ? "bg-accent text-accent-foreground"
+                    : "border border-border text-foreground bg-background"
+                } ${isClockedIn ? "hover:opacity-90" : "opacity-60 cursor-not-allowed"}`}
+              >
                 <LogOut className="w-4 h-4" /> Clock Out
               </button>
             </div>
@@ -140,6 +192,8 @@ export default function Dashboard() {
                 <label className="text-xs font-semibold text-foreground">Office Location <span className="text-destructive">*</span></label>
                 <select className="mt-1 w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring">
                   <option>Select location...</option>
+                  <option>HYT Business Center</option>
+                  <option>Atlanta Office</option>
                 </select>
               </div>
             </div>
@@ -152,7 +206,9 @@ export default function Dashboard() {
                 className="mt-1 w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Share the link with talent.dreamacademy@gmail.com and hr.dreamacademy@gmail.com · If clocking in, type CLOCK-IN
+                Share the link with talent.dreamacademy@gmail.com and hr.dreamacademy@gmail.com ·
+                {" "}
+                {activeTab === "clock-out" ? "you are currently in clock-out mode." : "you are currently in clock-in mode."}
               </p>
             </div>
 
@@ -165,8 +221,12 @@ export default function Dashboard() {
               />
             </div>
 
-            <button className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-stat-orange text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-sm">
-              <LogIn className="w-4 h-4" /> Submit Clock-In
+            <button
+              className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-stat-orange text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-sm"
+              onClick={activeTab === "clock-out" ? handleClockOut : handleClockIn}
+            >
+              {activeTab === "clock-out" ? <LogOut className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
+              {activeTab === "clock-out" ? "Submit Clock-Out" : "Submit Clock-In"}
             </button>
           </div>
         </div>

@@ -16,7 +16,6 @@ export default function AdminMentors() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Mentors</h2>
-        <p className="text-sm text-muted-foreground">Overview of all mentors in the program</p>
       </div>
 
       <div className="grid grid-cols-4 gap-4">

@@ -7,13 +7,13 @@ interface RoleUser {
   initials: string;
   role: UserRole;
   roleLabel: string;
-  department: string;
+  unit: string;
 }
 
 const roleUsers: Record<UserRole, RoleUser> = {
-  student: { name: "Juan dela Cruz", initials: "JD", role: "student", roleLabel: "Intern", department: "Tech & Innovation" },
-  mentor: { name: "Maria Reyes", initials: "MR", role: "mentor", roleLabel: "Senior Engineer", department: "Tech & Innovation" },
-  admin: { name: "Carlos Santos", initials: "CS", role: "admin", roleLabel: "Administrator", department: "HYT Foundation" },
+  student: { name: "Juan dela Cruz", initials: "JD", role: "student", roleLabel: "Intern", unit: "Tech & Innovation" },
+  mentor: { name: "Maria Reyes", initials: "MR", role: "mentor", roleLabel: "Senior Engineer", unit: "Tech & Innovation" },
+  admin: { name: "Carlos Santos", initials: "CS", role: "admin", roleLabel: "Administrator", unit: "Administration" },
 };
 
 interface RoleContextType {

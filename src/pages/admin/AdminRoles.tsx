@@ -26,7 +26,6 @@ export default function AdminRoles() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Roles & Permissions</h2>
-        <p className="text-sm text-muted-foreground">Manage user roles and their access levels</p>
       </div>
 
       <div className="space-y-4">

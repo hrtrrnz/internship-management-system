@@ -28,7 +28,6 @@ export default function MentorTaskAssignments() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">Task Assignments</h2>
-          <p className="text-sm text-muted-foreground">Create and manage tasks for your interns</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:opacity-90 transition-opacity">
           <Plus className="w-4 h-4" /> Assign Task

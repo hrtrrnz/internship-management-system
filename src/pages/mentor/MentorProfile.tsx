@@ -1,11 +1,10 @@
-import { User, Mail, Phone, MapPin, Building, Briefcase, Calendar, Star } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar, Star } from "lucide-react";
 
 export default function MentorProfile() {
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">My Profile</h2>
-        <p className="text-sm text-muted-foreground">Your mentor profile and information</p>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
@@ -14,7 +13,7 @@ export default function MentorProfile() {
             MR
           </div>
           <h3 className="text-xl font-display font-bold text-foreground">Maria Reyes</h3>
-          <p className="text-sm text-muted-foreground">Senior Software Engineer</p>
+          <p className="text-sm text-muted-foreground">Mentor</p>
           <div className="flex items-center gap-1 mt-2">
             {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 text-stat-orange fill-stat-orange" />)}
           </div>
@@ -23,7 +22,7 @@ export default function MentorProfile() {
           <div className="mt-4 w-full space-y-3 text-left">
             <InfoRow icon={Mail} label="Email" value="maria.reyes@hytfoundation.org" />
             <InfoRow icon={Phone} label="Phone" value="+63 917 555 1234" />
-            <InfoRow icon={MapPin} label="Location" value="Manila, Philippines" />
+            <InfoRow icon={MapPin} label="Address" value="Manila, Philippines" />
           </div>
         </div>
 
@@ -31,19 +30,9 @@ export default function MentorProfile() {
           <div className="bg-card rounded-xl border border-border p-5">
             <h3 className="font-display font-bold text-foreground mb-4">Role Details</h3>
             <div className="grid grid-cols-2 gap-4">
-              <InfoBlock icon={Building} label="Department" value="Technology & Innovation" />
-              <InfoBlock icon={Briefcase} label="Position" value="Senior Software Engineer" />
+              <InfoBlock icon={User} label="Role" value="Mentor" />
               <InfoBlock icon={Calendar} label="Mentoring Since" value="January 2025" />
               <InfoBlock icon={User} label="Total Interns Mentored" value="15" />
-            </div>
-          </div>
-
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground mb-4">Specializations</h3>
-            <div className="flex flex-wrap gap-2">
-              {["React", "TypeScript", "Node.js", "System Design", "API Architecture", "PostgreSQL", "Team Leadership", "Agile/Scrum"].map(s => (
-                <span key={s} className="px-3 py-1.5 rounded-lg bg-muted text-sm text-foreground font-medium">{s}</span>
-              ))}
             </div>
           </div>
 

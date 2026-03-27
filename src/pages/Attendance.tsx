@@ -66,7 +66,6 @@ export default function Attendance() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Attendance</h2>
-        <p className="text-sm text-muted-foreground">Track your daily attendance records</p>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
