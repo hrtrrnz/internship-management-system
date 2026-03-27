@@ -83,7 +83,7 @@ export default function AdminDashboard() {
               {[
                 "3 interns haven't clocked in today",
                 "2 weekly evaluations overdue",
-                "1 mentor has no scheduled sessions",
+                "1 mentor has no scheduled check-ins",
               ].map((alert, i) => (
                 <div key={i} className="flex items-center gap-2 p-2.5 rounded-lg bg-stat-orange-bg">
                   <AlertTriangle className="w-4 h-4 text-stat-orange flex-shrink-0" />

@@ -25,7 +25,7 @@ export default function MyMentor() {
 
         <div className="col-span-2 space-y-4">
           <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground mb-3">Upcoming Sessions</h3>
+            <h3 className="font-display font-bold text-foreground mb-3">Upcoming Check-ins</h3>
             <div className="space-y-3">
               {[
                 { date: "Mar 25, 2026", time: "2:00 PM", topic: "API Design Review" },
@@ -43,11 +43,11 @@ export default function MyMentor() {
           </div>
 
           <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground mb-3">Past Sessions</h3>
+            <h3 className="font-display font-bold text-foreground mb-3">Past Check-ins</h3>
             <div className="space-y-3">
               {[
                 { date: "Mar 18, 2026", topic: "React Best Practices", notes: "Discussed component patterns and state management" },
-                { date: "Mar 11, 2026", topic: "Code Review Session", notes: "Reviewed dashboard implementation, suggested improvements" },
+                { date: "Mar 11, 2026", topic: "Code Review Check-in", notes: "Reviewed dashboard implementation, suggested improvements" },
                 { date: "Mar 4, 2026", topic: "Onboarding & Expectations", notes: "Set internship goals and weekly milestones" },
               ].map(s => (
                 <div key={s.date} className="flex items-start gap-4 p-3 rounded-lg hover:bg-muted/30 transition-colors">

@@ -29,6 +29,8 @@ export default function MyProfile() {
             <h3 className="font-display font-bold text-foreground mb-4">Internship Details</h3>
             <div className="grid grid-cols-2 gap-4">
               <InfoBlock icon={GraduationCap} label="Program" value="Bachelor of Science in Information Technology" />
+              <InfoBlock icon={MapPin} label="Unit" value="Technology & Innovation" />
+              <InfoBlock icon={GraduationCap} label="Batch" value="B16" />
               <InfoBlock icon={MapPin} label="Office" value="HYT Business Center" />
               <InfoBlock icon={Calendar} label="Start Date" value="February 3, 2026" />
               <InfoBlock icon={Calendar} label="End Date" value="April 24, 2026" />

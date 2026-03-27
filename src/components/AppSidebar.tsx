@@ -92,6 +92,7 @@ const adminNav: NavSection[] = [
       { to: "/admin/attendance", icon: Clock, label: "Attendance Logs" },
       { to: "/admin/reports", icon: FileText, label: "All Reports" },
       { to: "/admin/evaluations", icon: ClipboardCheck, label: "Evaluations" },
+      { to: "/admin/tasks", icon: CheckSquare, label: "Tasks" },
       { to: "/admin/messages", icon: MessageSquare, label: "Messages" },
     ],
   },
@@ -111,15 +112,15 @@ const navByRole: Record<UserRole, NavSection[]> = {
 };
 
 const settingsRouteByRole: Record<UserRole, string> = {
-  student: "/my-profile",
-  mentor: "/mentor/profile",
+  student: "/settings",
+  mentor: "/mentor/settings",
   admin: "/admin/settings",
 };
 
 const sidebarRoleLabel: Record<UserRole, string> = {
-  student: "intern",
-  mentor: "mentor",
-  admin: "admin",
+  student: "Intern",
+  mentor: "Mentor",
+  admin: "Admin",
 };
 
 type AppSidebarProps = {

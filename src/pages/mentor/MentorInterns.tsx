@@ -1,14 +1,14 @@
 import { GraduationCap, Mail, MoreVertical } from "lucide-react";
 
 const interns = [
-  { name: "Juan dela Cruz", unit: "Technology & Innovation", week: 7, progress: 78, tasks: 18, status: "On Track", avatar: "JD" },
-  { name: "Ana Santos", unit: "Technology & Innovation", week: 7, progress: 85, tasks: 22, status: "On Track", avatar: "AS" },
-  { name: "Mark Rivera", unit: "Technology & Innovation", week: 7, progress: 45, tasks: 10, status: "Needs Attention", avatar: "MR" },
-  { name: "Lisa Tan", unit: "Marketing", week: 5, progress: 62, tasks: 14, status: "On Track", avatar: "LT" },
-  { name: "Peter Lim", unit: "Operations", week: 5, progress: 55, tasks: 12, status: "On Track", avatar: "PL" },
-  { name: "Grace Yu", unit: "Technology & Innovation", week: 3, progress: 30, tasks: 6, status: "New", avatar: "GY" },
-  { name: "David Chen", unit: "Data Analytics", week: 3, progress: 28, tasks: 5, status: "New", avatar: "DC" },
-  { name: "Sofia Garcia", unit: "Marketing", week: 1, progress: 8, tasks: 2, status: "New", avatar: "SG" },
+  { name: "Juan dela Cruz", unit: "Technology & Innovation", batch: "B16", week: 7, progress: 78, tasks: 18, status: "On Track", avatar: "JD" },
+  { name: "Ana Santos", unit: "Technology & Innovation", batch: "B16", week: 7, progress: 85, tasks: 22, status: "On Track", avatar: "AS" },
+  { name: "Mark Rivera", unit: "Technology & Innovation", batch: "B15", week: 7, progress: 45, tasks: 10, status: "Needs Attention", avatar: "MR" },
+  { name: "Lisa Tan", unit: "Marketing", batch: "B15", week: 5, progress: 62, tasks: 14, status: "On Track", avatar: "LT" },
+  { name: "Peter Lim", unit: "Operations", batch: "B15", week: 5, progress: 55, tasks: 12, status: "On Track", avatar: "PL" },
+  { name: "Grace Yu", unit: "Technology & Innovation", batch: "B14", week: 3, progress: 30, tasks: 6, status: "New", avatar: "GY" },
+  { name: "David Chen", unit: "Data Analytics", batch: "B14", week: 3, progress: 28, tasks: 5, status: "New", avatar: "DC" },
+  { name: "Sofia Garcia", unit: "Marketing", batch: "B14", week: 1, progress: 8, tasks: 2, status: "New", avatar: "SG" },
 ];
 
 const statusStyles: Record<string, string> = {
@@ -34,7 +34,7 @@ export default function MentorInterns() {
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">{intern.name}</p>
-                  <p className="text-xs text-muted-foreground">{intern.unit}</p>
+                  <p className="text-xs text-muted-foreground">{intern.unit} · Batch {intern.batch}</p>
                 </div>
               </div>
               <button className="p-1 rounded hover:bg-muted transition-colors">

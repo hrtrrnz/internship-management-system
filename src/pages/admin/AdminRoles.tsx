@@ -10,7 +10,7 @@ const roles = [
   {
     name: "Mentor",
     count: 8,
-    permissions: ["View assigned interns", "Review reports", "Create evaluations", "Assign tasks", "Schedule sessions", "Manage learning paths"],
+    permissions: ["View assigned interns", "Review reports", "Create evaluations", "Assign tasks", "Coordinate check-ins", "Manage learning paths"],
     color: "--stat-blue",
   },
   {

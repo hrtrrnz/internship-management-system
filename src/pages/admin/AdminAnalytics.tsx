@@ -1,5 +1,4 @@
-import { TrendingUp, Star, BarChart3, PieChart } from "lucide-react";
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const weeklyTrend = [
   { week: "W1", attendance: 95, reports: 82, tasks: 60 },
@@ -20,20 +19,13 @@ const deptPerformance = [
   { dept: "Finance", attendance: 85, tasks: 60, evals: 4.0 },
 ];
 
-const radarData = [
-  { metric: "Attendance", value: 92 },
-  { metric: "Reports", value: 88 },
-  { metric: "Tasks", value: 76 },
-  { metric: "Evaluations", value: 84 },
-  { metric: "Modules", value: 65 },
-];
-
-const topPerformers = [
-  { name: "Ana Santos", dept: "Tech & Innovation", score: 4.7, progress: 85 },
-  { name: "Juan dela Cruz", dept: "Tech & Innovation", score: 4.5, progress: 78 },
-  { name: "Lisa Tan", dept: "Marketing", score: 4.3, progress: 72 },
-  { name: "Peter Lim", dept: "Operations", score: 4.1, progress: 68 },
-  { name: "Grace Yu", dept: "Tech & Innovation", score: 3.9, progress: 55 },
+const internHours = [
+  { name: "Alya Cortez", unit: "Tech & Innovation", batch: "B16", renderedHours: 320, requiredHours: 486 },
+  { name: "Noah Villanueva", unit: "Marketing", batch: "B16", renderedHours: 284, requiredHours: 486 },
+  { name: "Mika Sarmiento", unit: "Operations", batch: "B15", renderedHours: 301, requiredHours: 486 },
+  { name: "Renz Castillo", unit: "Data", batch: "B15", renderedHours: 266, requiredHours: 486 },
+  { name: "Ivy Mendoza", unit: "Finance", batch: "B14", renderedHours: 338, requiredHours: 486 },
+  { name: "Zed Alonzo", unit: "HR", batch: "B14", renderedHours: 292, requiredHours: 486 },
 ];
 
 const metrics = [
@@ -66,7 +58,7 @@ export default function AdminAnalytics() {
       {/* Charts row 1 */}
       <div className="grid grid-cols-3 gap-6">
         {/* Area chart */}
-        <div className="col-span-2 bg-card rounded-xl border border-border p-6">
+        <div className="col-span-3 bg-card rounded-xl border border-border p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-display font-bold text-foreground">Weekly Trends</h3>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -85,19 +77,6 @@ export default function AdminAnalytics() {
               <Area type="monotone" dataKey="reports" stroke="hsl(var(--stat-blue))" fill="hsl(var(--stat-blue) / 0.1)" strokeWidth={2} />
               <Area type="monotone" dataKey="tasks" stroke="hsl(var(--stat-orange))" fill="hsl(var(--stat-orange) / 0.1)" strokeWidth={2} />
             </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Radar chart */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h3 className="font-display font-bold text-foreground mb-4">Program Health</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="hsl(var(--border))" />
-              <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-              <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-              <Radar dataKey="value" stroke="hsl(var(--accent))" fill="hsl(var(--accent) / 0.2)" strokeWidth={2} />
-            </RadarChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -119,26 +98,24 @@ export default function AdminAnalytics() {
           </ResponsiveContainer>
         </div>
 
-        {/* Top performers */}
+        {/* All interns hours */}
         <div className="bg-card rounded-xl border border-border p-5">
-          <h3 className="font-display font-bold text-foreground mb-4">Top Performers</h3>
+          <h3 className="font-display font-bold text-foreground mb-4">All Interns</h3>
           <div className="space-y-3">
-            {topPerformers.map((p, i) => (
-              <div key={p.name} className="flex items-center gap-3">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                  i === 0 ? 'bg-stat-orange-bg text-stat-orange' : 'bg-muted text-muted-foreground'
-                }`}>
-                  {i + 1}
+            {internHours.map((intern) => (
+              <div key={intern.name} className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
+                  {intern.name.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{p.dept}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{intern.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{intern.unit} · {intern.batch}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-stat-orange fill-stat-orange" />
-                    <span className="text-sm font-bold text-foreground">{p.score}</span>
-                  </div>
+                  <span className="text-sm font-bold text-foreground">
+                    {intern.renderedHours} / {intern.requiredHours}
+                  </span>
+                  <p className="text-[10px] text-muted-foreground">Rendered / Required</p>
                 </div>
               </div>
             ))}

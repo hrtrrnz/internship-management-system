@@ -1,64 +1,55 @@
 import { useMemo, useState } from "react";
-import { CheckSquare, Clock, Plus, Users } from "lucide-react";
+import { CheckSquare, Clock } from "lucide-react";
 
-type InternTaskStatus = {
+type InternStatus = {
   intern: string;
+  unit: string;
   batch: string;
   status: "Pending" | "In Progress" | "Completed";
   progress: number;
   updatedAt: string;
 };
 
-type MentorTask = {
+type AdminTask = {
   id: number;
   title: string;
   due: string;
   description: string;
-  internStatuses: InternTaskStatus[];
+  internStatuses: InternStatus[];
 };
 
-const tasks: MentorTask[] = [
+const tasks: AdminTask[] = [
   {
-    id: 1,
+    id: 101,
     title: "Complete TypeScript Assessment",
     due: "Mar 25",
-    description: "Finish all required exercises and final quiz for the TypeScript track.",
+    description: "Program-wide technical assessment task for batch B16.",
     internStatuses: [
-      { intern: "Juan dela Cruz", batch: "B16", status: "In Progress", progress: 75, updatedAt: "Today, 10:20 AM" },
-      { intern: "Ana Santos", batch: "B16", status: "Completed", progress: 100, updatedAt: "Today, 9:15 AM" },
-      { intern: "Mark Rivera", batch: "B15", status: "Pending", progress: 10, updatedAt: "Yesterday, 5:42 PM" },
+      { intern: "Alex Cruz", unit: "Tech Unit", batch: "B16", status: "In Progress", progress: 72, updatedAt: "Today, 10:12 AM" },
+      { intern: "Bea Santos", unit: "Tech Unit", batch: "B16", status: "Completed", progress: 100, updatedAt: "Today, 9:41 AM" },
+      { intern: "Lia Tan", unit: "Marketing", batch: "B15", status: "Pending", progress: 14, updatedAt: "Yesterday, 4:55 PM" },
     ],
   },
   {
-    id: 2,
-    title: "Build User Auth Module",
-    due: "Mar 26",
-    description: "Implement login, signup, and password recovery screens and flows.",
-    internStatuses: [
-      { intern: "Juan dela Cruz", batch: "B16", status: "In Progress", progress: 60, updatedAt: "Today, 1:08 PM" },
-      { intern: "Lisa Tan", batch: "B15", status: "Pending", progress: 20, updatedAt: "Yesterday, 4:19 PM" },
-    ],
-  },
-  {
-    id: 3,
-    title: "Write API Documentation",
+    id: 102,
+    title: "Submit Weekly Progress Report",
     due: "Mar 27",
-    description: "Prepare endpoint docs with request examples and response schemas.",
+    description: "Required weekly report for all interns across departments.",
     internStatuses: [
-      { intern: "Mark Rivera", batch: "B15", status: "In Progress", progress: 45, updatedAt: "Today, 11:37 AM" },
-      { intern: "Sofia Garcia", batch: "B14", status: "Completed", progress: 100, updatedAt: "Yesterday, 3:50 PM" },
-      { intern: "David Chen", batch: "B14", status: "Pending", progress: 5, updatedAt: "Yesterday, 9:05 AM" },
+      { intern: "Marco Reyes", unit: "Operations", batch: "B15", status: "In Progress", progress: 65, updatedAt: "Today, 1:20 PM" },
+      { intern: "Adrian Cole", unit: "Data Analytics", batch: "B14", status: "Pending", progress: 20, updatedAt: "Yesterday, 5:03 PM" },
+      { intern: "Alex Cruz", unit: "Tech Unit", batch: "B16", status: "Completed", progress: 100, updatedAt: "Today, 11:08 AM" },
     ],
   },
 ];
 
-const statusStyle: Record<InternTaskStatus["status"], string> = {
+const statusStyle: Record<InternStatus["status"], string> = {
   Pending: "bg-muted text-muted-foreground",
   "In Progress": "bg-stat-blue-bg text-stat-blue",
   Completed: "bg-stat-green-bg text-stat-green",
 };
 
-export default function MentorTaskAssignments() {
+export default function AdminTasks() {
   const [selectedTaskId, setSelectedTaskId] = useState(tasks[0]?.id ?? 0);
   const selectedTask = tasks.find((t) => t.id === selectedTaskId) ?? tasks[0];
 
@@ -74,17 +65,12 @@ export default function MentorTaskAssignments() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-display font-bold text-foreground">Task Assignments</h2>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:opacity-90 transition-opacity">
-          <Plus className="w-4 h-4" /> Assign Task
-        </button>
-      </div>
+      <h2 className="text-2xl font-display font-bold text-foreground">Task Monitoring</h2>
 
       <div className="grid grid-cols-5 gap-5">
         <div className="col-span-2 rounded-xl border border-border bg-card p-4">
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm font-semibold text-foreground">All Assigned Tasks</p>
+            <p className="text-sm font-semibold text-foreground">All Tasks</p>
             <span className="text-xs text-muted-foreground">{tasks.length}</span>
           </div>
           <div className="space-y-2">
@@ -137,12 +123,9 @@ export default function MentorTaskAssignments() {
                   {selectedTask.internStatuses.map((item) => (
                     <div key={item.intern} className="rounded-lg border border-border bg-background px-3 py-3">
                       <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                            {item.intern.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                          </div>
+                        <div>
                           <p className="text-sm font-medium text-foreground">{item.intern}</p>
-                          <p className="text-[11px] text-muted-foreground">Batch {item.batch}</p>
+                          <p className="text-[11px] text-muted-foreground">{item.unit} · Batch {item.batch}</p>
                         </div>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${statusStyle[item.status]}`}>
                           {item.status}

@@ -6,7 +6,7 @@ const accomplishments = [
   { id: 3, title: "Perfect Attendance – Week 6", date: "Mar 17, 2026", type: "Attendance", description: "Maintained 100% on-time attendance for the entire week.", badge: "⭐" },
   { id: 4, title: "Led Team Standup Presentation", date: "Mar 14, 2026", type: "Leadership", description: "Presented sprint progress and demo to the development team.", badge: "🎤" },
   { id: 5, title: "Resolved Critical Navigation Bug", date: "Mar 12, 2026", type: "Development", description: "Identified and fixed a routing issue affecting mobile users.", badge: "🐛" },
-  { id: 6, title: "Mentorship Session Completion", date: "Mar 10, 2026", type: "Learning", description: "Completed 1-on-1 mentorship session on API design best practices.", badge: "💡" },
+  { id: 6, title: "Mentorship Check-in Completion", date: "Mar 10, 2026", type: "Learning", description: "Completed 1-on-1 mentorship check-in on API design best practices.", badge: "💡" },
 ];
 
 const typeColors: Record<string, string> = {

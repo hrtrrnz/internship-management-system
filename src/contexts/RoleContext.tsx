@@ -8,12 +8,13 @@ interface RoleUser {
   role: UserRole;
   roleLabel: string;
   unit: string;
+  batch: string;
 }
 
 const roleUsers: Record<UserRole, RoleUser> = {
-  student: { name: "Juan dela Cruz", initials: "JD", role: "student", roleLabel: "Intern", unit: "Tech & Innovation" },
-  mentor: { name: "Maria Reyes", initials: "MR", role: "mentor", roleLabel: "Senior Engineer", unit: "Tech & Innovation" },
-  admin: { name: "Carlos Santos", initials: "CS", role: "admin", roleLabel: "Administrator", unit: "Administration" },
+  student: { name: "Juan dela Cruz", initials: "JD", role: "student", roleLabel: "Intern", unit: "Tech & Innovation", batch: "B16" },
+  mentor: { name: "Maria Reyes", initials: "MR", role: "mentor", roleLabel: "Senior Engineer", unit: "Tech & Innovation", batch: "N/A" },
+  admin: { name: "Carlos Santos", initials: "CS", role: "admin", roleLabel: "Administrator", unit: "Administration", batch: "N/A" },
 };
 
 interface RoleContextType {

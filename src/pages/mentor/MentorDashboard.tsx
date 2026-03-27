@@ -12,7 +12,7 @@ export default function MentorDashboard() {
       <div className="grid grid-cols-4 gap-4">
         <StatCard icon={GraduationCap} value="8" label="Assigned Interns" sub="2 new this month" color="--stat-blue" />
         <StatCard icon={FileText} value="6" label="Pending Reviews" sub="3 reports, 3 evals" color="--stat-orange" />
-        <StatCard icon={Calendar} value="4" label="Sessions This Week" sub="2 completed" color="--stat-green" />
+        <StatCard icon={Calendar} value="4" label="Check-ins This Week" sub="2 completed" color="--stat-green" />
         <StatCard icon={TrendingUp} value="72%" label="Avg. Intern Progress" sub="↑5% from last week" color="--stat-emerald" />
       </div>
 
@@ -50,7 +50,7 @@ export default function MentorDashboard() {
 
         <div className="space-y-4">
           <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground mb-3">Upcoming Sessions</h3>
+            <h3 className="font-display font-bold text-foreground mb-3">Upcoming Check-ins</h3>
             <div className="space-y-3">
               {[
                 { intern: "Juan dela Cruz", time: "2:00 PM Today", topic: "API Design Review" },

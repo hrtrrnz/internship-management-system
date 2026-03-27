@@ -18,7 +18,7 @@ const demoRoles = [
     icon: Users,
     title: "Mentor",
     name: "Maria Reyes",
-    description: "See the mentor view — manage your assigned interns, review reports, conduct evaluations, and schedule mentorship sessions.",
+    description: "See the mentor view — manage your assigned interns, review reports, conduct evaluations, and coordinate mentorship check-ins.",
     color: "--stat-blue",
     path: "/mentor",
   },

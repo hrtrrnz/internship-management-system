@@ -23,6 +23,7 @@ import Evaluations from "./pages/Evaluations";
 import MyProfile from "./pages/MyProfile";
 import Documents from "./pages/Documents";
 import Messages from "./pages/Messages";
+import Settings from "./pages/Settings";
 
 // Mentor pages
 import MentorDashboard from "./pages/mentor/MentorDashboard";
@@ -31,9 +32,9 @@ import MentorAttendanceReview from "./pages/mentor/MentorAttendanceReview";
 import MentorReportReview from "./pages/mentor/MentorReportReview";
 import MentorTaskAssignments from "./pages/mentor/MentorTaskAssignments";
 import MentorEvaluations from "./pages/mentor/MentorEvaluations";
-import MentorSessions from "./pages/mentor/MentorSessions";
 import MentorLearningPaths from "./pages/mentor/MentorLearningPaths";
 import MentorProfile from "./pages/mentor/MentorProfile";
+import MentorSettings from "./pages/mentor/MentorSettings";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -48,6 +49,7 @@ import AdminEvaluations from "./pages/admin/AdminEvaluations";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminRoles from "./pages/admin/AdminRoles";
 import AdminProfile from "./pages/admin/AdminProfile";
+import AdminTasks from "./pages/admin/AdminTasks";
 
 import NotFound from "./pages/NotFound";
 
@@ -77,6 +79,7 @@ const App = () => (
               <Route path="/my-mentor" element={<MyMentor />} />
               <Route path="/evaluations" element={<Evaluations />} />
               <Route path="/my-profile" element={<MyProfile />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/documents" element={<Documents />} />
               <Route path="/messages" element={<Messages />} />
 
@@ -87,9 +90,9 @@ const App = () => (
               <Route path="/mentor/report-review" element={<MentorReportReview />} />
               <Route path="/mentor/task-assignments" element={<MentorTaskAssignments />} />
               <Route path="/mentor/evaluations" element={<MentorEvaluations />} />
-              <Route path="/mentor/sessions" element={<MentorSessions />} />
               <Route path="/mentor/learning-paths" element={<MentorLearningPaths />} />
               <Route path="/mentor/profile" element={<MentorProfile />} />
+              <Route path="/mentor/settings" element={<MentorSettings />} />
               <Route path="/mentor/messages" element={<Messages />} />
 
               {/* Admin routes */}
@@ -102,6 +105,7 @@ const App = () => (
               <Route path="/admin/attendance" element={<AdminAttendanceLogs />} />
               <Route path="/admin/reports" element={<AdminReports />} />
               <Route path="/admin/evaluations" element={<AdminEvaluations />} />
+              <Route path="/admin/tasks" element={<AdminTasks />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
               <Route path="/admin/roles" element={<AdminRoles />} />
               <Route path="/admin/profile" element={<AdminProfile />} />

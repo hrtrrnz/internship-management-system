@@ -45,7 +45,7 @@ export default function MentorProfile() {
               </div>
               <div className="text-center p-3 rounded-lg bg-stat-blue-bg">
                 <p className="text-2xl font-bold font-display text-foreground">48</p>
-                <p className="text-xs text-muted-foreground">Sessions Held</p>
+                <p className="text-xs text-muted-foreground">Mentoring Activities</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-stat-orange-bg">
                 <p className="text-2xl font-bold font-display text-foreground">92%</p>

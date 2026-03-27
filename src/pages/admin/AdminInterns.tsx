@@ -1,14 +1,14 @@
 import { GraduationCap, MoreVertical } from "lucide-react";
 
 const interns = [
-  { name: "Juan dela Cruz", department: "Tech & Innovation", mentor: "Maria Reyes", week: 7, progress: 78, status: "On Track" },
-  { name: "Ana Santos", department: "Tech & Innovation", mentor: "Maria Reyes", week: 7, progress: 85, status: "On Track" },
-  { name: "Mark Rivera", department: "Tech & Innovation", mentor: "Maria Reyes", week: 7, progress: 45, status: "At Risk" },
-  { name: "Lisa Tan", department: "Marketing", mentor: "James Cruz", week: 5, progress: 62, status: "On Track" },
-  { name: "Peter Lim", department: "Operations", mentor: "Elena Torres", week: 5, progress: 55, status: "On Track" },
-  { name: "Grace Yu", department: "Tech & Innovation", mentor: "Roberto Lim", week: 3, progress: 30, status: "New" },
-  { name: "David Chen", department: "Data Analytics", mentor: "Michael Tan", week: 3, progress: 28, status: "New" },
-  { name: "Sofia Garcia", department: "Marketing", mentor: "Sarah Villanueva", week: 1, progress: 8, status: "New" },
+  { name: "Juan dela Cruz", department: "Tech & Innovation", batch: "B16", mentor: "Maria Reyes", week: 7, progress: 78, status: "On Track" },
+  { name: "Ana Santos", department: "Tech & Innovation", batch: "B16", mentor: "Maria Reyes", week: 7, progress: 85, status: "On Track" },
+  { name: "Mark Rivera", department: "Tech & Innovation", batch: "B15", mentor: "Maria Reyes", week: 7, progress: 45, status: "At Risk" },
+  { name: "Lisa Tan", department: "Marketing", batch: "B15", mentor: "James Cruz", week: 5, progress: 62, status: "On Track" },
+  { name: "Peter Lim", department: "Operations", batch: "B15", mentor: "Elena Torres", week: 5, progress: 55, status: "On Track" },
+  { name: "Grace Yu", department: "Tech & Innovation", batch: "B14", mentor: "Roberto Lim", week: 3, progress: 30, status: "New" },
+  { name: "David Chen", department: "Data Analytics", batch: "B14", mentor: "Michael Tan", week: 3, progress: 28, status: "New" },
+  { name: "Sofia Garcia", department: "Marketing", batch: "B14", mentor: "Sarah Villanueva", week: 1, progress: 8, status: "New" },
 ];
 
 const statusStyles: Record<string, string> = {
@@ -30,6 +30,7 @@ export default function AdminInterns() {
             <tr className="border-b border-border bg-muted/50">
               <th className="text-left px-5 py-3 font-medium text-muted-foreground">Intern</th>
               <th className="text-left px-5 py-3 font-medium text-muted-foreground">Department</th>
+              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Batch</th>
               <th className="text-left px-5 py-3 font-medium text-muted-foreground">Mentor</th>
               <th className="text-left px-5 py-3 font-medium text-muted-foreground">Week</th>
               <th className="text-left px-5 py-3 font-medium text-muted-foreground">Progress</th>
@@ -47,6 +48,7 @@ export default function AdminInterns() {
                   {intern.name}
                 </td>
                 <td className="px-5 py-3 text-muted-foreground">{intern.department}</td>
+                <td className="px-5 py-3 text-muted-foreground">{intern.batch}</td>
                 <td className="px-5 py-3 text-foreground">{intern.mentor}</td>
                 <td className="px-5 py-3 text-muted-foreground">{intern.week}/12</td>
                 <td className="px-5 py-3">

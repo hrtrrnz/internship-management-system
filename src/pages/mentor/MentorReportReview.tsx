@@ -1,110 +1,275 @@
 import { useState } from "react";
-import { FileText, CheckCircle, Clock, Eye, ChevronRight, MessageSquare, Send, AlertTriangle } from "lucide-react";
+import { AlertTriangle, CheckCircle, ChevronRight, Clock } from "lucide-react";
 
-const reports = [
-  { id: 1, intern: "Juan dela Cruz", avatar: "JD", date: "Mar 21", title: "Sprint Review & API Integration", status: "Pending Review", content: "Completed REST API integration for user module. Set up error handling and loading states. Demo'd dashboard to stakeholders during sprint review." },
-  { id: 2, intern: "Ana Santos", avatar: "AS", date: "Mar 21", title: "UI Component Testing Results", status: "Pending Review", content: "Ran comprehensive tests on all shared UI components. Found and fixed 3 accessibility issues. Updated Storybook with new test results." },
-  { id: 3, intern: "Mark Rivera", avatar: "MR", date: "Mar 21", title: "Database Migration Plan", status: "Pending Review", content: "Drafted migration plan for attendance and evaluation tables. Identified potential data integrity issues with the current schema." },
-  { id: 4, intern: "Juan dela Cruz", avatar: "JD", date: "Mar 20", title: "Dashboard UI Implementation", status: "Reviewed", content: "Built main dashboard layout with stat cards, attendance widget, and task overview. Implemented responsive breakpoints." },
-  { id: 5, intern: "Ana Santos", avatar: "AS", date: "Mar 20", title: "Auth Flow Documentation", status: "Reviewed", content: "Documented the complete authentication flow including OAuth, email verification, and password reset processes." },
-  { id: 6, intern: "Lisa Tan", avatar: "LT", date: "Mar 20", title: "Marketing Campaign Analysis", status: "Reviewed", content: "Analyzed Q1 marketing campaign performance. CTR improved by 12% compared to Q4. Recommended optimizations for Q2." },
-  { id: 7, intern: "Peter Lim", avatar: "PL", date: "Mar 20", title: "Operations Process Map", status: "Needs Revision", content: "Created process map for intern onboarding workflow. Missing detail on IT provisioning step." },
+type ReportStatus = "Pending Review" | "Reviewed" | "Needs Revision";
+
+type MentorReport = {
+  id: number;
+  intern: string;
+  batch: string;
+  date: string;
+  status: ReportStatus;
+  hours: string;
+  sections: {
+    accomplishments: { title: string; description: string }[];
+  };
+};
+
+const reports: MentorReport[] = [
+  {
+    id: 1,
+    intern: "Juan dela Cruz",
+    batch: "B16",
+    date: "Mar 21, 2026",
+    status: "Pending Review",
+    hours: "8h 30m",
+    sections: {
+      accomplishments: [
+        { title: "User Module API Integration", description: "Completed API integration for user module with error handling and loading states." },
+        { title: "Sprint Review Demo", description: "Presented dashboard progress to stakeholders and documented feedback points." },
+      ],
+    },
+  },
+  {
+    id: 2,
+    intern: "Ana Santos",
+    batch: "B16",
+    date: "Mar 21, 2026",
+    status: "Pending Review",
+    hours: "9h 00m",
+    sections: {
+      accomplishments: [
+        { title: "UI Component Testing", description: "Ran component tests and resolved accessibility issues in shared elements." },
+        { title: "Storybook Updates", description: "Updated stories and usage references for revised UI states." },
+      ],
+    },
+  },
+  {
+    id: 3,
+    intern: "Mark Rivera",
+    batch: "B15",
+    date: "Mar 20, 2026",
+    status: "Reviewed",
+    hours: "8h 45m",
+    sections: {
+      accomplishments: [
+        { title: "Database Migration Plan", description: "Drafted migration plan and identified potential data integrity checks." },
+      ],
+    },
+  },
+  {
+    id: 4,
+    intern: "Lisa Tan",
+    batch: "B15",
+    date: "Mar 20, 2026",
+    status: "Needs Revision",
+    hours: "7h 50m",
+    sections: {
+      accomplishments: [
+        { title: "Campaign Analysis Draft", description: "Submitted campaign analysis with strong findings but lacking source references." },
+      ],
+    },
+  },
+  {
+    id: 5,
+    intern: "Peter Lim",
+    batch: "B15",
+    date: "Mar 19, 2026",
+    status: "Reviewed",
+    hours: "8h 05m",
+    sections: {
+      accomplishments: [
+        { title: "Operations Tracker Update", description: "Updated weekly tracker and validated task completion checklist with mentor comments." },
+      ],
+    },
+  },
+  {
+    id: 6,
+    intern: "Sofia Garcia",
+    batch: "B14",
+    date: "Mar 19, 2026",
+    status: "Pending Review",
+    hours: "8h 15m",
+    sections: {
+      accomplishments: [
+        { title: "Brand Assets Audit", description: "Audited campaign assets and categorized outdated materials for revision." },
+      ],
+    },
+  },
+  {
+    id: 7,
+    intern: "David Chen",
+    batch: "B14",
+    date: "Mar 18, 2026",
+    status: "Needs Revision",
+    hours: "7h 40m",
+    sections: {
+      accomplishments: [
+        { title: "Data Pipeline Notes", description: "Documented ETL flow and flagged validation gaps in transformation rules." },
+      ],
+    },
+  },
+  {
+    id: 8,
+    intern: "Grace Yu",
+    batch: "B14",
+    date: "Mar 18, 2026",
+    status: "Reviewed",
+    hours: "8h 00m",
+    sections: {
+      accomplishments: [
+        { title: "Frontend Setup Progress", description: "Completed environment setup and aligned dependencies with team standards." },
+      ],
+    },
+  },
 ];
 
-const statusConfig: Record<string, { color: string; bg: string }> = {
-  "Pending Review": { color: "text-stat-orange", bg: "bg-stat-orange-bg" },
-  "Reviewed": { color: "text-stat-green", bg: "bg-stat-green-bg" },
-  "Needs Revision": { color: "text-destructive", bg: "bg-destructive/10" },
+const statusConfig: Record<ReportStatus, { color: string; bg: string; icon: React.ElementType }> = {
+  "Pending Review": { color: "text-stat-orange", bg: "bg-stat-orange-bg", icon: Clock },
+  Reviewed: { color: "text-stat-green", bg: "bg-stat-green-bg", icon: CheckCircle },
+  "Needs Revision": { color: "text-destructive", bg: "bg-destructive/10", icon: AlertTriangle },
 };
 
 export default function MentorReportReview() {
-  const [selectedId, setSelectedId] = useState(1);
-  const selected = reports.find(r => r.id === selectedId)!;
-  const sc = statusConfig[selected.status];
-  const pendingCount = reports.filter(r => r.status === "Pending Review").length;
+  const uniqueDates = Array.from(new Set(reports.map((r) => r.date)));
+  const [selectedDate, setSelectedDate] = useState(uniqueDates[0] ?? "");
+  const dateReports = reports.filter((r) => r.date === selectedDate);
+  const [selectedId, setSelectedId] = useState(dateReports[0]?.id ?? reports[0]?.id ?? 0);
+  const selected = reports.find((r) => r.id === selectedId) ?? dateReports[0] ?? reports[0];
+  const selectedStatus = statusConfig[selected.status];
+
+  const stats = [
+    { label: "Total", value: reports.length, color: "--stat-emerald" },
+    { label: "Pending Review", value: reports.filter((r) => r.status === "Pending Review").length, color: "--stat-orange" },
+    { label: "Reviewed", value: reports.filter((r) => r.status === "Reviewed").length, color: "--stat-green" },
+    { label: "Needs Revision", value: reports.filter((r) => r.status === "Needs Revision").length, color: "--destructive" },
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-display font-bold text-foreground">Report Review</h2>
-        </div>
-        {pendingCount > 0 && (
-          <span className="flex items-center gap-2 px-4 py-2 rounded-full bg-stat-orange-bg text-stat-orange text-sm font-medium">
-            <Clock className="w-4 h-4" /> {pendingCount} pending review
-          </span>
-        )}
+      <h2 className="text-2xl font-display font-bold text-foreground">Report Review</h2>
+
+      <div className="flex items-center gap-3">
+        {stats.map((s) => (
+          <div key={s.label} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-card border border-border">
+            <span className="w-2 h-2 rounded-full" style={{ background: `hsl(var(${s.color}))` }} />
+            <span className="text-sm font-medium text-foreground">{s.value}</span>
+            <span className="text-xs text-muted-foreground">{s.label}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Inbox-style split view */}
-      <div className="grid grid-cols-5 gap-0 bg-card rounded-xl border border-border overflow-hidden" style={{ minHeight: '540px' }}>
-        {/* List panel */}
-        <div className="col-span-2 border-r border-border">
-          <div className="px-4 py-3 border-b border-border bg-muted/20">
-            <p className="text-xs font-medium text-muted-foreground">Inbox · {reports.length} reports</p>
+      <div className="grid grid-cols-5 gap-4">
+        <div className="col-span-2 bg-card rounded-xl border border-border overflow-hidden">
+          <div className="px-4 py-3 border-b border-border bg-muted/30">
+            <p className="text-xs font-medium text-muted-foreground">Report Days</p>
           </div>
-          <div className="divide-y divide-border overflow-y-auto" style={{ maxHeight: '480px' }}>
-            {reports.map((r) => {
-              const rsc = statusConfig[r.status];
-              const isActive = r.id === selectedId;
+          <div className="divide-y divide-border">
+            {uniqueDates.map((date) => {
+              const dayItems = reports.filter((r) => r.date === date);
+              const active = date === selectedDate;
+              const pendingCount = dayItems.filter((r) => r.status === "Pending Review").length;
               return (
                 <button
-                  key={r.id}
-                  onClick={() => setSelectedId(r.id)}
-                  className={`w-full text-left px-4 py-3.5 transition-colors ${isActive ? 'bg-primary/5' : 'hover:bg-muted/20'}`}
+                  key={date}
+                  type="button"
+                  onClick={() => {
+                    setSelectedDate(date);
+                    setSelectedId(dayItems[0]?.id ?? 0);
+                  }}
+                  className={`w-full text-left px-4 py-3.5 transition-colors flex items-start gap-3 ${
+                    active ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-muted/30 border-l-2 border-l-transparent"
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold flex-shrink-0">
-                      {r.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className={`text-sm font-medium truncate ${isActive ? 'text-primary' : 'text-foreground'}`}>{r.intern}</span>
-                        <span className="text-[10px] text-muted-foreground flex-shrink-0">{r.date}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">{r.title}</p>
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-semibold ${active ? "text-primary" : "text-foreground"}`}>{date}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{dayItems.length} reports</p>
                   </div>
-                  {r.status === "Pending Review" && (
-                    <div className="w-2 h-2 rounded-full bg-stat-orange absolute right-3 top-4" />
+                  {pendingCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-stat-orange-bg text-stat-orange">
+                      {pendingCount} pending
+                    </span>
                   )}
+                  {active && <ChevronRight className="w-4 h-4 text-primary mt-1 flex-shrink-0" />}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Detail panel */}
-        <div className="col-span-3 flex flex-col">
-          <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
-                {selected.avatar}
-              </div>
+        <div className="col-span-3 bg-card rounded-xl border border-border overflow-hidden">
+          <div className="px-6 py-4 border-b border-border">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="font-semibold text-foreground">{selected.intern}</p>
-                <p className="text-xs text-muted-foreground">{selected.date} · {selected.title}</p>
+                <h3 className="font-display font-bold text-foreground text-lg">Daily Report</h3>
+                <p className="text-sm text-muted-foreground mt-0.5">{selectedDate} · Batch {selected.batch}</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${selectedStatus.bg} ${selectedStatus.color}`}>
+                {selected.status}
+              </span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {dateReports.map((r) => {
+                const active = r.id === selected.id;
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setSelectedId(r.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                      active
+                        ? "bg-primary/10 text-primary border-primary/30"
+                        : "bg-background text-muted-foreground border-border hover:bg-muted"
+                    }`}
+                  >
+                    {r.intern} · {r.batch}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              <div className="p-3 rounded-lg bg-muted/30">
+                <p className="text-xs text-muted-foreground">Hours Logged</p>
+                <p className="text-lg font-bold font-display text-foreground">{selected.hours}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30">
+                <p className="text-xs text-muted-foreground">Submitted</p>
+                <p className="text-lg font-bold font-display text-foreground">{selected.date}</p>
               </div>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${sc.bg} ${sc.color}`}>{selected.status}</span>
-          </div>
 
-          <div className="flex-1 p-6">
-            <div className="bg-muted/20 rounded-lg p-5">
-              <p className="text-sm text-foreground leading-relaxed">{selected.content}</p>
+            <div className="mb-5 overflow-auto rounded-lg border border-border bg-muted/20 p-4">
+              <div className="mx-auto aspect-[1/1.4142] w-full max-w-[720px] bg-white text-black shadow-md">
+                <div className="p-[1in] font-['Arial'] text-[11pt] leading-[1.35]">
+                  <p className="mb-0.5">{selected.date}</p>
+                  <p className="mb-0.5">Accomplishment Report</p>
+                  <p>To Whom It May Concern,</p>
+
+                  <h4 className="mt-10 text-center text-[11pt] font-bold">Accomplishment Report</h4>
+
+                  <ol className="mt-8 list-decimal pl-6 space-y-4">
+                    {selected.sections.accomplishments.map((item) => (
+                      <li key={item.title} className="leading-[1.35]">
+                        <p className="font-bold">{item.title}</p>
+                        <p>{item.description}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Action bar */}
-          <div className="px-6 py-4 border-t border-border bg-muted/10">
-            {selected.status === "Pending Review" ? (
-              <div className="space-y-3">
+            {selected.status === "Pending Review" && (
+              <div className="border-t border-border pt-4">
                 <textarea
                   placeholder="Write your feedback..."
                   className="w-full px-4 py-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                   rows={2}
                 />
-                <div className="flex items-center gap-2 justify-end">
+                <div className="flex items-center gap-2 justify-end mt-3">
                   <button className="px-4 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors flex items-center gap-1.5">
                     <AlertTriangle className="w-3.5 h-3.5" /> Request Revision
                   </button>
@@ -112,11 +277,6 @@ export default function MentorReportReview() {
                     <CheckCircle className="w-3.5 h-3.5" /> Approve & Send Feedback
                   </button>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="w-4 h-4 text-stat-green" />
-                <span>This report has been {selected.status.toLowerCase()}.</span>
               </div>
             )}
           </div>
