@@ -1,16 +1,15 @@
-import { Clock, CheckSquare, FileText, Users, LogIn, LogOut, ExternalLink, Building2, MapPin, Link2, Smile } from "lucide-react";
+import { Clock, CheckSquare, FileText, Users, LogIn, LogOut, ExternalLink, Building2, Smile } from "lucide-react";
 import { useState, useEffect } from "react";
 
-function StatCard({ icon: Icon, value, label, sub, colorClass, bgClass }: {
-  icon: React.ElementType; value: string; label: string; sub: string; colorClass: string; bgClass: string;
+function StatCard({ icon: Icon, value, label, sub, colorClass }: {
+  icon: React.ElementType; value: string; label: string; sub: string; colorClass: string;
 }) {
   return (
-    <div className={`rounded-xl p-5 border border-border ${bgClass} relative overflow-hidden`}>
-      <div className="absolute top-4 right-0 w-24 h-24 rounded-full opacity-20" style={{ background: `hsl(var(${colorClass}))`, filter: 'blur(30px)' }} />
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3`} style={{ background: `hsl(var(${colorClass}) / 0.15)` }}>
+    <div className="rounded-xl bg-card p-5 border border-border/80 relative overflow-hidden shadow-sm">
+      <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: `hsl(var(${colorClass}) / 0.16)` }}>
         <Icon className="w-5 h-5" style={{ color: `hsl(var(${colorClass}))` }} />
       </div>
-      <p className="text-3xl font-bold text-foreground font-display">{value}</p>
+      <p className="text-2xl font-bold text-foreground">{value}</p>
       <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
       <p className="text-xs mt-1" style={{ color: `hsl(var(${colorClass}))` }}>{sub}</p>
     </div>
@@ -30,11 +29,11 @@ function LiveClock() {
   const dateStr = time.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
-    <div className="bg-clock-bg rounded-xl p-5 flex items-center justify-between">
-      <p className="text-4xl font-mono font-bold text-stat-green tracking-wider">{h}:{m}:{s}</p>
+    <div className="bg-clock-bg rounded-xl p-5 flex items-center justify-between border border-sidebar-border/60">
+      <p className="text-3xl font-mono font-bold text-stat-green tracking-wider">{h}:{m}:{s}</p>
       <div className="text-right">
-        <p className="text-card font-semibold">{dayName}</p>
-        <p className="text-sidebar-muted text-sm">{dateStr}</p>
+        <p className="text-card font-semibold text-sm">{dayName}</p>
+        <p className="text-sidebar-muted text-xs">{dateStr}</p>
       </div>
     </div>
   );
@@ -75,23 +74,23 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <StatCard icon={Clock} value="34" label="Days Attended" sub="↑3 this week" colorClass="--stat-orange" bgClass="bg-stat-orange-bg" />
-        <StatCard icon={CheckSquare} value="18" label="Tasks Completed" sub="↑5 pending" colorClass="--stat-green" bgClass="bg-stat-green-bg" />
-        <StatCard icon={FileText} value="12" label="Reports Submitted" sub="1 overdue" colorClass="--stat-blue" bgClass="bg-stat-blue-bg" />
-        <StatCard icon={Users} value="78%" label="Overall Progress" sub="On track · 46 days left" colorClass="--stat-emerald" bgClass="bg-stat-emerald-bg" />
+        <StatCard icon={Clock} value="34" label="Days Attended" sub="↑3 this week" colorClass="--stat-orange" />
+        <StatCard icon={CheckSquare} value="18" label="Tasks Completed" sub="↑5 pending" colorClass="--stat-green" />
+        <StatCard icon={FileText} value="12" label="Reports Submitted" sub="1 overdue" colorClass="--stat-blue" />
+        <StatCard icon={Users} value="78%" label="Overall Progress" sub="On track · 46 days left" colorClass="--stat-emerald" />
       </div>
 
       <div className="grid grid-cols-3 gap-6">
         {/* Daily Log */}
         <div className="col-span-2">
-          <div className="bg-card rounded-xl border border-border p-6">
+          <div className="bg-card rounded-xl border border-border/80 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-1">
               <h3 className="text-lg font-display font-bold text-foreground">Dream Academy · Daily Log</h3>
-              <span className="flex items-center gap-1.5 text-sm text-destructive font-medium">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-2.5 py-1 text-xs text-destructive font-medium">
                 <span className="w-2 h-2 rounded-full bg-destructive" /> Not yet clocked in
               </span>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">Awesome day! Log your attendance below.</p>
+            <p className="text-sm text-muted-foreground mb-4">Please complete your attendance details for today.</p>
 
             <LiveClock />
 
@@ -107,7 +106,7 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 mt-3">
-              <button className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity">
+              <button className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity shadow-sm">
                 <LogIn className="w-4 h-4" /> Clock In
               </button>
               <button className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-border text-foreground font-medium text-sm hover:bg-muted transition-colors">
@@ -166,7 +165,7 @@ export default function Dashboard() {
               />
             </div>
 
-            <button className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-stat-orange text-white font-semibold text-sm hover:opacity-90 transition-opacity">
+            <button className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-stat-orange text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-sm">
               <LogIn className="w-4 h-4" /> Submit Clock-In
             </button>
           </div>
@@ -174,35 +173,7 @@ export default function Dashboard() {
 
         {/* Right column */}
         <div className="space-y-4">
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground">Recent Attendance</h3>
-            <p className="text-xs text-muted-foreground mb-3">Last 5 entries</p>
-            <ul className="space-y-3">
-              {attendanceEntries.map((e) => (
-                <li key={e.date} className="flex items-center gap-3 text-sm">
-                  <span className={`w-2.5 h-2.5 rounded-full ${e.status === "In" ? "bg-stat-green" : "bg-destructive"}`} />
-                  <span className="font-medium text-foreground w-14">{e.date}</span>
-                  <span className="flex-1 text-muted-foreground">{e.time}</span>
-                  <span className={`text-xs font-semibold ${e.status === "In" ? "text-stat-green" : "text-destructive"}`}>{e.status}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-card rounded-xl border border-border p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display font-bold text-foreground">Internship Progress</h3>
-              <span className="text-xs text-muted-foreground">Week 7 of 12</span>
-            </div>
-            <div className="space-y-3">
-              <ProgressBar label="Attendance" value={92} colorClass="--stat-green" />
-              <ProgressBar label="Tasks Completed" value={78} colorClass="--stat-blue" />
-              <ProgressBar label="Reports Submitted" value={85} colorClass="--stat-emerald" />
-              <ProgressBar label="Learning Modules" value={60} colorClass="--stat-orange" />
-            </div>
-          </div>
-
-          <div className="bg-card rounded-xl border border-border p-5">
+          <div className="bg-card rounded-xl border border-border/80 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-display font-bold text-foreground">Today's Tasks</h3>
               <span className="text-xs text-muted-foreground">{todayTasks.filter(t => t.done).length} of {todayTasks.length} done</span>
@@ -215,6 +186,34 @@ export default function Dashboard() {
                   </div>
                   <span className={`flex-1 ${t.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{t.label}</span>
                   <span className={`text-xs shrink-0 ${t.done ? 'text-muted-foreground' : 'text-destructive font-medium'}`}>{t.time}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-card rounded-xl border border-border/80 p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-bold text-foreground">Internship Progress</h3>
+              <span className="text-xs text-muted-foreground">Week 7 of 12</span>
+            </div>
+            <div className="space-y-3">
+              <ProgressBar label="Attendance" value={92} colorClass="--stat-green" />
+              <ProgressBar label="Tasks Completed" value={78} colorClass="--stat-blue" />
+              <ProgressBar label="Reports Submitted" value={85} colorClass="--stat-emerald" />
+              <ProgressBar label="Learning Modules" value={60} colorClass="--stat-orange" />
+            </div>
+          </div>
+
+          <div className="bg-card rounded-xl border border-border/80 p-5 shadow-sm">
+            <h3 className="font-display font-bold text-foreground">Recent Attendance</h3>
+            <p className="text-xs text-muted-foreground mb-3">Last 5 entries</p>
+            <ul className="space-y-3">
+              {attendanceEntries.map((e) => (
+                <li key={e.date} className="flex items-center gap-3 text-sm">
+                  <span className={`w-2.5 h-2.5 rounded-full ${e.status === "In" ? "bg-stat-green" : "bg-destructive"}`} />
+                  <span className="font-medium text-foreground w-14">{e.date}</span>
+                  <span className="flex-1 text-muted-foreground">{e.time}</span>
+                  <span className={`text-xs font-semibold ${e.status === "In" ? "text-stat-green" : "text-destructive"}`}>{e.status}</span>
                 </li>
               ))}
             </ul>

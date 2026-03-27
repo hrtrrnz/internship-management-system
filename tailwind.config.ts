@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Playfair Display', 'serif'],
-        body: ['Inter', 'sans-serif'],
+        display: ['Manrope', 'Inter', 'Segoe UI', 'sans-serif'],
+        body: ['Inter', 'Segoe UI', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
