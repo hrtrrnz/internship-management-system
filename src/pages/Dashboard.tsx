@@ -69,6 +69,9 @@ const todayTasks = [
   { label: "Upload accomplishment report", time: "5:00 PM", done: false },
 ];
 
+const INDIVIDUAL_LOGSHEET_URL = "https://docs.google.com/spreadsheets/d/1nz5LZ-USw7XH9qlRkzEa7WRXy7gzVort/edit?gid=1568030268#gid=1568030268";
+const BATCH_DAILY_ATTENDANCE_URL = "https://docs.google.com/spreadsheets/d/1Dhf9qzRfnLJq04vK5GwRdfsdqNxNjYow8MQIBB9qLLc/edit?pli=1&gid=923080193#gid=923080193";
+
 function formatDateTime(value: Date | null) {
   if (!value) return "—";
   return value.toLocaleString("en-US", {
@@ -131,11 +134,19 @@ export default function Dashboard() {
             <LiveClock />
 
             <div className="grid grid-cols-2 gap-3 mt-4">
-              <button className="flex items-center justify-between px-4 py-3 rounded-lg border border-border text-sm text-foreground hover:bg-muted transition-colors">
+              <button
+                type="button"
+                onClick={() => window.open(INDIVIDUAL_LOGSHEET_URL, "_blank", "noopener,noreferrer")}
+                className="flex items-center justify-between px-4 py-3 rounded-lg border border-border text-sm text-foreground hover:bg-muted transition-colors"
+              >
                 <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Individual Log Sheet</span>
                 <ExternalLink className="w-4 h-4 text-accent" />
               </button>
-              <button className="flex items-center justify-between px-4 py-3 rounded-lg border border-border text-sm text-foreground hover:bg-muted transition-colors">
+              <button
+                type="button"
+                onClick={() => window.open(BATCH_DAILY_ATTENDANCE_URL, "_blank", "noopener,noreferrer")}
+                className="flex items-center justify-between px-4 py-3 rounded-lg border border-border text-sm text-foreground hover:bg-muted transition-colors"
+              >
                 <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Batch Daily Attendance</span>
                 <ExternalLink className="w-4 h-4 text-accent" />
               </button>
