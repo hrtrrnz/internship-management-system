@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin, Calendar, Shield } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 export default function AdminProfile() {
   return (
@@ -30,6 +31,21 @@ export default function AdminProfile() {
               <InfoBlock icon={Calendar} label="Member Since" value="January 2025" />
               <InfoBlock icon={Calendar} label="Last Password Update" value="March 5, 2026" />
             </div>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() =>
+                toast({
+                  title: "Profile editor",
+                  description: "Edit profile form will appear here.",
+                })
+              }
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            >
+              Edit profile
+            </button>
           </div>
 
         </div>

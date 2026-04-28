@@ -1,6 +1,6 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Clock, CheckSquare, FileText, Trophy,
+  LayoutDashboard, Clock, CheckSquare, FileText,
   BookOpen, Users, ClipboardCheck, User, FolderOpen, MoreVertical, Bell, Search,
   UserCog, BarChart3, Settings, Building, Shield, Star, Calendar,
   GraduationCap, LogOut, PanelLeft, PanelRight, MessageSquare
@@ -19,11 +19,10 @@ const studentNav: NavSection[] = [
   {
     label: "MAIN",
     items: [
-      { to: "/", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/portal", icon: LayoutDashboard, label: "Dashboard" },
       { to: "/attendance", icon: Clock, label: "Attendance" },
       { to: "/tasks", icon: CheckSquare, label: "Tasks" },
       { to: "/daily-reports", icon: FileText, label: "Daily Reports" },
-      { to: "/accomplishments", icon: Trophy, label: "Accomplishments" },
     ],
   },
   {
@@ -171,7 +170,10 @@ export default function AppSidebar({ collapsed = false }: AppSidebarProps) {
           </div>
         </div>
 
-        <nav className={cn("mt-2 overflow-y-auto space-y-5", collapsed ? "px-2" : "px-3")} style={{ maxHeight: 'calc(100vh - 180px)' }}>
+        <nav
+          className={cn("sidebar-scroll mt-2 overflow-y-auto space-y-5", collapsed ? "px-2" : "px-3")}
+          style={{ maxHeight: "calc(100vh - 180px)" }}
+        >
           {sections.map((section) => (
             <div key={section.label}>
               <p className={cn("mb-1.5 text-[10px] font-semibold tracking-widest text-sidebar-muted", collapsed ? "hidden" : "px-3")}>

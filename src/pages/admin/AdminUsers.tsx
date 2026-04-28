@@ -1,5 +1,16 @@
 import { useState } from "react";
 import { Users, Plus, MoreVertical, Search, Filter } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const users = [
   { name: "Carlos Santos", email: "carlos@hytfoundation.org", role: "Admin", department: "Administration", status: "Active", joinDate: "Jan 2025" },
@@ -22,6 +33,7 @@ const roleStyles: Record<string, string> = {
 
 export default function AdminUsers() {
   const [filterRole, setFilterRole] = useState<string>("All");
+  const [openAddUser, setOpenAddUser] = useState(false);
   const filtered = filterRole === "All" ? users : users.filter(u => u.role === filterRole);
 
   return (
@@ -30,7 +42,10 @@ export default function AdminUsers() {
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">User Management</h2>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+        <button
+          onClick={() => setOpenAddUser(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+        >
           <Plus className="w-4 h-4" /> Add User
         </button>
       </div>
@@ -91,12 +106,32 @@ export default function AdminUsers() {
         <div className="col-span-3">
           <div className="grid grid-cols-3 gap-3">
             {filtered.map((u) => (
-              <div key={u.email} className="bg-card rounded-xl border border-border p-4 hover:shadow-md transition-shadow">
+              <button
+                key={u.email}
+                type="button"
+                onClick={() =>
+                  toast({
+                    title: "User preview",
+                    description: `Opened ${u.name} profile card.`,
+                  })
+                }
+                className="w-full text-left bg-card rounded-xl border border-border p-4 hover:shadow-md hover:-translate-y-0.5 transition-all"
+              >
                 <div className="flex items-start justify-between mb-3">
                   <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
                     {u.name.split(" ").map(n => n[0]).join("")}
                   </div>
-                  <button className="p-1 rounded hover:bg-muted transition-colors">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toast({
+                        title: "Quick actions",
+                        description: `Actions for ${u.name} are coming soon.`,
+                      });
+                    }}
+                    className="p-1 rounded hover:bg-muted transition-colors"
+                  >
                     <MoreVertical className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
@@ -112,11 +147,64 @@ export default function AdminUsers() {
                   <span>{u.department}</span>
                   <span>Since {u.joinDate}</span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
       </div>
+
+      <Dialog open={openAddUser} onOpenChange={setOpenAddUser}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add User</DialogTitle>
+            <DialogDescription>Create a new admin, mentor, or intern profile.</DialogDescription>
+          </DialogHeader>
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setOpenAddUser(false);
+              toast({
+                title: "User created",
+                description: "The new user has been added successfully.",
+              });
+            }}
+          >
+            <div className="space-y-2">
+              <Label htmlFor="add-user-name">Full name</Label>
+              <Input id="add-user-name" placeholder="Juan dela Cruz" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-user-email">Email</Label>
+              <Input id="add-user-email" type="email" placeholder="juan@email.com" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-user-role">Role</Label>
+              <select
+                id="add-user-role"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                defaultValue="Intern"
+              >
+                <option>Admin</option>
+                <option>Mentor</option>
+                <option>Intern</option>
+              </select>
+            </div>
+            <DialogFooter>
+              <button
+                type="button"
+                onClick={() => setOpenAddUser(false)}
+                className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button type="submit" className="rounded-md bg-accent px-4 py-2 text-sm text-accent-foreground">
+                Save user
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Shield, Users, Edit } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const roles = [
   {
@@ -10,7 +11,7 @@ const roles = [
   {
     name: "Mentor",
     count: 8,
-    permissions: ["View assigned interns", "Review reports", "Create evaluations", "Assign tasks", "Coordinate check-ins", "Manage learning paths"],
+    permissions: ["View assigned interns", "Review reports", "Create evaluations", "Assign tasks", "Send reminders", "Manage learning paths"],
     color: "--stat-blue",
   },
   {
@@ -30,7 +31,7 @@ export default function AdminRoles() {
 
       <div className="space-y-4">
         {roles.map((role) => (
-          <div key={role.name} className="bg-card rounded-xl border border-border p-6">
+          <div key={role.name} className="bg-card rounded-xl border border-border p-6 hover:shadow-sm transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `hsl(var(${role.color}) / 0.15)` }}>
@@ -43,7 +44,16 @@ export default function AdminRoles() {
                   </p>
                 </div>
               </div>
-              <button className="p-2 rounded-lg hover:bg-muted transition-colors">
+              <button
+                type="button"
+                onClick={() =>
+                  toast({
+                    title: "Edit role",
+                    description: `Permission editor for ${role.name} opened.`,
+                  })
+                }
+                className="p-2 rounded-lg hover:bg-muted transition-colors"
+              >
                 <Edit className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>

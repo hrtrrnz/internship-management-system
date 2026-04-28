@@ -22,7 +22,9 @@ export default function SignIn() {
       <div className="hidden lg:flex w-1/2 relative overflow-hidden flex-col justify-between p-12"
         style={{ background: "linear-gradient(180deg, hsl(20 30% 12%) 0%, hsl(15 25% 8%) 100%)" }}>
         <div>
-          <img src={hytLogo} alt="HYT Foundation" width={140} height={140} className="mb-6" />
+          <Link to="/" aria-label="Go to landing page" className="inline-block">
+            <img src={hytLogo} alt="HYT Foundation" width={140} height={140} className="mb-6" />
+          </Link>
         </div>
         <div>
           <h2 className="text-4xl font-display font-bold leading-tight mb-6">

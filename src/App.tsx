@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RoleProvider } from "@/contexts/RoleContext";
 import AppLayout from "./components/AppLayout";
+import Landing from "./pages/Landing";
 
 // Auth pages
 import SignIn from "./pages/SignIn";
@@ -16,7 +17,6 @@ import Dashboard from "./pages/Dashboard";
 import Attendance from "./pages/Attendance";
 import Tasks from "./pages/Tasks";
 import DailyReports from "./pages/DailyReports";
-import Accomplishments from "./pages/Accomplishments";
 import LearningModules from "./pages/LearningModules";
 import MyMentor from "./pages/MyMentor";
 import Evaluations from "./pages/Evaluations";
@@ -64,17 +64,17 @@ const App = () => (
         <RoleProvider>
           <Routes>
             {/* Auth routes (outside layout) */}
+            <Route path="/" element={<Landing />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/demo" element={<DemoSelect />} />
 
             <Route element={<AppLayout />}>
               {/* Student routes */}
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/portal" element={<Dashboard />} />
               <Route path="/attendance" element={<Attendance />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/daily-reports" element={<DailyReports />} />
-              <Route path="/accomplishments" element={<Accomplishments />} />
               <Route path="/learning-modules" element={<LearningModules />} />
               <Route path="/my-mentor" element={<MyMentor />} />
               <Route path="/evaluations" element={<Evaluations />} />

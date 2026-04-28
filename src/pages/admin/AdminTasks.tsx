@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { CheckSquare, Clock } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 type InternStatus = {
   intern: string;
   unit: string;
   batch: string;
   status: "Pending" | "In Progress" | "Completed";
-  progress: number;
   updatedAt: string;
 };
 
@@ -25,9 +25,9 @@ const tasks: AdminTask[] = [
     due: "Mar 25",
     description: "Program-wide technical assessment task for batch B16.",
     internStatuses: [
-      { intern: "Alex Cruz", unit: "Tech Unit", batch: "B16", status: "In Progress", progress: 72, updatedAt: "Today, 10:12 AM" },
-      { intern: "Bea Santos", unit: "Tech Unit", batch: "B16", status: "Completed", progress: 100, updatedAt: "Today, 9:41 AM" },
-      { intern: "Lia Tan", unit: "Marketing", batch: "B15", status: "Pending", progress: 14, updatedAt: "Yesterday, 4:55 PM" },
+      { intern: "Alex Cruz", unit: "Tech Unit", batch: "B16", status: "In Progress", updatedAt: "Today, 10:12 AM" },
+      { intern: "Bea Santos", unit: "Tech Unit", batch: "B16", status: "Completed", updatedAt: "Today, 9:41 AM" },
+      { intern: "Lia Tan", unit: "Marketing", batch: "B15", status: "Pending", updatedAt: "Yesterday, 4:55 PM" },
     ],
   },
   {
@@ -36,9 +36,9 @@ const tasks: AdminTask[] = [
     due: "Mar 27",
     description: "Required weekly report for all interns across departments.",
     internStatuses: [
-      { intern: "Marco Reyes", unit: "Operations", batch: "B15", status: "In Progress", progress: 65, updatedAt: "Today, 1:20 PM" },
-      { intern: "Adrian Cole", unit: "Data Analytics", batch: "B14", status: "Pending", progress: 20, updatedAt: "Yesterday, 5:03 PM" },
-      { intern: "Alex Cruz", unit: "Tech Unit", batch: "B16", status: "Completed", progress: 100, updatedAt: "Today, 11:08 AM" },
+      { intern: "Marco Reyes", unit: "Operations", batch: "B15", status: "In Progress", updatedAt: "Today, 1:20 PM" },
+      { intern: "Adrian Cole", unit: "Data Analytics", batch: "B14", status: "Pending", updatedAt: "Yesterday, 5:03 PM" },
+      { intern: "Alex Cruz", unit: "Tech Unit", batch: "B16", status: "Completed", updatedAt: "Today, 11:08 AM" },
     ],
   },
 ];
@@ -65,7 +65,7 @@ export default function AdminTasks() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-display font-bold text-foreground">Task Monitoring</h2>
+      <h2 className="text-2xl font-display font-bold text-foreground">Task Status</h2>
 
       <div className="grid grid-cols-5 gap-5">
         <div className="col-span-2 rounded-xl border border-border bg-card p-4">
@@ -80,7 +80,13 @@ export default function AdminTasks() {
                 <button
                   key={task.id}
                   type="button"
-                  onClick={() => setSelectedTaskId(task.id)}
+                  onClick={() => {
+                    setSelectedTaskId(task.id);
+                    toast({
+                      title: "Task selected",
+                      description: `${task.title} opened.`,
+                    });
+                  }}
                   className={`w-full rounded-lg border px-3 py-2.5 text-left transition-colors ${
                     active ? "border-primary/40 bg-primary/5" : "border-border bg-background hover:bg-muted/40"
                   }`}
@@ -121,7 +127,17 @@ export default function AdminTasks() {
 
                 <div className="space-y-2">
                   {selectedTask.internStatuses.map((item) => (
-                    <div key={item.intern} className="rounded-lg border border-border bg-background px-3 py-3">
+                    <button
+                      key={item.intern}
+                      type="button"
+                      onClick={() =>
+                        toast({
+                          title: "Task status",
+                          description: `${item.intern} is marked ${item.status}.`,
+                        })
+                      }
+                      className="w-full text-left rounded-lg border border-border bg-background px-3 py-3 hover:bg-muted/30 transition-colors"
+                    >
                       <div className="flex items-center justify-between mb-2">
                         <div>
                           <p className="text-sm font-medium text-foreground">{item.intern}</p>
@@ -131,14 +147,11 @@ export default function AdminTasks() {
                           {item.status}
                         </span>
                       </div>
-                      <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
-                        <div className="h-full rounded-full bg-accent" style={{ width: `${item.progress}%` }} />
-                      </div>
                       <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
-                        <span>{item.progress}% progress</span>
+                        <span>Last updated</span>
                         <span>{item.updatedAt}</span>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -146,7 +159,7 @@ export default function AdminTasks() {
           ) : (
             <div className="h-full min-h-[320px] flex flex-col items-center justify-center text-muted-foreground">
               <CheckSquare className="w-6 h-6 mb-2" />
-              Select a task to view intern progress.
+              Select a task to view intern status.
             </div>
           )}
         </div>

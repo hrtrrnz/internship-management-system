@@ -1,4 +1,5 @@
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { toast } from "@/hooks/use-toast";
 
 const weeklyTrend = [
   { week: "W1", attendance: 95, reports: 82, tasks: 60 },
@@ -45,13 +46,23 @@ export default function AdminAnalytics() {
       {/* KPI strip */}
       <div className="grid grid-cols-4 gap-4">
         {metrics.map((m) => (
-          <div key={m.label} className="bg-card rounded-xl border border-border p-4">
+          <button
+            key={m.label}
+            type="button"
+            onClick={() =>
+              toast({
+                title: "Analytics metric",
+                description: `${m.label} trend opened.`,
+              })
+            }
+            className="w-full text-left bg-card rounded-xl border border-border p-4 hover:shadow-sm transition-shadow"
+          >
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-muted-foreground">{m.label}</p>
               <span className="text-xs font-medium" style={{ color: `hsl(var(${m.color}))` }}>{m.change}</span>
             </div>
             <p className="text-3xl font-bold font-display text-foreground">{m.value}</p>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -103,7 +114,17 @@ export default function AdminAnalytics() {
           <h3 className="font-display font-bold text-foreground mb-4">All Interns</h3>
           <div className="space-y-3">
             {internHours.map((intern) => (
-              <div key={intern.name} className="flex items-center gap-3">
+              <button
+                key={intern.name}
+                type="button"
+                onClick={() =>
+                  toast({
+                    title: "Intern analytics",
+                    description: `${intern.name}: ${intern.renderedHours}/${intern.requiredHours} hours.`,
+                  })
+                }
+                className="w-full text-left flex items-center gap-3 rounded-md p-1 hover:bg-muted/40 transition-colors"
+              >
                 <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
                   {intern.name.charAt(0)}
                 </div>
@@ -117,7 +138,7 @@ export default function AdminAnalytics() {
                   </span>
                   <p className="text-[10px] text-muted-foreground">Rendered / Required</p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

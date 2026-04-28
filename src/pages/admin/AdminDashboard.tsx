@@ -1,4 +1,5 @@
 import { Users, GraduationCap, Star, Building, TrendingUp, Clock, FileText, AlertTriangle } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 export default function AdminDashboard() {
   return (
@@ -20,12 +21,22 @@ export default function AdminDashboard() {
                 { label: "Report Submission", value: "88%", trend: "+5%", icon: FileText, color: "text-stat-blue" },
                 { label: "Avg. Evaluation", value: "4.2/5", trend: "+0.3", icon: TrendingUp, color: "text-stat-orange" },
               ].map((m) => (
-                <div key={m.label} className="p-4 rounded-lg bg-muted/30 text-center">
+                <button
+                  key={m.label}
+                  type="button"
+                  onClick={() =>
+                    toast({
+                      title: "Metric insight",
+                      description: `${m.label} details opened.`,
+                    })
+                  }
+                  className="w-full p-4 rounded-lg bg-muted/30 text-center hover:bg-muted/50 transition-colors"
+                >
                   <m.icon className={`w-6 h-6 mx-auto mb-2 ${m.color}`} />
                   <p className="text-2xl font-bold font-display text-foreground">{m.value}</p>
                   <p className="text-xs text-muted-foreground">{m.label}</p>
                   <p className="text-xs text-stat-green mt-1">{m.trend}</p>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -64,7 +75,17 @@ export default function AdminDashboard() {
                 { text: "Batch 2026-Q1 internship started", time: "3d ago", type: "info" },
                 { text: "System maintenance completed", time: "5d ago", type: "info" },
               ].map((a, i) => (
-                <div key={i} className="flex items-start gap-3 p-2">
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() =>
+                    toast({
+                      title: "Activity opened",
+                      description: a.text,
+                    })
+                  }
+                  className="w-full text-left flex items-start gap-3 p-2 rounded-md hover:bg-muted/40 transition-colors"
+                >
                   <div className={`w-2 h-2 rounded-full mt-1.5 ${
                     a.type === "success" ? "bg-stat-green" : a.type === "warning" ? "bg-stat-orange" : "bg-stat-blue"
                   }`} />
@@ -72,7 +93,7 @@ export default function AdminDashboard() {
                     <p className="text-sm text-foreground">{a.text}</p>
                     <p className="text-xs text-muted-foreground">{a.time}</p>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -83,12 +104,22 @@ export default function AdminDashboard() {
               {[
                 "3 interns haven't clocked in today",
                 "2 weekly evaluations overdue",
-                "1 mentor has no scheduled check-ins",
+                "1 mentor has overdue feedback reviews",
               ].map((alert, i) => (
-                <div key={i} className="flex items-center gap-2 p-2.5 rounded-lg bg-stat-orange-bg">
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() =>
+                    toast({
+                      title: "Alert acknowledged",
+                      description: alert,
+                    })
+                  }
+                  className="w-full text-left flex items-center gap-2 p-2.5 rounded-lg bg-stat-orange-bg hover:opacity-85 transition-opacity"
+                >
                   <AlertTriangle className="w-4 h-4 text-stat-orange flex-shrink-0" />
                   <p className="text-xs text-foreground">{alert}</p>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -102,13 +133,22 @@ function StatCard({ icon: Icon, value, label, sub, color }: {
   icon: React.ElementType; value: string; label: string; sub: string; color: string;
 }) {
   return (
-    <div className="rounded-xl bg-card p-5 border border-border/80 relative overflow-hidden shadow-sm">
+    <button
+      type="button"
+      onClick={() =>
+        toast({
+          title: label,
+          description: `Viewing details for ${label.toLowerCase()}.`,
+        })
+      }
+      className="w-full text-left rounded-xl bg-card p-5 border border-border/80 relative overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+    >
       <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: `hsl(var(${color}) / 0.16)` }}>
         <Icon className="w-5 h-5" style={{ color: `hsl(var(${color}))` }} />
       </div>
       <p className="text-2xl font-bold text-foreground">{value}</p>
       <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
       <p className="text-xs mt-1" style={{ color: `hsl(var(${color}))` }}>{sub}</p>
-    </div>
+    </button>
   );
 }

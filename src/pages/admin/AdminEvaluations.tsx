@@ -1,23 +1,24 @@
-import { Star, Download, CheckCircle2, Clock, Users } from "lucide-react";
+import { Download, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const evaluations = [
-  { intern: "Ana Santos", mentor: "Maria Reyes", score: 4.7, date: "Apr 10, 2026", status: "Completed", dept: "Tech & Innovation", offboarding: "Apr 12, 2026" },
-  { intern: "Juan dela Cruz", mentor: "Maria Reyes", score: 4.38, date: "Apr 15, 2026", status: "Completed", dept: "Tech & Innovation", offboarding: "Apr 18, 2026" },
-  { intern: "Lisa Tan", mentor: "James Cruz", score: 4.3, date: "Apr 5, 2026", status: "Completed", dept: "Marketing", offboarding: "Apr 8, 2026" },
-  { intern: "Peter Lim", mentor: "Elena Torres", score: 4.1, date: "Apr 7, 2026", status: "Completed", dept: "Operations", offboarding: "Apr 10, 2026" },
-  { intern: "Mark Rivera", mentor: "Maria Reyes", score: 0, date: "", status: "Pending", dept: "Tech & Innovation", offboarding: "Apr 30, 2026" },
-  { intern: "Sara Kim", mentor: "James Cruz", score: 0, date: "", status: "Pending", dept: "Marketing", offboarding: "May 5, 2026" },
+  { intern: "Ana Santos", mentor: "Maria Reyes", result: "Passed", date: "Apr 10, 2026", status: "Completed", dept: "Tech & Innovation", offboarding: "Apr 12, 2026" },
+  { intern: "Juan dela Cruz", mentor: "Maria Reyes", result: "Passed", date: "Apr 15, 2026", status: "Completed", dept: "Tech & Innovation", offboarding: "Apr 18, 2026" },
+  { intern: "Lisa Tan", mentor: "James Cruz", result: "Passed", date: "Apr 5, 2026", status: "Completed", dept: "Marketing", offboarding: "Apr 8, 2026" },
+  { intern: "Peter Lim", mentor: "Elena Torres", result: "Failed", date: "Apr 7, 2026", status: "Completed", dept: "Operations", offboarding: "Apr 10, 2026" },
+  { intern: "Mark Rivera", mentor: "Maria Reyes", result: "Pending", date: "", status: "Pending", dept: "Tech & Innovation", offboarding: "Apr 30, 2026" },
+  { intern: "Sara Kim", mentor: "James Cruz", result: "Pending", date: "", status: "Pending", dept: "Marketing", offboarding: "May 5, 2026" },
 ];
 
 const completed = evaluations.filter(e => e.status === "Completed");
 const pending = evaluations.filter(e => e.status === "Pending");
-const avgScore = (completed.reduce((a, e) => a + e.score, 0) / completed.length).toFixed(1);
+const passedCount = completed.filter((e) => e.result === "Passed").length;
+const failedCount = completed.filter((e) => e.result === "Failed").length;
+const passRate = completed.length > 0 ? Math.round((passedCount / completed.length) * 100) : 0;
 
 const distribution = [
-  { range: "4.5–5.0", count: completed.filter(e => e.score >= 4.5).length, color: "--stat-green" },
-  { range: "4.0–4.4", count: completed.filter(e => e.score >= 4.0 && e.score < 4.5).length, color: "--stat-blue" },
-  { range: "3.5–3.9", count: completed.filter(e => e.score >= 3.5 && e.score < 4.0).length, color: "--stat-orange" },
-  { range: "Below 3.5", count: completed.filter(e => e.score < 3.5).length, color: "--destructive" },
+  { label: "Passed", count: passedCount, color: "--stat-green" },
+  { label: "Failed", count: failedCount, color: "--destructive" },
 ];
 
 export default function AdminEvaluations() {
@@ -27,7 +28,16 @@ export default function AdminEvaluations() {
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">Final Evaluations</h2>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors">
+        <button
+          type="button"
+          onClick={() =>
+            toast({
+              title: "Export started",
+              description: "Evaluation summary download is being prepared.",
+            })
+          }
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
+        >
           <Download className="w-4 h-4" /> Export
         </button>
       </div>
@@ -40,25 +50,25 @@ export default function AdminEvaluations() {
               <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                 <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
                 <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--stat-orange))" strokeWidth="3"
-                  strokeDasharray={`${(parseFloat(avgScore) / 5) * 97.4} 97.4`} strokeLinecap="round" />
+                  strokeDasharray={`${(passRate / 100) * 97.4} 97.4`} strokeLinecap="round" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <Star className="w-4 h-4 text-stat-orange fill-stat-orange mb-0.5" />
-                <span className="text-xl font-bold font-display text-foreground">{avgScore}</span>
+                <CheckCircle2 className="w-4 h-4 text-stat-orange mb-0.5" />
+                <span className="text-xl font-bold font-display text-foreground">{passRate}%</span>
               </div>
             </div>
-            <p className="text-sm font-medium text-foreground">Program Average</p>
-            <p className="text-xs text-muted-foreground">out of 5.0</p>
+            <p className="text-sm font-medium text-foreground">Pass Rate</p>
+            <p className="text-xs text-muted-foreground">{passedCount} of {completed.length} completed</p>
           </div>
 
           <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground text-sm mb-3">Score Distribution</h3>
+            <h3 className="font-display font-bold text-foreground text-sm mb-3">Outcome Distribution</h3>
             <div className="space-y-2.5">
               {distribution.map((d) => {
                 const maxCount = Math.max(...distribution.map(x => x.count));
                 return (
-                  <div key={d.range} className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-16">{d.range}</span>
+                  <div key={d.label} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-16">{d.label}</span>
                     <div className="flex-1 h-5 bg-muted rounded-md overflow-hidden">
                       <div className="h-full rounded-md flex items-center pl-2" style={{
                         width: `${maxCount > 0 ? (d.count / maxCount) * 100 : 0}%`,
@@ -85,13 +95,28 @@ export default function AdminEvaluations() {
               <p className="text-lg font-bold font-display text-foreground">{pending.length}</p>
               <p className="text-[10px] text-muted-foreground">Pending</p>
             </div>
+            <div className="bg-card rounded-xl border border-border p-4 text-center">
+              <XCircle className="w-5 h-5 text-destructive mx-auto mb-1" />
+              <p className="text-lg font-bold font-display text-foreground">{failedCount}</p>
+              <p className="text-[10px] text-muted-foreground">Failed</p>
+            </div>
           </div>
         </div>
 
         {/* Right: Evaluation list */}
         <div className="col-span-2 space-y-3">
-          {completed.sort((a, b) => b.score - a.score).map((e, i) => (
-            <div key={`${e.intern}`} className="bg-card rounded-xl border border-border p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
+          {completed.sort((a, b) => (a.result === "Passed" ? -1 : 1)).map((e, i) => (
+            <button
+              key={`${e.intern}`}
+              type="button"
+              onClick={() =>
+                toast({
+                  title: "Evaluation details",
+                  description: `${e.intern} is marked ${e.result}.`,
+                })
+              }
+              className="w-full text-left bg-card rounded-xl border border-border p-4 flex items-center gap-4 hover:shadow-sm transition-shadow"
+            >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
                 i === 0 ? 'bg-stat-orange/10 text-stat-orange' : 'bg-muted text-muted-foreground'
               }`}>
@@ -105,18 +130,13 @@ export default function AdminEvaluations() {
                 <p className="text-[10px] text-muted-foreground">{e.dept} · {e.mentor} · Offboarded {e.offboarding}</p>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
-                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full rounded-full" style={{
-                    width: `${(e.score / 5) * 100}%`,
-                    background: e.score >= 4.5 ? 'hsl(var(--stat-green))' : e.score >= 4.0 ? 'hsl(var(--stat-blue))' : e.score >= 3.5 ? 'hsl(var(--stat-orange))' : 'hsl(var(--destructive))'
-                  }} />
-                </div>
-                <div className="flex items-center gap-1 w-14">
-                  <Star className="w-3.5 h-3.5 text-stat-orange fill-stat-orange" />
-                  <span className="text-sm font-bold text-foreground">{e.score}</span>
-                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  e.result === "Passed" ? "text-stat-green bg-stat-green-bg" : "text-destructive bg-destructive/10"
+                }`}>
+                  {e.result}
+                </span>
               </div>
-            </div>
+            </button>
           ))}
 
           {pending.length > 0 && (

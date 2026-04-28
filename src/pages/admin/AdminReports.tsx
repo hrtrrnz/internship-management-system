@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AlertTriangle, CheckCircle, ChevronRight, Clock, Download } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 type ReportStatus = "Submitted" | "Reviewed" | "Needs Revision";
 
@@ -169,7 +170,16 @@ export default function AdminReports() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-display font-bold text-foreground">All Reports</h2>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors">
+        <button
+          type="button"
+          onClick={() =>
+            toast({
+              title: "Export started",
+              description: "Preparing report CSV download.",
+            })
+          }
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
+        >
           <Download className="w-4 h-4" /> Export
         </button>
       </div>
@@ -266,7 +276,15 @@ export default function AdminReports() {
               </div>
             </div>
 
-            <div className="mb-5 overflow-auto rounded-lg border border-border bg-muted/20 p-4">
+            <div
+              className="mb-5 overflow-auto rounded-lg border border-border bg-muted/20 p-4 cursor-pointer hover:border-primary/40 transition-colors"
+              onClick={() =>
+                toast({
+                  title: "Document preview",
+                  description: `Previewing ${selected.intern}'s report.`,
+                })
+              }
+            >
               <div className="mx-auto aspect-[1/1.4142] w-full max-w-[720px] bg-white text-black shadow-md">
                 <div className="p-[1in] font-['Arial'] text-[11pt] leading-[1.35]">
                   <p className="mb-0.5">{selected.date}</p>
