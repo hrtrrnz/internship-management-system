@@ -1,4 +1,6 @@
-import { FolderOpen, FileText, Download, Eye } from "lucide-react";
+import { FolderOpen, FileText, Eye } from "lucide-react";
+import { toast } from "sonner";
+import { MockFileDownloadMenu } from "@/components/MockFileDownloadMenu";
 
 const documents = [
   { id: 1, name: "Internship Agreement", type: "PDF", size: "245 KB", date: "Feb 3, 2026", category: "Contracts" },
@@ -62,8 +64,19 @@ export default function Documents() {
                 <td className="px-5 py-3 text-muted-foreground">{d.date}</td>
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-2">
-                    <button className="p-1.5 rounded-lg hover:bg-muted transition-colors"><Eye className="w-4 h-4 text-muted-foreground" /></button>
-                    <button className="p-1.5 rounded-lg hover:bg-muted transition-colors"><Download className="w-4 h-4 text-muted-foreground" /></button>
+                    <button
+                      type="button"
+                      className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                      aria-label={`Preview ${d.name}`}
+                      onClick={() =>
+                        toast.success("Preview opened", {
+                          description: `${d.name} — demo preview only.`,
+                        })
+                      }
+                    >
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                    <MockFileDownloadMenu fileLabel={d.name} />
                   </div>
                 </td>
               </tr>

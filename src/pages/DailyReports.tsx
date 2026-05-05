@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FileText, CheckCircle, Clock, AlertTriangle, ChevronRight } from "lucide-react";
+import { MockFileDownloadMenu } from "@/components/MockFileDownloadMenu";
 
 const reports = [
   {
@@ -210,14 +211,19 @@ export default function DailyReports() {
         {/* Report detail */}
         <div className="col-span-3 bg-card rounded-xl border border-border overflow-hidden">
           <div className="px-6 py-4 border-b border-border">
-            <div className="flex items-start justify-between">
-              <div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
                 <h3 className="font-display font-bold text-foreground text-lg">Daily Report</h3>
                 <p className="text-sm text-muted-foreground mt-0.5">{selected.date}</p>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${selectedStatus.bg} ${selectedStatus.color}`}>
-                {selected.status}
-              </span>
+              <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                {selected.sections ? (
+                  <MockFileDownloadMenu fileLabel={`Daily report — ${selected.date}`} />
+                ) : null}
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${selectedStatus.bg} ${selectedStatus.color}`}>
+                  {selected.status}
+                </span>
+              </div>
             </div>
           </div>
 

@@ -1,178 +1,207 @@
-import { ClipboardCheck, Star, TrendingUp, Clock, CheckCircle2 } from "lucide-react";
-
-const evaluation = {
-  status: "pending" as "pending" | "completed",
-  scheduledDate: "Apr 15, 2026",
-  offboardingDate: "Apr 18, 2026",
-  evaluator: "Maria Reyes",
-  completedData: null as null | {
-    date: string;
-    score: number;
-    summary: string;
-    criteria: { name: string; score: number }[];
-    strengths: string[];
-    improvements: string[];
-    recommendation: string;
-  },
-};
-
-// Simulating a completed evaluation for demo
-const completedEval = {
-  status: "completed" as const,
-  scheduledDate: "Apr 15, 2026",
-  offboardingDate: "Apr 18, 2026",
-  evaluator: "Maria Reyes",
-  date: "Apr 15, 2026",
-  score: 4.38,
-  summary: "Juan has shown exceptional growth throughout the internship program. His technical skills improved significantly, and he consistently demonstrated strong initiative and collaboration.",
-  criteria: [
-    { name: "Technical Skills", score: 4.3 },
-    { name: "Communication", score: 4.5 },
-    { name: "Punctuality", score: 4.0 },
-    { name: "Initiative", score: 4.7 },
-    { name: "Teamwork", score: 4.4 },
-  ],
-  strengths: [
-    "Strong problem-solving ability in React & TypeScript",
-    "Excellent collaboration with cross-functional teams",
-    "Proactive in taking on additional responsibilities",
-  ],
-  improvements: [
-    "Documentation could be more thorough",
-    "Time estimation for complex tasks needs refinement",
-  ],
-  recommendation: "Highly recommended for a full-time junior developer position.",
-};
+import { useCallback, useState } from "react";
+import { CheckCircle2, Clock, FileText, ListTodo, Paperclip, User } from "lucide-react";
+import {
+  BeforeEvaluationList,
+  CompletedWorkList,
+  EvaluationPageHeader,
+  EvaluationScheduleSection,
+  EvaluationSectionHeader,
+  EvaluationTwoColumnGrid,
+  PreEvalProgressAside,
+  ScheduleSectionLabel,
+  ScheduleStat,
+  ScheduleStatsGrid,
+} from "@/components/evaluation/evaluationShared";
+import {
+  DEMO_STUDENT_INTERN_ID,
+  demoInternJuanCompletedWorks,
+  demoInternJuanPrerequisites,
+  demoScheduleMariaReyes,
+} from "@/lib/evaluationDemoData";
+import {
+  useEvaluationFormWorkflow,
+  formatEvaluationFileSize,
+  resolveEvaluationFormForIntern,
+} from "@/contexts/EvaluationFormWorkflowContext";
+import { cn } from "@/lib/utils";
+import { MockFileDownloadMenu } from "@/components/MockFileDownloadMenu";
+import { TaskDetailModal } from "@/components/tasks/TaskDetailModal";
+import type { TaskItem } from "@/lib/internTasks";
+import { getActiveInternTasks, getInternTaskById, internTaskCategoryStyles } from "@/lib/internTasks";
+import { mockPreviewFile } from "@/lib/mockFilePreview";
 
 export default function Evaluations() {
-  const isCompleted = true; // Toggle for demo
-  const eval_ = isCompleted ? completedEval : evaluation;
+  const { submissions, internFormAssignments } = useEvaluationFormWorkflow();
+  const [evaluationTask, setEvaluationTask] = useState<TaskItem | null>(null);
+  const resolvedForm = resolveEvaluationFormForIntern(DEMO_STUDENT_INTERN_ID, submissions, internFormAssignments);
+  const prerequisites = demoInternJuanPrerequisites;
+  const activeInternTasks = getActiveInternTasks();
+
+  const openLinkedOrEvaluationTask = useCallback((taskId: number) => {
+    const t = getInternTaskById(taskId);
+    if (t) setEvaluationTask(t);
+  }, []);
+
+  const doneCount = prerequisites.filter((p) => p.done).length;
+  const totalReq = prerequisites.length;
+  const allReady = doneCount === totalReq;
+  const sch = demoScheduleMariaReyes;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-display font-bold text-foreground">Final Evaluation</h2>
-      </div>
+    <div className="space-y-8">
+      <EvaluationPageHeader
+        title="Evaluation"
+        description="Track work you’ve already finished and what’s left before your mentor conducts your evaluation. Your official evaluation form appears here only after an administrator approves your mentor’s upload and your mentor assigns that form to you."
+      />
 
-      {/* Status banner */}
-      <div className={`rounded-xl border p-4 flex items-center gap-4 ${
-        isCompleted ? 'bg-stat-green/5 border-stat-green/20' : 'bg-stat-orange/5 border-stat-orange/20'
-      }`}>
-        {isCompleted ? (
-          <CheckCircle2 className="w-5 h-5 text-stat-green flex-shrink-0" />
-        ) : (
-          <Clock className="w-5 h-5 text-stat-orange flex-shrink-0" />
+      <section
+        className={cn(
+          "rounded-2xl border p-5 shadow-sm ring-1 sm:p-6",
+          resolvedForm
+            ? "border-stat-green/25 bg-stat-green-bg/80 ring-stat-green/10"
+            : "border-stat-orange/25 bg-stat-orange-bg/50 ring-stat-orange/10"
         )}
-        <div className="flex-1">
-          <p className="text-sm font-medium text-foreground">
-            {isCompleted ? "Evaluation Completed" : "Evaluation Scheduled"}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {isCompleted
-              ? `Completed on ${completedEval.date} by ${completedEval.evaluator}`
-              : `Scheduled for ${evaluation.scheduledDate} · Offboarding on ${evaluation.offboardingDate}`
-            }
-          </p>
-        </div>
-        {!isCompleted && (
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-stat-orange/10 text-stat-orange">
-            {Math.ceil((new Date(evaluation.scheduledDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days away
-          </span>
-        )}
-      </div>
-
-      {isCompleted ? (
-        <div className="grid grid-cols-3 gap-6">
-          {/* Left: Overall score + criteria */}
-          <div className="space-y-4">
-            <div className="bg-card rounded-xl border border-border p-6 text-center">
-              <div className="w-28 h-28 mx-auto relative mb-3">
-                <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--muted))" strokeWidth="2.5" />
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--stat-orange))" strokeWidth="2.5"
-                    strokeDasharray={`${(completedEval.score / 5) * 97.4} 97.4`} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <Star className="w-4 h-4 text-stat-orange fill-stat-orange mb-0.5" />
-                  <span className="text-2xl font-bold font-display text-foreground">{completedEval.score}</span>
-                </div>
-              </div>
-              <p className="text-sm font-medium text-foreground">Overall Score</p>
-              <p className="text-xs text-muted-foreground">out of 5.0</p>
+      >
+        <div className="flex gap-3">
+          <div
+            className={cn(
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+              resolvedForm ? "bg-stat-green-bg" : "bg-stat-orange-bg"
+            )}
+          >
+            <FileText className={cn("h-5 w-5", resolvedForm ? "text-stat-green" : "text-stat-orange")} aria-hidden />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <h2 className="font-display text-base font-bold text-foreground">
+                {resolvedForm ? "Official evaluation form assigned" : "No evaluation form assigned yet"}
+              </h2>
+              {resolvedForm ? <MockFileDownloadMenu fileLabel={resolvedForm.fileName} /> : null}
             </div>
+            {resolvedForm ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Your mentor assigned this approved document for your evaluation:{" "}
+                  <button
+                    type="button"
+                    className="font-semibold text-foreground underline-offset-2 hover:text-primary hover:underline"
+                    onClick={() => mockPreviewFile(resolvedForm.fileName)}
+                  >
+                    {resolvedForm.fileName}
+                  </button>{" "}
+                  ({formatEvaluationFileSize(resolvedForm.fileSizeBytes)}). Complete your checklist below before the planned session.
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Admin approved {resolvedForm.approvedAt} · {resolvedForm.approvedByAdminName} · Uploaded by mentor{" "}
+                  {resolvedForm.uploadedByMentorName}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Administrators only green-light evaluation files; your mentor must choose which approved form applies to you before it
+                shows up here. You can still complete completed work and prerequisites while you wait.
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
 
-            <div className="bg-card rounded-xl border border-border p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-4 h-4 text-stat-green" />
-                <h3 className="font-display font-bold text-sm text-foreground">Criteria Breakdown</h3>
-              </div>
-              <div className="space-y-3">
-                {completedEval.criteria.map((c) => (
-                  <div key={c.name}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-muted-foreground text-xs">{c.name}</span>
-                      <span className="font-medium text-foreground text-xs">{c.score}</span>
-                    </div>
-                    <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{
-                        width: `${(c.score / 5) * 100}%`,
-                        background: c.score >= 4.5 ? 'hsl(var(--stat-green))' : c.score >= 4.0 ? 'hsl(var(--stat-blue))' : 'hsl(var(--stat-orange))'
-                      }} />
-                    </div>
-                  </div>
+      <EvaluationScheduleSection
+        aside={
+          <PreEvalProgressAside
+            title="Pre-evaluation checklist"
+            doneCount={doneCount}
+            total={totalReq}
+            allReady={allReady}
+            messageReady="Everything required beforehand is done. Show up prepared for your session."
+            messagePending="Finish the remaining items below so your evaluation can proceed without holds."
+          />
+        }
+      >
+        <ScheduleSectionLabel />
+        <ScheduleStatsGrid>
+          <ScheduleStat
+            label="Mentor"
+            value={sch.evaluator}
+            icon={<User className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />}
+          />
+          <ScheduleStat label="Eval window opens" value={sch.evaluationWindowOpens} />
+          <ScheduleStat label="Planned session" value={sch.plannedSession} />
+          <ScheduleStat label="Program end" value={sch.offboardingDate} />
+        </ScheduleStatsGrid>
+      </EvaluationScheduleSection>
+
+      <EvaluationTwoColumnGrid
+        left={
+          <section className="space-y-4">
+            <EvaluationSectionHeader
+              icon={CheckCircle2}
+              iconClassName="text-stat-green"
+              title="Completed work"
+              description="Verified deliverables and milestones counted toward your internship record."
+            />
+            <CompletedWorkList items={[...demoInternJuanCompletedWorks]} />
+          </section>
+        }
+        right={
+          <section className="space-y-8">
+            <div className="space-y-4">
+              <EvaluationSectionHeader
+                icon={Clock}
+                iconClassName="text-stat-blue"
+                title="Active internship tasks"
+                description="Open any task for the same details as the Tasks page. Finish uploads and submissions there so your mentor sees everything in one place."
+              />
+              <ul className="space-y-2">
+                {activeInternTasks.map((t) => (
+                  <li key={t.id}>
+                    <button
+                      type="button"
+                      onClick={() => setEvaluationTask(t)}
+                      className={cn(
+                        "group flex w-full flex-col gap-2 rounded-xl border border-border/80 bg-card p-4 text-left shadow-sm ring-1 ring-black/[0.02] transition-colors",
+                        "hover:border-primary/30 hover:bg-muted/20 dark:ring-white/[0.03]"
+                      )}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${internTaskCategoryStyles[t.category]}`}>
+                          {t.category}
+                        </span>
+                        <span className="text-[11px] font-medium text-muted-foreground">{t.status}</span>
+                      </div>
+                      <p className="font-display text-sm font-semibold leading-snug text-foreground group-hover:text-primary">{t.title}</p>
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
+                        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <Clock className="h-3 w-3 shrink-0 opacity-80" />
+                          Due {t.due}
+                        </span>
+                        {t.mentorAttachments && t.mentorAttachments.length > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                            <Paperclip className="h-3 w-3" />
+                            {t.mentorAttachments.length} files
+                          </span>
+                        ) : null}
+                      </div>
+                    </button>
+                  </li>
                 ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Summary, strengths, improvements */}
-          <div className="col-span-2 space-y-4">
-            <div className="bg-card rounded-xl border border-border p-5">
-              <h3 className="font-display font-bold text-foreground mb-2">Evaluation Summary</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{completedEval.summary}</p>
+              </ul>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-card rounded-xl border border-border p-5">
-                <h3 className="font-display font-bold text-foreground mb-3 text-sm">Key Strengths</h3>
-                <ul className="space-y-2">
-                  {completedEval.strengths.map((s, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <div className="w-1.5 h-1.5 rounded-full bg-stat-green mt-1.5 flex-shrink-0" />
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-card rounded-xl border border-border p-5">
-                <h3 className="font-display font-bold text-foreground mb-3 text-sm">Areas for Improvement</h3>
-                <ul className="space-y-2">
-                  {completedEval.improvements.map((s, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <div className="w-1.5 h-1.5 rounded-full bg-stat-orange mt-1.5 flex-shrink-0" />
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div className="space-y-4">
+              <EvaluationSectionHeader
+                icon={ListTodo}
+                iconClassName="text-primary"
+                title="Before evaluation"
+                description="Complete these while waiting for your scheduled session. Your mentor may add organization-specific items in Messages or Tasks."
+              />
+              <BeforeEvaluationList items={prerequisites} onSelectLinkedTask={openLinkedOrEvaluationTask} />
             </div>
+          </section>
+        }
+      />
 
-            <div className="bg-accent/5 border border-accent/20 rounded-xl p-5">
-              <h3 className="font-display font-bold text-foreground mb-1 text-sm">Mentor's Recommendation</h3>
-              <p className="text-sm text-muted-foreground italic">"{completedEval.recommendation}"</p>
-              <p className="text-xs text-muted-foreground mt-2">— {completedEval.evaluator}</p>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-card rounded-xl border border-border p-10 text-center">
-          <ClipboardCheck className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-          <h3 className="font-display font-bold text-foreground mb-1">Evaluation Not Yet Available</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Your final evaluation will be conducted by your mentor before your offboarding date. You'll be able to view your results here once it's completed.
-          </p>
-        </div>
-      )}
+      <TaskDetailModal task={evaluationTask} onClose={() => setEvaluationTask(null)} mode="evaluation" />
     </div>
   );
 }

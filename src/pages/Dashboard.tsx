@@ -85,7 +85,6 @@ function formatDateTime(value: Date | null) {
 
 export default function Dashboard() {
   const [isClockedIn, setIsClockedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState<"clock-in" | "clock-out">("clock-in");
   const [clockInTime, setClockInTime] = useState<Date | null>(null);
   const [clockOutTime, setClockOutTime] = useState<Date | null>(null);
 
@@ -94,14 +93,12 @@ export default function Dashboard() {
     setClockInTime(new Date());
     setClockOutTime(null);
     setIsClockedIn(true);
-    setActiveTab("clock-out");
   };
 
   const handleClockOut = () => {
     if (!isClockedIn) return;
     setClockOutTime(new Date());
     setIsClockedIn(false);
-    setActiveTab("clock-in");
   };
 
   return (
@@ -152,30 +149,35 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mt-3">
-              <button
-                onClick={handleClockIn}
-                disabled={isClockedIn}
-                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all shadow-sm ${
-                  activeTab === "clock-in"
+            <div className="grid grid-cols-2 gap-3 mt-3" role="tablist" aria-label="Attendance mode">
+              <div
+                role="tab"
+                aria-selected={!isClockedIn}
+                aria-current={!isClockedIn ? "step" : undefined}
+                className={`pointer-events-none flex select-none items-center justify-center gap-2 rounded-lg px-4 py-3 text-center text-sm font-medium shadow-sm transition-colors ${
+                  !isClockedIn
                     ? "bg-accent text-accent-foreground"
-                    : "border border-border text-foreground bg-background"
-                } ${isClockedIn ? "opacity-60 cursor-not-allowed" : "hover:opacity-90"}`}
+                    : "border border-border bg-muted/30 text-muted-foreground"
+                }`}
               >
-                <LogIn className="w-4 h-4" /> Clock In
-              </button>
-              <button
-                onClick={handleClockOut}
-                disabled={!isClockedIn}
-                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm transition-all ${
-                  activeTab === "clock-out"
-                    ? "bg-accent text-accent-foreground"
-                    : "border border-border text-foreground bg-background"
-                } ${isClockedIn ? "hover:opacity-90" : "opacity-60 cursor-not-allowed"}`}
+                <LogIn className="h-4 w-4 shrink-0" aria-hidden /> Clock In
+              </div>
+              <div
+                role="tab"
+                aria-selected={isClockedIn}
+                aria-current={isClockedIn ? "step" : undefined}
+                className={`pointer-events-none flex select-none items-center justify-center gap-2 rounded-lg px-4 py-3 text-center text-sm font-medium transition-colors ${
+                  isClockedIn
+                    ? "bg-accent text-accent-foreground shadow-sm"
+                    : "border border-border bg-muted/30 text-muted-foreground"
+                }`}
               >
-                <LogOut className="w-4 h-4" /> Clock Out
-              </button>
+                <LogOut className="h-4 w-4 shrink-0" aria-hidden /> Clock Out
+              </div>
             </div>
+            <p className="mt-2 text-center text-[11px] text-muted-foreground">
+              Mode updates when you submit clock-in or clock-out below.
+            </p>
 
             <div className="grid grid-cols-2 gap-4 mt-5">
               <div>
@@ -219,7 +221,7 @@ export default function Dashboard() {
               <p className="text-xs text-muted-foreground mt-1">
                 Share the link with talent.dreamacademy@gmail.com and hr.dreamacademy@gmail.com ·
                 {" "}
-                {activeTab === "clock-out" ? "you are currently in clock-out mode." : "you are currently in clock-in mode."}
+                {isClockedIn ? "you are currently in clock-out mode." : "you are currently in clock-in mode."}
               </p>
             </div>
 
@@ -233,11 +235,12 @@ export default function Dashboard() {
             </div>
 
             <button
+              type="button"
               className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-stat-orange text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-sm"
-              onClick={activeTab === "clock-out" ? handleClockOut : handleClockIn}
+              onClick={isClockedIn ? handleClockOut : handleClockIn}
             >
-              {activeTab === "clock-out" ? <LogOut className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
-              {activeTab === "clock-out" ? "Submit Clock-Out" : "Submit Clock-In"}
+              {isClockedIn ? <LogOut className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
+              {isClockedIn ? "Submit Clock-Out" : "Submit Clock-In"}
             </button>
           </div>
         </div>

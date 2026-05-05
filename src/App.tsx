@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { createBrowserRouter, Outlet, RouterProvider, ScrollRestoration } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RoleProvider } from "@/contexts/RoleContext";
+import { MessagesThreadProvider } from "@/contexts/MessagesThreadContext";
+import { EvaluationFormWorkflowProvider } from "@/contexts/EvaluationFormWorkflowContext";
 import AppLayout from "./components/AppLayout";
 import Landing from "./pages/Landing";
 
@@ -54,65 +56,77 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function RootLayout() {
+  return (
+    <RoleProvider>
+      <MessagesThreadProvider>
+        <EvaluationFormWorkflowProvider>
+          <ScrollRestoration />
+          <Outlet />
+        </EvaluationFormWorkflowProvider>
+      </MessagesThreadProvider>
+    </RoleProvider>
+  );
+}
+
+const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    children: [
+      { path: "/", element: <Landing /> },
+      { path: "/signin", element: <SignIn /> },
+      { path: "/signup", element: <SignUp /> },
+      {
+        element: <AppLayout />,
+        children: [
+          { path: "/portal", element: <Dashboard /> },
+          { path: "/attendance", element: <Attendance /> },
+          { path: "/tasks", element: <Tasks /> },
+          { path: "/daily-reports", element: <DailyReports /> },
+          { path: "/learning-modules", element: <LearningModules /> },
+          { path: "/my-mentor", element: <MyMentor /> },
+          { path: "/evaluations", element: <Evaluations /> },
+          { path: "/my-profile", element: <MyProfile /> },
+          { path: "/settings", element: <Settings /> },
+          { path: "/documents", element: <Documents /> },
+          { path: "/messages", element: <Messages /> },
+          { path: "/mentor", element: <MentorDashboard /> },
+          { path: "/mentor/interns", element: <MentorInterns /> },
+          { path: "/mentor/attendance-review", element: <MentorAttendanceReview /> },
+          { path: "/mentor/report-review", element: <MentorReportReview /> },
+          { path: "/mentor/task-assignments", element: <MentorTaskAssignments /> },
+          { path: "/mentor/evaluations", element: <MentorEvaluations /> },
+          { path: "/mentor/learning-paths", element: <MentorLearningPaths /> },
+          { path: "/mentor/profile", element: <MentorProfile /> },
+          { path: "/mentor/settings", element: <MentorSettings /> },
+          { path: "/mentor/messages", element: <Messages /> },
+          { path: "/admin", element: <AdminDashboard /> },
+          { path: "/admin/analytics", element: <AdminAnalytics /> },
+          { path: "/admin/users", element: <AdminUsers /> },
+          { path: "/admin/departments", element: <AdminDepartments /> },
+          { path: "/admin/mentors", element: <AdminMentors /> },
+          { path: "/admin/interns", element: <AdminInterns /> },
+          { path: "/admin/attendance", element: <AdminAttendanceLogs /> },
+          { path: "/admin/reports", element: <AdminReports /> },
+          { path: "/admin/evaluations", element: <AdminEvaluations /> },
+          { path: "/admin/tasks", element: <AdminTasks /> },
+          { path: "/admin/settings", element: <AdminSettings /> },
+          { path: "/admin/roles", element: <AdminRoles /> },
+          { path: "/admin/profile", element: <AdminProfile /> },
+          { path: "/admin/messages", element: <Messages /> },
+        ],
+      },
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+]);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <RoleProvider>
-          <Routes>
-            {/* Auth routes (outside layout) */}
-            <Route path="/" element={<Landing />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-
-            <Route element={<AppLayout />}>
-              {/* Student routes */}
-              <Route path="/portal" element={<Dashboard />} />
-              <Route path="/attendance" element={<Attendance />} />
-              <Route path="/tasks" element={<Tasks />} />
-              <Route path="/daily-reports" element={<DailyReports />} />
-              <Route path="/learning-modules" element={<LearningModules />} />
-              <Route path="/my-mentor" element={<MyMentor />} />
-              <Route path="/evaluations" element={<Evaluations />} />
-              <Route path="/my-profile" element={<MyProfile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/documents" element={<Documents />} />
-              <Route path="/messages" element={<Messages />} />
-
-              {/* Mentor routes */}
-              <Route path="/mentor" element={<MentorDashboard />} />
-              <Route path="/mentor/interns" element={<MentorInterns />} />
-              <Route path="/mentor/attendance-review" element={<MentorAttendanceReview />} />
-              <Route path="/mentor/report-review" element={<MentorReportReview />} />
-              <Route path="/mentor/task-assignments" element={<MentorTaskAssignments />} />
-              <Route path="/mentor/evaluations" element={<MentorEvaluations />} />
-              <Route path="/mentor/learning-paths" element={<MentorLearningPaths />} />
-              <Route path="/mentor/profile" element={<MentorProfile />} />
-              <Route path="/mentor/settings" element={<MentorSettings />} />
-              <Route path="/mentor/messages" element={<Messages />} />
-
-              {/* Admin routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/analytics" element={<AdminAnalytics />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/departments" element={<AdminDepartments />} />
-              <Route path="/admin/mentors" element={<AdminMentors />} />
-              <Route path="/admin/interns" element={<AdminInterns />} />
-              <Route path="/admin/attendance" element={<AdminAttendanceLogs />} />
-              <Route path="/admin/reports" element={<AdminReports />} />
-              <Route path="/admin/evaluations" element={<AdminEvaluations />} />
-              <Route path="/admin/tasks" element={<AdminTasks />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
-              <Route path="/admin/roles" element={<AdminRoles />} />
-              <Route path="/admin/profile" element={<AdminProfile />} />
-              <Route path="/admin/messages" element={<Messages />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </RoleProvider>
-      </BrowserRouter>
+      <RouterProvider router={router} />
     </TooltipProvider>
   </QueryClientProvider>
 );

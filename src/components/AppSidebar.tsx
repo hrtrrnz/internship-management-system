@@ -1,9 +1,9 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Clock, CheckSquare, FileText,
-  BookOpen, Users, ClipboardCheck, User, FolderOpen, MoreVertical, Bell, Search,
+  BookOpen, Users, ClipboardCheck, User, FolderOpen, MoreVertical, Bell,
   UserCog, BarChart3, Settings, Building, Shield, Star, Calendar,
-  GraduationCap, LogOut, PanelLeft, PanelRight, MessageSquare, AlertCircle
+  GraduationCap, LogOut, PanelLeft, PanelRight, MessageSquare, AlertCircle,
 } from "lucide-react";
 import { useRole, UserRole } from "@/contexts/RoleContext";
 import { useState, useRef, useEffect } from "react";
@@ -25,14 +25,14 @@ const studentNav: NavSection[] = [
       { to: "/attendance", icon: Clock, label: "Attendance" },
       { to: "/tasks", icon: CheckSquare, label: "Tasks" },
       { to: "/daily-reports", icon: FileText, label: "Daily Reports" },
+      { to: "/messages", icon: MessageSquare, label: "Messages" },
     ],
   },
   {
     label: "LEARNING",
     items: [
-      { to: "/my-mentor", icon: Users, label: "My Mentor" },
+      { to: "/my-mentor", icon: Users, label: "My Mentors" },
       { to: "/evaluations", icon: ClipboardCheck, label: "Evaluation" },
-      { to: "/messages", icon: MessageSquare, label: "Messages" },
     ],
   },
   {
@@ -58,7 +58,7 @@ const mentorNav: NavSection[] = [
       { to: "/mentor/attendance-review", icon: Clock, label: "Attendance Review" },
       { to: "/mentor/report-review", icon: FileText, label: "Report Review" },
       { to: "/mentor/task-assignments", icon: CheckSquare, label: "Task Assignments" },
-      { to: "/mentor/evaluations", icon: ClipboardCheck, label: "Evaluations" },
+      { to: "/mentor/evaluations", icon: ClipboardCheck, label: "Evaluation" },
       { to: "/mentor/messages", icon: MessageSquare, label: "Messages" },
     ],
   },
@@ -92,7 +92,7 @@ const adminNav: NavSection[] = [
     items: [
       { to: "/admin/attendance", icon: Clock, label: "Attendance Logs" },
       { to: "/admin/reports", icon: FileText, label: "All Reports" },
-      { to: "/admin/evaluations", icon: ClipboardCheck, label: "Evaluations" },
+      { to: "/admin/evaluations", icon: ClipboardCheck, label: "Evaluation" },
       { to: "/admin/tasks", icon: CheckSquare, label: "Tasks" },
       { to: "/admin/messages", icon: MessageSquare, label: "Messages" },
     ],
@@ -415,13 +415,6 @@ export function TopBar({ collapsed = false, onToggleSidebar }: TopBarProps) {
             </ScrollArea>
           </PopoverContent>
         </Popover>
-        <button
-          type="button"
-          className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors"
-          aria-label="Search"
-        >
-          <Search className="w-5 h-5 text-foreground" />
-        </button>
       </div>
     </header>
   );

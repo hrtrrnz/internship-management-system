@@ -1,5 +1,6 @@
-import { Clock, CheckCircle, AlertCircle, Download, Calendar } from "lucide-react";
+import { Clock, CheckCircle, AlertCircle, Calendar } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { MockFileDownloadMenu } from "@/components/MockFileDownloadMenu";
 
 const todayLogs = [
   { name: "Ana Santos", dept: "Tech & Innovation", in: "7:55 AM", status: "Present" },
@@ -46,18 +47,7 @@ export default function AdminAttendance() {
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">Attendance Logs</h2>
         </div>
-        <button
-          type="button"
-          onClick={() =>
-            toast({
-              title: "Export started",
-              description: "Attendance CSV is being prepared.",
-            })
-          }
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
-        >
-          <Download className="w-4 h-4" /> Export CSV
-        </button>
+        <MockFileDownloadMenu variant="button" fileLabel="Attendance logs export" />
       </div>
 
       <div className="grid grid-cols-3 gap-6">

@@ -1,9 +1,11 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useState } from "react";
 import AppSidebar, { TopBar } from "./AppSidebar";
+import FloatingMessagesLauncher from "./FloatingMessagesLauncher";
 import { cn } from "@/lib/utils";
 
 export default function AppLayout() {
+  const { pathname } = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
@@ -11,7 +13,7 @@ export default function AppLayout() {
       <AppSidebar collapsed={isSidebarCollapsed} />
       <main
         className={cn(
-          "flex-1 transition-[margin] duration-300",
+          "flex min-h-screen flex-1 flex-col transition-[margin] duration-300",
           isSidebarCollapsed ? "ml-20" : "ml-60"
         )}
       >
@@ -19,9 +21,10 @@ export default function AppLayout() {
           collapsed={isSidebarCollapsed}
           onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
         />
-        <div className="px-6 py-6">
-          <Outlet />
+        <div className="min-h-0 flex-1 px-6 py-6">
+          <Outlet key={pathname} />
         </div>
+        <FloatingMessagesLauncher />
       </main>
     </div>
   );
