@@ -1,4 +1,4 @@
-import { GraduationCap, CheckSquare, FileText, Clock, TrendingUp, Users, Calendar } from "lucide-react";
+import { GraduationCap, CheckSquare, FileText, TrendingUp } from "lucide-react";
 
 const internSummary = [
   { name: "Juan dela Cruz", progress: 78, tasks: 18, reports: 12, status: "On Track" },
@@ -12,7 +12,7 @@ export default function MentorDashboard() {
       <div className="grid grid-cols-4 gap-4">
         <StatCard icon={GraduationCap} value="8" label="Assigned Interns" sub="2 new this month" color="--stat-blue" />
         <StatCard icon={FileText} value="6" label="Pending Reviews" sub="3 reports, 3 evals" color="--stat-orange" />
-        <StatCard icon={Calendar} value="4" label="Check-ins This Week" sub="2 completed" color="--stat-green" />
+        <StatCard icon={CheckSquare} value="4" label="Active Reviews" sub="2 completed" color="--stat-green" />
         <StatCard icon={TrendingUp} value="72%" label="Avg. Intern Progress" sub="↑5% from last week" color="--stat-emerald" />
       </div>
 
@@ -49,22 +49,6 @@ export default function MentorDashboard() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground mb-3">Upcoming Check-ins</h3>
-            <div className="space-y-3">
-              {[
-                { intern: "Juan dela Cruz", time: "2:00 PM Today", topic: "API Design Review" },
-                { intern: "Ana Santos", time: "10:00 AM Tomorrow", topic: "Code Review" },
-                { intern: "Mark Rivera", time: "3:00 PM Mar 26", topic: "Progress Check-in" },
-              ].map((s, i) => (
-                <div key={i} className="p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                  <p className="text-sm font-medium text-foreground">{s.topic}</p>
-                  <p className="text-xs text-muted-foreground">{s.intern} · {s.time}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="bg-card rounded-xl border border-border p-5">
             <h3 className="font-display font-bold text-foreground mb-3">Pending Actions</h3>
             <div className="space-y-2">

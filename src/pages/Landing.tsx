@@ -1,184 +1,470 @@
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import hytLogo from "@/assets/hyt-logo.png";
 import landingBg from "../../image.png";
+import hytBlackLogo from "../../logo black.png";
+import img1 from "@/assets/1.jpg";
+import img2 from "@/assets/2.jpg";
+import img3 from "@/assets/3.jpg";
+import img4 from "@/assets/4.jpg";
+import img5 from "@/assets/5.jpg";
+import img6 from "@/assets/6.jpg";
+import why1 from "@/assets/why1.jpg";
+import why2 from "@/assets/why2.jpg";
+import train1 from "@/assets/train1.jpg";
+import { cn } from "@/lib/utils";
+import { portalButtonClass } from "@/lib/portalTheme";
+
+const topCards = [
+  {
+    title: "About us",
+    text: "HYT Foundation exists to inspire and aid young entrepreneurs to attain their full potential. Our purpose is to bring the next generation forward - establishing a future with a society of young generation leaders.",
+    accent: "border-l-[#f26e4b]",
+  },
+  {
+    title: "Our Vision",
+    text: "Establish a competent society of young professional leaders and entrepreneurs through honing their vocational aptitude with the means of advanced technology, innovating creations to serve the world.",
+    accent: "border-l-[#21b7c8]",
+  },
+  {
+    title: "Our Mission",
+    text: "Guiding young and aspiring generation leaders by professionally mentoring them, developing a social responsibility and empowering them to pass it forward to future generations while growing internationally.",
+    accent: "border-l-[#c8c52a]",
+  },
+];
+
+const valueGridImages = [img1, img2, img3, img4, img5, img6];
+
+const unitColumns = [
+  {
+    title: "Creative Unit",
+    stripe: "bg-[#f26e4b]",
+    items: ["Logo", "Animation", "Brand sheet", "Social media posts", "Portfolio", "Pitch deck design"],
+  },
+  {
+    title: "Human Resources Unit",
+    stripe: "bg-[#2bb2c8]",
+    items: ["Recruitment", "HRMS research and development", "Employee engagement", "Assist in L&D unit"],
+  },
+  {
+    title: "Sales & Marketing Unit",
+    stripe: "bg-[#c7ca2f]",
+    items: ["Lead Generation", "Marketing Plan", "Partnership", "Pitch deck", "Community management"],
+  },
+  {
+    title: "Engineering Unit",
+    stripe: "bg-[#d85f75]",
+    items: ["Time and Motion Study", "Cost Benefit Analysis", "Production Planning", "Research and IIOT"],
+  },
+  {
+    title: "Technology Unit",
+    stripe: "bg-[#2baec0]",
+    items: ["Front-end / Back-end", "Web and mobile design", "Programming", "Research and Development"],
+  },
+  {
+    title: "Accounting Unit",
+    stripe: "bg-[#f37a53]",
+    items: ["AIS research", "Administrative", "R&D of KGC"],
+  },
+  {
+    title: "Legal & Justice Unit",
+    stripe: "bg-[#d76589]",
+    items: ["Legal Research", "Draft legal documents", "Transcription of meetings", "Review contracts"],
+  },
+  {
+    title: "Learning & Development Unit",
+    stripe: "bg-[#d3c737]",
+    items: ["Lead Generation", "Strategic Plan", "Organizational Development", "Managerial delegations"],
+  },
+];
+
+const section = "py-8 sm:py-10";
+const container = "mx-auto max-w-6xl px-4 sm:px-6";
 
 export default function Landing() {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header
-        className="text-white"
-        style={{ background: "linear-gradient(rgb(40, 28, 21) 0%, rgb(26, 18, 15) 100%)" }}
-      >
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-3">
-            <img src={hytLogo} alt="HYT Foundation" width={40} height={40} />
-            <div className="leading-tight">
-              <p className="text-sm font-bold tracking-wide">HYT Foundation</p>
-              <p className="text-xs tracking-wide text-white/70">Dream Academy Portal</p>
+    <div id="top" className="flex min-h-screen flex-col bg-background text-foreground antialiased">
+      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+          <Link to="/" className="flex min-w-0 items-center gap-2.5">
+            <img src={hytLogo} alt="HYT Foundation" width={40} height={40} className="shrink-0" />
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-[10px] font-semibold tracking-wide text-muted-foreground sm:text-[11px]">
+                HELPING YOUTH TRANSCEND
+              </p>
+              <p className="text-[9px] font-medium tracking-wide text-muted-foreground/80 sm:text-[10px]">FOUNDATION INC.</p>
             </div>
           </Link>
-          <div className="flex items-center gap-6">
-            <nav className="hidden items-center gap-4 text-sm md:flex" aria-label="Quick links">
-              <a href="#about" className="text-white/75 hover:text-white">
-                About Us
-              </a>
-              <a href="#contact" className="text-white/75 hover:text-white">
-                Contact
-              </a>
-            </nav>
-            <Link to="/signin" className="text-sm font-medium text-white/85 hover:text-white">
-              Sign in
-            </Link>
+          <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
+            <a href="#top" className="transition-colors hover:text-foreground">
+              Home
+            </a>
+            <a href="#about" className="transition-colors hover:text-foreground">
+              About Us
+            </a>
+            <a href="#join" className="transition-colors hover:text-foreground">
+              Why Join Us?
+            </a>
+            <a href="#dream-academy" className="transition-colors hover:text-foreground">
+              Dream Academy
+            </a>
+            <a href="#units" className="transition-colors hover:text-foreground">
+              Units
+            </a>
+            <a href="#contact" className="transition-colors hover:text-foreground">
+              Contact Us
+            </a>
+          </nav>
+          <div className="flex shrink-0 items-center gap-2.5 sm:gap-4">
+            <span className="cursor-default text-[10px] text-muted-foreground sm:text-sm">Donate</span>
+            <Button
+              asChild
+              size="sm"
+              className={cn(
+                portalButtonClass,
+                "h-auto min-h-9 max-w-[10.5rem] whitespace-normal px-2.5 py-2 text-center text-[11px] font-semibold leading-snug sm:max-w-none sm:px-4 sm:text-sm sm:leading-none",
+              )}
+            >
+              <Link to="/signin">Dream Academy Portal</Link>
+            </Button>
           </div>
         </div>
       </header>
 
-      <main
-        className="relative flex-1 bg-cover bg-center"
-        style={{ backgroundImage: `url(${landingBg})` }}
-      >
-        <div className="pointer-events-none absolute inset-0 bg-black/35" />
-        <section className="relative w-full">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-black/40 to-black/55" />
-          <div className="relative mx-auto max-w-5xl px-6 py-16 md:py-24">
-            <div className="max-w-2xl">
-              <p className="text-sm font-medium text-white/85">Helping Youth Transcend Foundation Inc.</p>
-              <h1 className="mt-3 text-balance text-4xl font-semibold tracking-tight md:text-5xl">
-                <span className="text-white">Building future-generation leaders</span>
-              </h1>
-              <p className="mt-4 text-pretty text-base text-white/85 md:text-lg">
-                We are the foundation for future generation leaders in which we support to enlighten and hone the youth
-                in acquiring an adept set of business skills, professionally mentoring young adults and directing them
-                to pursue what they aspire to become.
-              </p>
-
-            <ul className="mt-8 space-y-3 text-sm text-white/85">
-              <li className="flex gap-3">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-stat-blue" />
-                Skill-building programs designed to develop practical, career-ready business skills.
-              </li>
-              <li className="flex gap-3">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-stat-orange" />
-                Professional mentorship that strengthens confidence, character, and direction.
-              </li>
-              <li className="flex gap-3">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-stat-green" />
-                Guided pathways that help young adults pursue what they aspire to become.
-              </li>
-            </ul>
-
-            <div className="mt-10 flex flex-wrap items-center gap-3">
-              <Button asChild size="lg">
-                <Link to="/signin" className="gap-2">
-                  Enter portal <ArrowRight />
-                </Link>
-              </Button>
-            </div>
+      {/* Hero — shorter viewport */}
+      <section className="relative border-b border-border/50">
+        <div className="absolute inset-0">
+          <img src={landingBg} alt="" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-background/80 to-muted/40" />
+        </div>
+        <div className={`relative ${container} flex min-h-[36vh] flex-col justify-center py-10 text-center sm:min-h-[40vh] sm:py-12`}>
+          <h1
+            className="text-3xl font-extrabold uppercase leading-[1.1] tracking-tight sm:text-4xl md:text-5xl"
+            style={{ fontFamily: '"Happy Monkey", system-ui' }}
+          >
+            <span className="block text-[#ff4a2f]">Bringing the</span>
+            <span className="block text-[#00d2ff]">Next Generation</span>
+            <span className="block text-[#d6e63a]">Forward</span>
+          </h1>
+          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground sm:mt-5 sm:text-[15px]">
+            We are the foundation for future generation leaders in which we support to enlighten and hone the youth in
+            acquiring an adept set of business skills, professionally mentoring young adults and directing them to pursue what
+            they aspire to become.
+          </p>
+          <div className="mt-6 flex justify-center">
+            <Button asChild size="default" className="rounded-full px-8 font-medium">
+              <a href="#about">ABOUT US</a>
+            </Button>
           </div>
         </div>
+      </section>
+
+      <main className="flex-1">
+        {/* Foundation */}
+        <section id="about" className={cn("scroll-mt-16 border-b border-border/40 bg-muted/25", section)}>
+          <div className={container}>
+            <div className="flex flex-col gap-1 text-center sm:text-left">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Foundation</p>
+              <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Who we are</h2>
+            </div>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3 sm:gap-4">
+              {topCards.map((card) => (
+                <article
+                  key={card.title}
+                  className={cn(
+                    "rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm backdrop-blur-sm sm:p-5",
+                    card.accent,
+                    "border-l-4",
+                  )}
+                >
+                  <h3 className="text-sm font-semibold sm:text-base">{card.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-[13px]">{card.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
         </section>
 
-        <section className="relative w-full pb-16 md:pb-24">
-          <div className="mx-auto max-w-5xl px-6 pt-0 md:pt-0">
-            <div className="rounded-xl border border-white/20 bg-black/35 p-6 md:p-8 backdrop-blur-[2px]">
-              <div className="space-y-8">
-                <div id="about" className="w-full rounded-lg border border-white/20 bg-black/35 p-6">
-                  <h2 className="text-xl font-semibold tracking-tight text-white">Our Values</h2>
-                  <p className="mt-3 text-sm leading-6 text-white/85">
-                    HYT Foundation exists to inspire and aid young entrepreneurs to attain their full potential. Our
-                    purpose is to bring the next generation forward – establishing a future with a society of young
-                    generation leaders.
-                  </p>
+        {/* Values — horizontal strip + compact logo */}
+        <section className={cn(section, "border-b border-border/40")}>
+          <div className={container}>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-xl">
+                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Our values</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  HYT Foundation seeks to inspire and aid young entrepreneurs to attain their full potential. Our purpose is
+                  to bring the next generation forward and establish a society of young generation leaders.
+                </p>
+              </div>
+              <div className="flex justify-center lg:justify-end">
+                <img src={hytBlackLogo} alt="HYT black logo" className="h-11 w-auto max-w-[140px] object-contain opacity-90 sm:h-12" />
+              </div>
+            </div>
+            <div className="mx-auto mt-5 grid w-full max-w-3xl grid-cols-3 gap-2.5 sm:max-w-4xl sm:gap-3 md:max-w-5xl md:grid-cols-6">
+              {valueGridImages.map((imageSrc, i) => (
+                <div
+                  key={i}
+                  className="aspect-[4/3] w-full overflow-hidden rounded-lg border border-border/60 bg-card shadow-sm"
+                >
+                  <img src={imageSrc} alt={`HYT values ${i + 1}`} className="h-full w-full object-cover" />
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-                <div id="contact" className="w-full rounded-lg border border-white/20 bg-black/35 p-6">
-                  <h2 className="text-xl font-semibold tracking-tight text-white">Contact us</h2>
-                  <p className="mt-3 text-sm leading-6 text-white/85">
-                    Want to partner, volunteer, or learn more? Send us a message and we’ll get back to you.
-                  </p>
+        {/* Why join — centered image pair, then tabs */}
+        <section id="join" className={cn("scroll-mt-16 border-b border-border/40 bg-muted/20", section)}>
+          <div className={container}>
+            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Why join us</h2>
+            <div className="mx-auto mt-5 grid max-w-3xl grid-cols-2 gap-3 sm:max-w-4xl sm:gap-4">
+              <div className="aspect-[4/3] overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+                <img src={why1} alt="Why should you join" className="h-full w-full object-cover" />
+              </div>
+              <div className="aspect-[4/3] overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+                <img src={why2} alt="Who are we helping" className="h-full w-full object-cover" />
+              </div>
+            </div>
+            <Tabs defaultValue="why-do" className="mx-auto mt-6 w-full max-w-3xl sm:max-w-4xl">
+              <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-xl bg-muted/60 p-1 sm:grid-cols-4">
+                <TabsTrigger value="why-do" className="rounded-lg text-xs sm:text-sm">
+                  Why we do it
+                </TabsTrigger>
+                <TabsTrigger value="who-are" className="rounded-lg text-xs sm:text-sm">
+                  Who we are
+                </TabsTrigger>
+                <TabsTrigger value="why-join" className="rounded-lg text-xs sm:text-sm">
+                  Why join
+                </TabsTrigger>
+                <TabsTrigger value="who-help" className="rounded-lg text-xs sm:text-sm">
+                  Who we help
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="why-do" className="mt-4 rounded-2xl border border-border/60 bg-card/80 p-4 text-sm leading-relaxed text-muted-foreground shadow-sm">
+                Our goal is to bring forth knowledgeable young entrepreneurs and cater the world&apos;s needs through these
+                exemplary leaders while adapting and understanding generational differences by being flexible and innovative.
+              </TabsContent>
+              <TabsContent value="who-are" className="mt-4 rounded-2xl border border-border/60 bg-card/80 p-4 text-sm leading-relaxed text-muted-foreground shadow-sm">
+                We are the foundation for future generation leaders in which we support to enlighten and hone the youth in
+                acquiring an adept set of business skills, professionally mentoring young adults and directing them to pursue
+                what they aspire to become.
+              </TabsContent>
+              <TabsContent value="why-join" className="mt-4 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm">
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  To become outstanding young aspiring leaders and entrepreneurs, the HYT Foundation Inc. provides
+                  opportunities for young people to learn and enhance their abilities.
+                </p>
+              </TabsContent>
+              <TabsContent value="who-help" className="mt-4 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm">
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  The HYT Foundation Inc. is assisting future generations in accomplishing goals, by providing professional
+                  mentoring to emerging professional leaders and entrepreneurs. To motivate and pass on their knowledge and
+                  skills to future generations leaders.
+                </p>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </section>
 
-                  <form
-                    className="mt-6 space-y-4"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const form = e.currentTarget;
-                      const data = new FormData(form);
-                      const name = String(data.get("name") ?? "").trim();
-                      const email = String(data.get("email") ?? "").trim();
-                      const message = String(data.get("message") ?? "").trim();
-
-                      const subject = encodeURIComponent("Website contact form");
-                      const body = encodeURIComponent(
-                        [`Name: ${name || "-"}`, `Email: ${email || "-"}`, "", message].join("\n"),
-                      );
-
-                      window.location.href = `mailto:info@hytfoundation.org?subject=${subject}&body=${body}`;
-                    }}
-                  >
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="contact-name">Name</Label>
-                        <Input
-                          id="contact-name"
-                          name="name"
-                          autoComplete="name"
-                          placeholder="Your name"
-                        className="border-white/20 bg-white/90"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="contact-email">Email</Label>
-                        <Input
-                          id="contact-email"
-                          name="email"
-                          type="email"
-                          autoComplete="email"
-                          placeholder="you@example.com"
-                          required
-                        className="border-white/20 bg-white/90"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="contact-message">Message</Label>
-                      <Textarea
-                        id="contact-message"
-                        name="message"
-                        placeholder="How can we help?"
-                        rows={5}
-                        required
-                      className="border-white/20 bg-white/90"
-                      />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Button type="submit">Send message</Button>
-                    </div>
-                  </form>
+        {/* Dream Academy — single slab */}
+        <section id="dream-academy" className={cn("scroll-mt-16 border-b border-border/40", section)}>
+          <div className={container}>
+            <div className="overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card to-muted/30 shadow-sm">
+              <div className="border-b border-border/40 bg-muted/40 px-5 py-4 sm:px-8">
+                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Dream Academy</h2>
+              </div>
+              <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1fr_200px] lg:gap-8">
+                <div className="space-y-6 text-sm leading-relaxed text-muted-foreground">
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">About Dream Academy</h3>
+                    <p className="mt-2">
+                      Dream Academy is a platform developed through the partnership of Helping Youth Transcend Foundation and
+                      Klassic Solutions Inc. to assist young people in developing their abilities, talents, and gaining
+                      experience in preparation for their future careers.
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-foreground">Training program and objectives</h3>
+                    <h4 className="mt-3 text-xs font-semibold uppercase tracking-wide text-primary">Training program</h4>
+                    <p className="mt-1.5">
+                      The Dream Academy Training Program consists of working as a trainee mainly under the Klassic Group of
+                      Companies and trusted partners and sponsors. It is a multi-industry company that helps young people to
+                      be flexible, adapt, grow and learn successfully.
+                    </p>
+                    <h4 className="mt-4 text-xs font-semibold uppercase tracking-wide text-primary">Training objectives</h4>
+                    <p className="mt-1.5">
+                      The Dream Academy is dedicated to assisting the younger generation in thriving, developing, and
+                      transforming into their best selves. Since the organization is diversified, with numerous enterprises in
+                      different industries, the youth will develop into well-rounded individuals. HYT Foundation Inc. desires
+                      young people to transcend and preserve this generation while pursuing their aspirations.
+                    </p>
+                  </div>
+                  <div className="border-t border-border/50 pt-6">
+                    <h3 className="text-base font-semibold text-foreground">Dreamer&apos;s goals</h3>
+                    <p className="mt-2">
+                      Our goal is to inspire youths to lead, manage, and educate others as entrepreneurs. Also, bring forth their
+                      abilities to explore and applaud it by sharing it with others. To realize its goal of serving the
+                      world&apos;s youth and fostering their ambition to lead the next generation, this is to make the world a
+                      better place for communities by contributing to our young people and general society in any such,
+                      virtuous, and high-quality manner.
+                    </p>
+                  </div>
+                </div>
+                <div className="overflow-hidden rounded-xl border border-border/60 lg:self-start">
+                  <img
+                    src={train1}
+                    alt="Training Program and Objectives"
+                    className="aspect-[3/4] max-h-[200px] w-full object-cover sm:max-h-[220px] lg:max-h-[200px]"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </section>
+
+        {/* Units — uniform card grid */}
+        <section id="units" className={cn("scroll-mt-16 border-b border-border/40 bg-muted/25", section)}>
+          <div className={container}>
+            <div className="text-center">
+              <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Unit assignments</h2>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                Explore the units where trainees contribute across the organization.
+              </p>
+            </div>
+            <div className="mx-auto mt-6 grid max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+              {unitColumns.map((unit) => (
+                <article
+                  key={unit.title}
+                  className="flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"
+                >
+                  <div className={cn("h-1 w-full shrink-0", unit.stripe)} aria-hidden />
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="text-sm font-semibold leading-snug text-foreground">{unit.title}</h3>
+                    <ul className="mt-3 flex flex-1 flex-col gap-1.5 text-xs leading-snug text-muted-foreground">
+                      {unit.items.map((item) => (
+                        <li key={item} className="flex gap-2">
+                          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/20" aria-hidden />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Contact + aside */}
+        <section id="contact" className={cn("scroll-mt-16", section)}>
+          <div className={container}>
+            <div className="mx-auto max-w-lg">
+              <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl">Contact Us</h2>
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                Need to get in touch with us? Either fill out the form with your inquiry or find the department email
+                you&apos;d like to contact below.
+              </p>
+              <form
+                className="mt-5 space-y-3 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm sm:p-5"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const data = new FormData(e.currentTarget);
+                  const name = String(data.get("name") ?? "").trim();
+                  const email = String(data.get("email") ?? "").trim();
+                  const message = String(data.get("message") ?? "").trim();
+                  const subject = encodeURIComponent("HYT Foundation Inquiry");
+                  const body = encodeURIComponent([`Name: ${name || "-"}`, `Email: ${email || "-"}`, "", message].join("\n"));
+                  window.location.href = `mailto:hello@brains.asia?subject=${subject}&body=${body}`;
+                }}
+              >
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="contact-name">Name *</Label>
+                    <Input id="contact-name" name="name" placeholder="Your name" required className="h-10" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="contact-email">Email *</Label>
+                    <Input id="contact-email" name="email" type="email" placeholder="you@example.com" required className="h-10" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="contact-message">Message *</Label>
+                  <Textarea id="contact-message" name="message" placeholder="Write your message here..." rows={3} required className="min-h-[100px] resize-y" />
+                </div>
+                <Button type="submit" className="w-full bg-[#111827] text-white sm:w-auto">
+                  SUBMIT
+                </Button>
+              </form>
+            </div>
+          </div>
+        </section>
       </main>
 
-      <footer
-        className="border-t border-border/20 text-white/80"
-        style={{ background: "linear-gradient(rgb(40, 28, 21) 0%, rgb(26, 18, 15) 100%)" }}
-      >
-        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-8 text-sm md:flex-row md:items-start md:justify-between">
-          <p>© {new Date().getFullYear()} Helping Youth Transcend Foundation Inc.</p>
-          <div className="space-y-1 md:text-right">
-            <p>Suite 1004 Atlanta Center, Annapolis St., San Juan City, Metro Manila, Philippines</p>
-            <p>(02) 835 90648 • (63) 961 495 8696 • (63) 905 102 4246</p>
+      <footer className="border-t border-border/60 bg-[#0f121a] text-white">
+        <div className={cn(container, "flex flex-col gap-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:py-10")}>
+          <div className="flex items-center gap-3">
+            <img src={hytLogo} alt="HYT logo" className="h-12 w-12 sm:h-14 sm:w-14" />
+            <div>
+              <p className="text-xs font-semibold text-[#ff6f3b]">HELPING YOUTH</p>
+              <p className="text-xs font-semibold text-[#20d2ff] sm:text-sm">TRANSCEND FOUNDATION INC.</p>
+            </div>
+          </div>
+          <p className="max-w-sm text-xs leading-relaxed text-white/75">
+            We are the foundation for future generation leaders in which we support to enlighten and hone the youth in
+            acquiring an adept set of business skills.
+          </p>
+          <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs sm:text-sm">
+            <div>
+              <p className="mb-1.5 font-semibold uppercase tracking-wide text-white/50">Quick links</p>
+              <ul className="space-y-1 text-white/90">
+                <li>
+                  <a href="#top" className="hover:text-white">
+                    Home
+                  </a>
+                </li>
+                <li>
+                  <a href="#about" className="hover:text-white">
+                    About us
+                  </a>
+                </li>
+                <li>
+                  <a href="#join" className="hover:text-white">
+                    Why join us?
+                  </a>
+                </li>
+                <li>
+                  <a href="#dream-academy" className="hover:text-white">
+                    Dream Academy
+                  </a>
+                </li>
+                <li>
+                  <a href="#units" className="hover:text-white">
+                    Units
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <p className="mb-1.5 font-semibold uppercase tracking-wide text-white/50">Contact</p>
+              <ul className="space-y-1 text-[11px] text-white/80 sm:text-xs">
+                <li>Suite 1004 Atlanta Center, San Juan City</li>
+                <li>(02) 835 90648 • (63) 961 495 8696</li>
+                <li>
+                  <a href="mailto:hello@brains.asia" className="hover:text-white">
+                    hello@brains.asia
+                  </a>
+                </li>
+              </ul>
+              <p className="mb-1.5 mt-3 font-semibold uppercase tracking-wide text-white/50">Social media</p>
+              <p className="text-[11px] text-white/45">powered by BRAINS INFINITE INNOVATIONS INC.</p>
+            </div>
           </div>
         </div>
       </footer>
     </div>
   );
 }
-

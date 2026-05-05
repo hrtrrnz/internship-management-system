@@ -10,7 +10,6 @@ import Landing from "./pages/Landing";
 // Auth pages
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
-import DemoSelect from "./pages/DemoSelect";
 
 // Student pages
 import Dashboard from "./pages/Dashboard";
@@ -67,7 +66,6 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/demo" element={<DemoSelect />} />
 
             <Route element={<AppLayout />}>
               {/* Student routes */}

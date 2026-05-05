@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -58,6 +60,20 @@
 
     --font-display: 'Manrope', 'Inter', 'Segoe UI', sans-serif;
     --font-body: 'Inter', 'Segoe UI', sans-serif;
+  }
+
+  /* Sidebar only: landing footer tone (~#0f121a). Scoped so main + header stay light. */
+  .portal-app {
+    --sidebar-background: 222 27% 8%;
+    --sidebar-foreground: 30 15% 72%;
+    --sidebar-primary: 35 80% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 13%;
+    --sidebar-accent-foreground: 30 25% 90%;
+    --sidebar-border: 220 14% 16%;
+    --sidebar-ring: 35 80% 55%;
+    --sidebar-muted: 30 10% 48%;
+    --clock-bg: 222 27% 8%;
   }
 }
 
