@@ -5,6 +5,8 @@ export type Group = {
   name: string;
   members: string[];
   createdBy: UserRole;
+  /** True for 1:1 threads. */
+  isPrivate?: boolean;
   lastSender: string;
   lastMessage: string;
   lastAt: string;
@@ -25,6 +27,8 @@ export type ChatMessage = {
   edited?: boolean;
   status?: "sent" | "delivered" | "read";
   reactions?: Record<string, number>;
+  /** Current signed-in user reaction; used to enforce one reaction per user per message. */
+  myReaction?: string;
 };
 
 export const MESSAGES_SEED_GROUPS: Group[] = [
@@ -58,6 +62,26 @@ export const MESSAGES_SEED_GROUPS: Group[] = [
     lastMessage: "Acknowledged.",
     lastAt: "Feb 24",
   },
+  {
+    id: 4,
+    name: "Applicant Pooling",
+    members: ["HR Desk", "Maria Reyes", "James Cruz", "Elena Torres"],
+    createdBy: "admin",
+    lastSender: "James Cruz",
+    lastMessage: "Shared three profiles for pooling — initials only in Drive.",
+    lastAt: "9:14",
+    unread: 2,
+  },
+  {
+    id: 5,
+    name: "Dream Academy Applicants",
+    members: ["Admissions Desk", "Nora", "Lia Tan", "Adrian Cole"],
+    createdBy: "admin",
+    lastSender: "Admissions Desk",
+    lastMessage: "Next briefing for short-listed applicants is Thursday 10:30 AM.",
+    lastAt: "Mon",
+    unread: 1,
+  },
 ];
 
 export const MESSAGES_SEED_MESSAGES: ChatMessage[] = [
@@ -73,6 +97,40 @@ export const MESSAGES_SEED_MESSAGES: ChatMessage[] = [
   },
   { id: 3, groupId: 2, sender: "Tristan Lee", text: "Please submit your outputs after your shift.", at: "12:57", status: "delivered" },
   { id: 4, groupId: 3, sender: "Nora", text: "Acknowledged.", at: "Feb 24", status: "read" },
+  {
+    id: 6,
+    groupId: 4,
+    sender: "HR Desk",
+    text: "Pooling status for cohort Q2 — please review flagged CVs (sanitized IDs only).",
+    at: "Yesterday",
+    status: "read",
+  },
+  { id: 7, groupId: 4, sender: "Maria Reyes", text: "Uploaded two nominees for pooling review.", at: "8:50", status: "read" },
+  {
+    id: 8,
+    groupId: 4,
+    sender: "James Cruz",
+    text: "Shared three profiles for pooling — initials only in Drive.",
+    at: "9:14",
+    status: "delivered",
+  },
+  {
+    id: 9,
+    groupId: 5,
+    sender: "Admissions Desk",
+    text: "Welcome — use this channel for applicant questions and RSVP tracking.",
+    at: "Mar 2",
+    status: "read",
+  },
+  { id: 10, groupId: 5, sender: "Nora", text: "Confirmed two mentor shadows for finalist day.", at: "Mar 3", status: "read" },
+  {
+    id: 11,
+    groupId: 5,
+    sender: "Admissions Desk",
+    text: "Next briefing for short-listed applicants is Thursday 10:30 AM.",
+    at: "Mon",
+    status: "read",
+  },
 ];
 
 export type FloatingThreadLine = { sender: string; text: string; mine?: boolean };

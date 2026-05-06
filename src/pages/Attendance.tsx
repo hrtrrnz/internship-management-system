@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Clock, CheckCircle, XCircle, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRole } from "@/contexts/RoleContext";
+import { useAttendancePolicy } from "@/contexts/AttendancePolicyContext";
 
 const records: Record<string, { in: string; out: string; hours: string; status: string }> = {
   "2026-03-21": { in: "8:02 AM", out: "5:14 PM", hours: "9h 12m", status: "Present" },
@@ -28,12 +30,14 @@ const statusColor: Record<string, string> = {
   Present: "bg-stat-green",
   Late: "bg-stat-orange",
   Absent: "bg-destructive",
+  Excused: "bg-blue-500",
 };
 
 const statusBg: Record<string, string> = {
   Present: "bg-stat-green-bg border-stat-green/20",
   Late: "bg-stat-orange-bg border-stat-orange/20",
   Absent: "bg-destructive/10 border-destructive/20",
+  Excused: "bg-blue-50 border-blue-200/70 dark:bg-blue-950/20 dark:border-blue-900/50",
 };
 
 function getDaysInMonth(year: number, month: number) {
@@ -45,6 +49,9 @@ function getFirstDayOfWeek(year: number, month: number) {
 }
 
 export default function Attendance() {
+  const { role, user } = useRole();
+  const isAdmin = role === "admin";
+  const { workdayOverrideByDate, setWorkdayOverrideByDate, excusalByInternByDate } = useAttendancePolicy();
   const [selectedDate, setSelectedDate] = useState<string | null>("2026-03-21");
   const [currentMonth, setCurrentMonth] = useState(2); // March = 2
   const [currentYear] = useState(2026);
@@ -55,12 +62,51 @@ export default function Attendance() {
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfWeek(currentYear, currentMonth);
 
-  const allRecords = Object.entries(records);
-  const presentCount = allRecords.filter(([, r]) => r.status === "Present").length;
-  const lateCount = allRecords.filter(([, r]) => r.status === "Late").length;
-  const absentCount = allRecords.filter(([, r]) => r.status === "Absent").length;
+  const isWorkday = (dateStr: string) => {
+    const override = workdayOverrideByDate[dateStr];
+    if (override !== undefined) return override;
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const dow = new Date(y, m - 1, d).getDay();
+    return dow !== 0 && dow !== 6; // Mon–Fri by default
+  };
 
-  const selected = selectedDate ? records[selectedDate] : null;
+  const effectiveRecordByDate = useMemo(() => {
+    const map: Record<string, { in: string; out: string; hours: string; status: string }> = {};
+    // Populate month view (non-future) so summary + selection work even when no explicit record exists.
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
+      const isFuture = new Date(currentYear, currentMonth, i) > new Date(2026, 2, 24);
+      if (isFuture) continue;
+
+      const base = records[dateStr];
+      const workday = isWorkday(dateStr);
+
+      if (!workday) continue;
+
+      if (base && base.in !== "—") {
+        map[dateStr] = base;
+        continue;
+      }
+
+      const myExcusal = excusalByInternByDate[user.name]?.[dateStr];
+      if (myExcusal?.excused) {
+        map[dateStr] = { in: "—", out: "—", hours: "—", status: "Excused" };
+      } else {
+        map[dateStr] = { in: "—", out: "—", hours: "—", status: "Absent" };
+      }
+    }
+    return map;
+  }, [currentMonth, currentYear, daysInMonth, workdayOverrideByDate, excusalByInternByDate, user.name]);
+
+  const allEffectiveRecords = Object.entries(effectiveRecordByDate);
+  const presentCount = allEffectiveRecords.filter(([, r]) => r.status === "Present").length;
+  const lateCount = allEffectiveRecords.filter(([, r]) => r.status === "Late").length;
+  const absentCount = allEffectiveRecords.filter(([, r]) => r.status === "Absent").length;
+  const excusedCount = allEffectiveRecords.filter(([, r]) => r.status === "Excused").length;
+
+  const selected = selectedDate ? effectiveRecordByDate[selectedDate] ?? null : null;
+  const selectedExcusal = selectedDate ? excusalByInternByDate[user.name]?.[selectedDate] : undefined;
+  const selectedWorkday = selectedDate ? isWorkday(selectedDate) : false;
 
   return (
     <div className="space-y-6">
@@ -98,25 +144,29 @@ export default function Attendance() {
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const day = i + 1;
               const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              const record = records[dateStr];
+              const record = effectiveRecordByDate[dateStr];
+              const workday = isWorkday(dateStr);
               const isWeekend = new Date(currentYear, currentMonth, day).getDay() === 0 || new Date(currentYear, currentMonth, day).getDay() === 6;
               const isSelected = selectedDate === dateStr;
               const isFuture = new Date(currentYear, currentMonth, day) > new Date(2026, 2, 24);
+              const base = records[dateStr];
+              const hasClockIn = Boolean(base && base.in && base.in !== "—");
+              const canSelect = !isFuture && (isAdmin ? true : hasClockIn);
 
               return (
                 <button
                   key={day}
-                  onClick={() => record && setSelectedDate(dateStr)}
+                  onClick={() => canSelect && setSelectedDate(dateStr)}
                   className={`aspect-square rounded-lg flex flex-col items-center justify-center gap-1 text-sm transition-all relative
                     ${isSelected ? 'ring-2 ring-primary bg-primary/5' : ''}
-                    ${isWeekend ? 'text-muted-foreground/50' : 'text-foreground'}
+                    ${(!workday || isWeekend) ? 'text-muted-foreground/50' : 'text-foreground'}
                     ${isFuture ? 'text-muted-foreground/30' : ''}
-                    ${!isWeekend && !isFuture && record ? 'cursor-pointer hover:bg-muted/50' : ''}
-                    ${!record && !isWeekend && !isFuture ? 'text-muted-foreground/60' : ''}
+                    ${canSelect ? 'cursor-pointer hover:bg-muted/50' : ''}
+                    ${!record && workday && !isFuture ? 'text-muted-foreground/80' : ''}
                   `}
                 >
                   <span className="font-medium">{day}</span>
-                  {record && !isWeekend && (
+                  {record && (
                     <span className={`w-2 h-2 rounded-full ${statusColor[record.status]}`} />
                   )}
                 </button>
@@ -129,6 +179,7 @@ export default function Attendance() {
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-stat-green" /> Present</span>
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-stat-orange" /> Late</span>
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-destructive" /> Absent</span>
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Excused</span>
           </div>
         </div>
 
@@ -142,13 +193,13 @@ export default function Attendance() {
                 <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                   <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
                   <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--stat-green))" strokeWidth="3"
-                    strokeDasharray={`${(presentCount / (presentCount + lateCount + absentCount)) * 97.4} 97.4`} strokeLinecap="round" />
+                    strokeDasharray={`${(presentCount / (presentCount + lateCount + absentCount + excusedCount || 1)) * 97.4} 97.4`} strokeLinecap="round" />
                   <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--stat-orange))" strokeWidth="3"
-                    strokeDasharray={`${(lateCount / (presentCount + lateCount + absentCount)) * 97.4} 97.4`}
-                    strokeDashoffset={`-${(presentCount / (presentCount + lateCount + absentCount)) * 97.4}`} strokeLinecap="round" />
+                    strokeDasharray={`${(lateCount / (presentCount + lateCount + absentCount + excusedCount || 1)) * 97.4} 97.4`}
+                    strokeDashoffset={`-${(presentCount / (presentCount + lateCount + absentCount + excusedCount || 1)) * 97.4}`} strokeLinecap="round" />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-bold font-display text-foreground">{presentCount + lateCount + absentCount}</span>
+                  <span className="text-2xl font-bold font-display text-foreground">{presentCount + lateCount + absentCount + excusedCount}</span>
                   <span className="text-[10px] text-muted-foreground">Total Days</span>
                 </div>
               </div>
@@ -166,6 +217,10 @@ export default function Attendance() {
                 <span className="flex items-center gap-2"><XCircle className="w-4 h-4 text-destructive" /> Absent</span>
                 <span className="font-bold text-foreground">{absentCount}</span>
               </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-blue-500" /> Excused</span>
+                <span className="font-bold text-foreground">{excusedCount}</span>
+              </div>
             </div>
           </div>
 
@@ -182,6 +237,7 @@ export default function Attendance() {
                   <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                     selected.status === "Present" ? "text-stat-green bg-stat-green-bg" :
                     selected.status === "Late" ? "text-stat-orange bg-stat-orange-bg" :
+                    selected.status === "Excused" ? "text-blue-700 bg-blue-100 dark:text-blue-200 dark:bg-blue-900/30" :
                     "text-destructive bg-destructive/10"
                   }`}>{selected.status}</span>
                 </div>
@@ -197,6 +253,50 @@ export default function Attendance() {
                   <span className="text-sm text-muted-foreground">Total Hours</span>
                   <span className="text-sm font-bold text-foreground">{selected.hours}</span>
                 </div>
+                {selected.status === "Excused" && (
+                  <div className="pt-2 mt-2 border-t border-border/60 space-y-1.5">
+                    <div className="text-xs text-muted-foreground">Excusal description</div>
+                    <div className="text-sm text-foreground whitespace-pre-wrap">{selectedExcusal?.description?.trim() || "—"}</div>
+                    <div className="text-xs text-muted-foreground mt-2">Excuse letter</div>
+                    <div className="text-sm text-foreground">
+                      {selectedExcusal?.excuseLetters?.length ? selectedExcusal.excuseLetters.join(", ") : "—"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {selectedDate && isAdmin && (
+            <div className="bg-card rounded-xl border border-border p-5">
+              <h3 className="font-display font-bold text-foreground mb-3">Admin controls</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Work day</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setWorkdayOverrideByDate((prev) => ({
+                        ...prev,
+                        [selectedDate]: !selectedWorkday,
+                      }))
+                    }
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      selectedWorkday ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                    }`}
+                  >
+                    {selectedWorkday ? "Workday" : "Off"}
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setWorkdayOverrideByDate((prev) => ({ ...prev, [selectedDate]: undefined }));
+                  }}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                >
+                  Clear workday override for this date
+                </button>
               </div>
             </div>
           )}

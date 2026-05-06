@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { RoleProvider } from "@/contexts/RoleContext";
 import { MessagesThreadProvider } from "@/contexts/MessagesThreadContext";
 import { EvaluationFormWorkflowProvider } from "@/contexts/EvaluationFormWorkflowContext";
+import { AttendancePolicyProvider } from "@/contexts/AttendancePolicyContext";
 import AppLayout from "./components/AppLayout";
 import Landing from "./pages/Landing";
 
@@ -60,10 +61,12 @@ function RootLayout() {
   return (
     <RoleProvider>
       <MessagesThreadProvider>
-        <EvaluationFormWorkflowProvider>
-          <ScrollRestoration />
-          <Outlet />
-        </EvaluationFormWorkflowProvider>
+        <AttendancePolicyProvider>
+          <EvaluationFormWorkflowProvider>
+            <ScrollRestoration />
+            <Outlet />
+          </EvaluationFormWorkflowProvider>
+        </AttendancePolicyProvider>
       </MessagesThreadProvider>
     </RoleProvider>
   );

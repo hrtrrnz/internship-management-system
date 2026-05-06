@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Archive,
   BellOff,
@@ -51,8 +51,9 @@ const roleSubtitle: Record<UserRole, string> = {
 
 export default function Messages() {
   const { role, user } = useRole();
-  const { groups, setGroups, messages, setMessages } = useMessagesThread();
+  const { groups, setGroups, messages, setMessages, pinnedIdsByGroup, setPinnedIdsByGroup } = useMessagesThread();
   const canCreateGroup = role === "mentor" || role === "admin";
+  const canCreatePrivate = true;
 
   const [selectedGroupId, setSelectedGroupId] = useState<number>(MESSAGES_SEED_GROUPS[0].id);
   const [messageInput, setMessageInput] = useState("");
@@ -63,13 +64,15 @@ export default function Messages() {
   const [showGroupInfo, setShowGroupInfo] = useState(false);
   const [replyToId, setReplyToId] = useState<number | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
-  const [pinnedIdsByGroup, setPinnedIdsByGroup] = useState<Record<number, number[]>>({ 1: [1], 2: [], 3: [] });
   const [draftByGroup, setDraftByGroup] = useState<Record<number, string>>({});
   const [newMemberName, setNewMemberName] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  /** Controls floating pinned-list modal visibility. */
+  const [showPinnedListModal, setShowPinnedListModal] = useState(false);
   /** When set, floating modal shows this pinned message (by id). */
   const [pinnedDetailId, setPinnedDetailId] = useState<number | null>(null);
+  const [reactionPickerForId, setReactionPickerForId] = useState<number | null>(null);
 
   const visibleGroups = useMemo(() => {
     const normalized = chatSearch.trim().toLowerCase();
@@ -127,6 +130,39 @@ export default function Messages() {
       createdBy: role,
       lastSender: user.name,
       lastMessage: "Group created.",
+      lastAt: "Just now",
+    };
+    setGroups((prev) => [newGroup, ...prev]);
+    setSelectedGroupId(newGroup.id);
+    setDraftByGroup((prev) => ({ ...prev, [newGroup.id]: "" }));
+    setPinnedIdsByGroup((prev) => ({ ...prev, [newGroup.id]: [] }));
+  };
+
+  const handleCreatePrivateChat = () => {
+    const candidateNames = Array.from(new Set(groups.flatMap((g) => g.members))).filter((name) => name !== user.name);
+    if (candidateNames.length === 0) return;
+    const input = window.prompt(`Start private chat with:\n${candidateNames.join(", ")}`)?.trim();
+    if (!input) return;
+    const normalized = input.toLowerCase();
+    const targetName = candidateNames.find((n) => n.toLowerCase() === normalized);
+    if (!targetName) return;
+
+    const existing = groups.find(
+      (g) => g.isPrivate && g.members.length === 2 && g.members.includes(user.name) && g.members.includes(targetName)
+    );
+    if (existing) {
+      setSelectedGroupId(existing.id);
+      return;
+    }
+
+    const newGroup: Group = {
+      id: Date.now(),
+      name: targetName,
+      members: [user.name, targetName],
+      createdBy: role,
+      isPrivate: true,
+      lastSender: targetName,
+      lastMessage: "Private chat started.",
       lastAt: "Just now",
     };
     setGroups((prev) => [newGroup, ...prev]);
@@ -225,6 +261,7 @@ export default function Messages() {
     setEditingMessageId(null);
     setMessageSearch("");
     setShowGroupInfo(false);
+    setShowPinnedListModal(false);
     setPinnedDetailId(null);
   };
 
@@ -294,7 +331,17 @@ export default function Messages() {
 
   const reactToMessage = (messageId: number, emoji: string) => {
     setMessages((prev) =>
-      prev.map((m) => (m.id === messageId ? { ...m, reactions: { ...(m.reactions ?? {}), [emoji]: (m.reactions?.[emoji] ?? 0) + 1 } } : m))
+      prev.map((m) => {
+        if (m.id !== messageId) return m;
+        const nextReactions = { ...(m.reactions ?? {}) };
+        if (m.myReaction) {
+          const oldCount = (nextReactions[m.myReaction] ?? 0) - 1;
+          if (oldCount > 0) nextReactions[m.myReaction] = oldCount;
+          else delete nextReactions[m.myReaction];
+        }
+        nextReactions[emoji] = (nextReactions[emoji] ?? 0) + 1;
+        return { ...m, reactions: nextReactions, myReaction: emoji };
+      })
     );
   };
 
@@ -335,6 +382,17 @@ export default function Messages() {
   const msgActionClass =
     "rounded-md px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground";
 
+  useEffect(() => {
+    if (reactionPickerForId == null) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest?.("[data-reaction-picker]")) return;
+      setReactionPickerForId(null);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [reactionPickerForId]);
+
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -342,12 +400,20 @@ export default function Messages() {
           <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">Messages</h2>
           <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">{roleSubtitle[role]}</p>
         </div>
-        {canCreateGroup && (
+        {(canCreateGroup || canCreatePrivate) && (
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" onClick={handleCreateGroup} className="gap-2 shadow-sm">
-              <Plus className="h-4 w-4" />
-              New group
-            </Button>
+            {canCreateGroup && (
+              <Button type="button" onClick={handleCreateGroup} className="gap-2 shadow-sm">
+                <Plus className="h-4 w-4" />
+                New group
+              </Button>
+            )}
+            {canCreatePrivate && (
+              <Button type="button" variant="outline" onClick={handleCreatePrivateChat} className="gap-2 border-dashed shadow-sm">
+                <Users className="h-4 w-4" />
+                New private
+              </Button>
+            )}
             <Button
               type="button"
               variant={showArchived ? "secondary" : "outline"}
@@ -424,6 +490,11 @@ export default function Messages() {
                           {group.lastMessage}
                         </p>
                         <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                          {group.isPrivate && (
+                            <span className="inline-flex items-center gap-0.5 rounded-md bg-primary/12 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                              Private
+                            </span>
+                          )}
                           {group.pinned && (
                             <span className="inline-flex items-center gap-0.5 rounded-md bg-stat-orange-bg px-1.5 py-0.5 text-[10px] font-medium text-stat-orange">
                               <Pin className="h-2.5 w-2.5" /> Pinned
@@ -434,12 +505,14 @@ export default function Messages() {
                               <BellOff className="h-2.5 w-2.5" /> Muted
                             </span>
                           )}
-                          <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-                            <Users className="h-3 w-3 opacity-70" />
-                            {group.members.length}
-                          </span>
+                          {!group.isPrivate && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <Users className="h-3 w-3 opacity-70" />
+                              {group.members.length}
+                            </span>
+                          )}
                         </div>
-                        {canCreateGroup && (
+                        {canCreateGroup && !group.isPrivate && (
                           <div className="mt-2 flex flex-wrap gap-1 border-t border-border/50 pt-2" onClick={(e) => e.stopPropagation()}>
                             <Button
                               type="button"
@@ -490,7 +563,7 @@ export default function Messages() {
                     <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1 rounded-md bg-muted/80 px-2 py-0.5 font-medium text-foreground/80">
                         <Users className="h-3 w-3" />
-                        {selectedGroup.members.length} members
+                        {selectedGroup.isPrivate ? "Private chat" : `${selectedGroup.members.length} members`}
                       </span>
                       <span className="hidden sm:inline">·</span>
                       <span>Last activity {selectedGroup.lastAt}</span>
@@ -513,6 +586,7 @@ export default function Messages() {
                     variant={showGroupInfo ? "secondary" : "outline"}
                     size="sm"
                     onClick={() => {
+                      setShowPinnedListModal(false);
                       setPinnedDetailId(null);
                       setShowGroupInfo((prev) => !prev);
                     }}
@@ -525,45 +599,23 @@ export default function Messages() {
                   </Button>
                 </div>
               </div>
-              {pinnedMessagesList.length > 0 && (
-                <div className="mt-3 rounded-xl border border-amber-200/80 bg-amber-50/80 px-2 py-2 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/30">
-                  <div className="mb-1.5 flex items-center gap-1.5 px-1.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900/90 dark:text-amber-200/90">
-                    <Pin className="h-3 w-3 shrink-0" aria-hidden />
-                    Pinned messages ({pinnedMessagesList.length})
-                  </div>
-                  <div className="flex max-h-40 flex-col gap-1.5 overflow-y-auto pr-0.5">
-                    {pinnedMessagesList.map((pm) => (
-                      <div
-                        key={pm.id}
-                        className="flex items-start gap-1 rounded-lg border border-amber-200/60 bg-amber-50/90 px-2 py-1.5 dark:border-amber-800/40 dark:bg-amber-950/40"
-                      >
-                        <button
-                          type="button"
-                          className="min-w-0 flex-1 text-left text-xs text-amber-950 transition-colors hover:opacity-90 dark:text-amber-100"
-                          onClick={() => {
-                            setShowGroupInfo(false);
-                            setPinnedDetailId(pm.id);
-                          }}
-                        >
-                          <span className="font-semibold text-amber-950/90 dark:text-amber-100/90">{pm.sender}</span>
-                          <span className="text-amber-900/70 dark:text-amber-200/70"> · </span>
-                          <span className="line-clamp-2 text-amber-950/85 dark:text-amber-50/90">{pm.text}</span>
-                        </button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 shrink-0 text-amber-900/70 hover:bg-amber-200/50 hover:text-amber-950 dark:text-amber-200/80 dark:hover:bg-amber-900/50 dark:hover:text-amber-50"
-                          onClick={() => unpinMessage(pm.id)}
-                          aria-label={`Unpin message from ${pm.sender}`}
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <button
+                type="button"
+                className="mt-3 flex w-full items-center justify-between rounded-xl border border-amber-200/80 bg-amber-50/80 px-3 py-2 text-left shadow-sm transition-colors hover:bg-amber-100/80 dark:border-amber-900/50 dark:bg-amber-950/30 dark:hover:bg-amber-950/45"
+                onClick={() => {
+                  setShowGroupInfo(false);
+                  setPinnedDetailId(null);
+                  setShowPinnedListModal(true);
+                }}
+                aria-haspopup="dialog"
+                aria-expanded={showPinnedListModal}
+              >
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-amber-900/90 dark:text-amber-200/90">
+                  <Pin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                  Pinned Messages ({pinnedMessagesList.length})
+                </span>
+                <span className="text-[11px] font-medium text-amber-900/75 dark:text-amber-200/75">View</span>
+              </button>
             </header>
 
             <div className="min-h-0 flex-1 overflow-y-auto bg-gradient-to-b from-muted/15 to-background px-4 py-4 sm:px-6">
@@ -719,11 +771,38 @@ export default function Messages() {
                             >
                               <Pin className="h-3 w-3" /> {selectedPinIdSet.has(message.id) ? "Unpin" : "Pin"}
                             </button>
-                            {quickEmojis.map((emoji) => (
-                              <button key={emoji} type="button" onClick={() => reactToMessage(message.id, emoji)} className={msgActionClass}>
-                                {emoji}
+                            <div data-reaction-picker className="relative inline-flex">
+                              <button
+                                type="button"
+                                onClick={() => setReactionPickerForId((prev) => (prev === message.id ? null : message.id))}
+                                className={cn(msgActionClass, "inline-flex items-center gap-1")}
+                                aria-haspopup="menu"
+                                aria-expanded={reactionPickerForId === message.id}
+                              >
+                                <Smile className="h-3 w-3" /> React
                               </button>
-                            ))}
+                              {reactionPickerForId === message.id && (
+                                <div className="absolute bottom-full right-0 z-20 mb-1 flex flex-nowrap gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1.5 shadow-lg">
+                                  {quickEmojis.map((emoji) => (
+                                    <button
+                                      key={emoji}
+                                      type="button"
+                                      onClick={() => {
+                                        reactToMessage(message.id, emoji);
+                                        setReactionPickerForId(null);
+                                      }}
+                                      className={cn(
+                                        "rounded-md px-2 py-1 text-sm hover:bg-muted",
+                                        message.myReaction === emoji && "bg-muted"
+                                      )}
+                                      aria-label={`React with ${emoji}`}
+                                    >
+                                      {emoji}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -886,7 +965,9 @@ export default function Messages() {
                       </p>
                       <p className="mt-0.5 truncate text-xs text-muted-foreground">{selectedGroup.name}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Created by {selectedGroup.createdBy === "student" ? "intern" : selectedGroup.createdBy}
+                        {selectedGroup.isPrivate
+                          ? `Private participants: ${selectedGroup.members.join(", ")}`
+                          : `Created by ${selectedGroup.createdBy === "student" ? "intern" : selectedGroup.createdBy}`}
                       </p>
                     </div>
                     <Button
@@ -922,7 +1003,7 @@ export default function Messages() {
                         </div>
                       ))}
                     </div>
-                    {canCreateGroup && (
+                    {canCreateGroup && !selectedGroup.isPrivate && (
                       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
                         <Input
                           value={newMemberName}
@@ -940,9 +1021,81 @@ export default function Messages() {
               </div>
             )}
 
-            {pinnedDetailId != null && pinnedDetailMessage && (
+            {showPinnedListModal && selectedGroup && (
               <div
                 className="absolute inset-0 z-30 flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px] dark:bg-black/55"
+                role="presentation"
+                onClick={() => setShowPinnedListModal(false)}
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="pinned-list-title"
+                  className="flex max-h-[min(85vh,34rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 dark:ring-white/10"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex shrink-0 items-center justify-between border-b border-amber-200/80 bg-amber-50/95 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/50 sm:px-5">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Pin className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden />
+                      <p id="pinned-list-title" className="font-display text-sm font-semibold text-amber-950 dark:text-amber-100">
+                        Pinned Messages ({pinnedMessagesList.length})
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowPinnedListModal(false)}
+                      className="shrink-0 rounded-lg"
+                      aria-label="Close pinned messages"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+                    {pinnedMessagesList.length > 0 ? (
+                      <div className="space-y-2">
+                        {pinnedMessagesList.map((pm) => (
+                          <div key={pm.id} className="flex items-start gap-2 rounded-xl border border-border/70 bg-muted/20 px-3 py-2.5">
+                            <button
+                              type="button"
+                              className="min-w-0 flex-1 text-left text-xs leading-relaxed text-foreground transition-colors hover:opacity-90"
+                              onClick={() => {
+                                setShowPinnedListModal(false);
+                                setShowGroupInfo(false);
+                                setPinnedDetailId(pm.id);
+                              }}
+                            >
+                              <span className="font-semibold text-foreground/90">{pm.sender}</span>
+                              <span className="text-muted-foreground"> · </span>
+                              <span className="line-clamp-2 text-foreground/85">{pm.text}</span>
+                            </button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 shrink-0"
+                              onClick={() => unpinMessage(pm.id)}
+                              aria-label={`Unpin message from ${pm.sender}`}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 px-4 py-5 text-center text-xs text-muted-foreground">
+                        No pinned messages in this conversation.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {pinnedDetailId != null && pinnedDetailMessage && (
+              <div
+                className="absolute inset-0 z-40 flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px] dark:bg-black/55"
                 role="presentation"
                 onClick={() => setPinnedDetailId(null)}
               >

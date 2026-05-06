@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CheckCircle2, Clock, FileText, ListTodo, Paperclip, User } from "lucide-react";
 import {
   BeforeEvaluationList,
@@ -6,7 +6,6 @@ import {
   EvaluationPageHeader,
   EvaluationScheduleSection,
   EvaluationSectionHeader,
-  EvaluationTwoColumnGrid,
   PreEvalProgressAside,
   ScheduleSectionLabel,
   ScheduleStat,
@@ -31,11 +30,16 @@ import { getActiveInternTasks, getInternTaskById, internTaskCategoryStyles } fro
 import { mockPreviewFile } from "@/lib/mockFilePreview";
 
 export default function Evaluations() {
+  const ITEMS_PER_PAGE = 3;
   const { submissions, internFormAssignments } = useEvaluationFormWorkflow();
   const [evaluationTask, setEvaluationTask] = useState<TaskItem | null>(null);
+  const [completedWorkPage, setCompletedWorkPage] = useState(0);
+  const [activeTasksPage, setActiveTasksPage] = useState(0);
+  const [beforeEvalPage, setBeforeEvalPage] = useState(0);
   const resolvedForm = resolveEvaluationFormForIntern(DEMO_STUDENT_INTERN_ID, submissions, internFormAssignments);
   const prerequisites = demoInternJuanPrerequisites;
   const activeInternTasks = getActiveInternTasks();
+  const completedWorks = [...demoInternJuanCompletedWorks];
 
   const openLinkedOrEvaluationTask = useCallback((taskId: number) => {
     const t = getInternTaskById(taskId);
@@ -46,6 +50,23 @@ export default function Evaluations() {
   const totalReq = prerequisites.length;
   const allReady = doneCount === totalReq;
   const sch = demoScheduleMariaReyes;
+
+  const completedWorkTotalPages = Math.max(1, Math.ceil(completedWorks.length / ITEMS_PER_PAGE));
+  const activeTasksTotalPages = Math.max(1, Math.ceil(activeInternTasks.length / ITEMS_PER_PAGE));
+  const beforeEvalTotalPages = Math.max(1, Math.ceil(prerequisites.length / ITEMS_PER_PAGE));
+
+  const completedWorkPageItems = useMemo(
+    () => completedWorks.slice(completedWorkPage * ITEMS_PER_PAGE, (completedWorkPage + 1) * ITEMS_PER_PAGE),
+    [completedWorks, completedWorkPage, ITEMS_PER_PAGE]
+  );
+  const activeTaskPageItems = useMemo(
+    () => activeInternTasks.slice(activeTasksPage * ITEMS_PER_PAGE, (activeTasksPage + 1) * ITEMS_PER_PAGE),
+    [activeInternTasks, activeTasksPage, ITEMS_PER_PAGE]
+  );
+  const beforeEvalPageItems = useMemo(
+    () => prerequisites.slice(beforeEvalPage * ITEMS_PER_PAGE, (beforeEvalPage + 1) * ITEMS_PER_PAGE),
+    [prerequisites, beforeEvalPage, ITEMS_PER_PAGE]
+  );
 
   return (
     <div className="space-y-8">
@@ -131,75 +152,145 @@ export default function Evaluations() {
         </ScheduleStatsGrid>
       </EvaluationScheduleSection>
 
-      <EvaluationTwoColumnGrid
-        left={
-          <section className="space-y-4">
-            <EvaluationSectionHeader
-              icon={CheckCircle2}
-              iconClassName="text-stat-green"
-              title="Completed work"
-              description="Verified deliverables and milestones counted toward your internship record."
-            />
-            <CompletedWorkList items={[...demoInternJuanCompletedWorks]} />
-          </section>
-        }
-        right={
-          <section className="space-y-8">
-            <div className="space-y-4">
-              <EvaluationSectionHeader
-                icon={Clock}
-                iconClassName="text-stat-blue"
-                title="Active internship tasks"
-                description="Open any task for the same details as the Tasks page. Finish uploads and submissions there so your mentor sees everything in one place."
-              />
-              <ul className="space-y-2">
-                {activeInternTasks.map((t) => (
-                  <li key={t.id}>
-                    <button
-                      type="button"
-                      onClick={() => setEvaluationTask(t)}
-                      className={cn(
-                        "group flex w-full flex-col gap-2 rounded-xl border border-border/80 bg-card p-4 text-left shadow-sm ring-1 ring-black/[0.02] transition-colors",
-                        "hover:border-primary/30 hover:bg-muted/20 dark:ring-white/[0.03]"
-                      )}
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${internTaskCategoryStyles[t.category]}`}>
-                          {t.category}
-                        </span>
-                        <span className="text-[11px] font-medium text-muted-foreground">{t.status}</span>
-                      </div>
-                      <p className="font-display text-sm font-semibold leading-snug text-foreground group-hover:text-primary">{t.title}</p>
-                      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
-                        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                          <Clock className="h-3 w-3 shrink-0 opacity-80" />
-                          Due {t.due}
-                        </span>
-                        {t.mentorAttachments && t.mentorAttachments.length > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
-                            <Paperclip className="h-3 w-3" />
-                            {t.mentorAttachments.length} files
-                          </span>
-                        ) : null}
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+      <section className="grid gap-8 xl:grid-cols-3">
+        <section className="space-y-4">
+          <EvaluationSectionHeader
+            icon={CheckCircle2}
+            iconClassName="text-stat-green"
+            title="Completed work"
+            description="Verified deliverables and milestones counted toward your internship record."
+          />
+          <CompletedWorkList items={completedWorkPageItems} />
+          {completedWorkTotalPages > 1 ? (
+            <div className="flex items-center justify-between rounded-xl border border-border/70 bg-muted/20 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">
+                Page {completedWorkPage + 1} of {completedWorkTotalPages}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCompletedWorkPage((p) => Math.max(0, p - 1))}
+                  disabled={completedWorkPage === 0}
+                  className="rounded-md border border-border bg-background px-2 py-1 font-medium text-foreground hover:bg-muted disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCompletedWorkPage((p) => Math.min(completedWorkTotalPages - 1, p + 1))}
+                  disabled={completedWorkPage >= completedWorkTotalPages - 1}
+                  className="rounded-md border border-border bg-background px-2 py-1 font-medium text-foreground hover:bg-muted disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
             </div>
+          ) : null}
+        </section>
 
-            <div className="space-y-4">
-              <EvaluationSectionHeader
-                icon={ListTodo}
-                iconClassName="text-primary"
-                title="Before evaluation"
-                description="Complete these while waiting for your scheduled session. Your mentor may add organization-specific items in Messages or Tasks."
-              />
-              <BeforeEvaluationList items={prerequisites} onSelectLinkedTask={openLinkedOrEvaluationTask} />
+        <section className="space-y-4">
+          <EvaluationSectionHeader
+            icon={Clock}
+            iconClassName="text-stat-blue"
+            title="Active internship tasks"
+            description="Open any task for the same details as the Tasks page. Finish uploads and submissions there so your mentor sees everything in one place."
+          />
+          <ul className="space-y-2">
+            {activeTaskPageItems.map((t) => (
+              <li key={t.id}>
+                <button
+                  type="button"
+                  onClick={() => setEvaluationTask(t)}
+                  className={cn(
+                    "group flex w-full flex-col gap-2 rounded-xl border border-border/80 bg-card p-4 text-left shadow-sm ring-1 ring-black/[0.02] transition-colors",
+                    "hover:border-primary/30 hover:bg-muted/20 dark:ring-white/[0.03]"
+                  )}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${internTaskCategoryStyles[t.category]}`}>
+                      {t.category}
+                    </span>
+                    <span className="text-[11px] font-medium text-muted-foreground">{t.status}</span>
+                  </div>
+                  <p className="font-display text-sm font-semibold leading-snug text-foreground group-hover:text-primary">{t.title}</p>
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-2">
+                    <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Clock className="h-3 w-3 shrink-0 opacity-80" />
+                      Due {t.due}
+                    </span>
+                    {t.mentorAttachments && t.mentorAttachments.length > 0 ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                        <Paperclip className="h-3 w-3" />
+                        {t.mentorAttachments.length} files
+                      </span>
+                    ) : null}
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {activeTasksTotalPages > 1 ? (
+            <div className="flex items-center justify-between rounded-xl border border-border/70 bg-muted/20 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">
+                Page {activeTasksPage + 1} of {activeTasksTotalPages}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTasksPage((p) => Math.max(0, p - 1))}
+                  disabled={activeTasksPage === 0}
+                  className="rounded-md border border-border bg-background px-2 py-1 font-medium text-foreground hover:bg-muted disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTasksPage((p) => Math.min(activeTasksTotalPages - 1, p + 1))}
+                  disabled={activeTasksPage >= activeTasksTotalPages - 1}
+                  className="rounded-md border border-border bg-background px-2 py-1 font-medium text-foreground hover:bg-muted disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
             </div>
-          </section>
-        }
-      />
+          ) : null}
+        </section>
+
+        <section className="space-y-4">
+          <EvaluationSectionHeader
+            icon={ListTodo}
+            iconClassName="text-primary"
+            title="Before evaluation"
+            description="Complete these while waiting for your scheduled session. Your mentor may add organization-specific items in Messages or Tasks."
+          />
+          <BeforeEvaluationList items={beforeEvalPageItems} onSelectLinkedTask={openLinkedOrEvaluationTask} />
+          {beforeEvalTotalPages > 1 ? (
+            <div className="flex items-center justify-between rounded-xl border border-border/70 bg-muted/20 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">
+                Page {beforeEvalPage + 1} of {beforeEvalTotalPages}
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBeforeEvalPage((p) => Math.max(0, p - 1))}
+                  disabled={beforeEvalPage === 0}
+                  className="rounded-md border border-border bg-background px-2 py-1 font-medium text-foreground hover:bg-muted disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBeforeEvalPage((p) => Math.min(beforeEvalTotalPages - 1, p + 1))}
+                  disabled={beforeEvalPage >= beforeEvalTotalPages - 1}
+                  className="rounded-md border border-border bg-background px-2 py-1 font-medium text-foreground hover:bg-muted disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </section>
+      </section>
 
       <TaskDetailModal task={evaluationTask} onClose={() => setEvaluationTask(null)} mode="evaluation" />
     </div>

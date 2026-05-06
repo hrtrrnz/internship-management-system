@@ -7,6 +7,8 @@ type MessagesThreadContextValue = {
   setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
   messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
+  pinnedIdsByGroup: Record<number, number[]>;
+  setPinnedIdsByGroup: React.Dispatch<React.SetStateAction<Record<number, number[]>>>;
 };
 
 const MessagesThreadContext = createContext<MessagesThreadContextValue | null>(null);
@@ -14,6 +16,13 @@ const MessagesThreadContext = createContext<MessagesThreadContextValue | null>(n
 export function MessagesThreadProvider({ children }: { children: ReactNode }) {
   const [groups, setGroups] = useState<Group[]>(MESSAGES_SEED_GROUPS);
   const [messages, setMessages] = useState<ChatMessage[]>(MESSAGES_SEED_MESSAGES);
+  const [pinnedIdsByGroup, setPinnedIdsByGroup] = useState<Record<number, number[]>>({
+    1: [1],
+    2: [],
+    3: [],
+    4: [],
+    5: [],
+  });
 
   const value = useMemo(
     () => ({
@@ -21,8 +30,10 @@ export function MessagesThreadProvider({ children }: { children: ReactNode }) {
       setGroups,
       messages,
       setMessages,
+      pinnedIdsByGroup,
+      setPinnedIdsByGroup,
     }),
-    [groups, messages]
+    [groups, messages, pinnedIdsByGroup]
   );
 
   return <MessagesThreadContext.Provider value={value}>{children}</MessagesThreadContext.Provider>;
