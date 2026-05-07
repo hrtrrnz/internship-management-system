@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Clock, CheckCircle, AlertCircle, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Clock, CheckCircle, AlertCircle, Calendar, ChevronLeft, ChevronRight, CalendarPlus, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { MockFileDownloadMenu } from "@/components/MockFileDownloadMenu";
 import { useAttendancePolicy } from "@/contexts/AttendancePolicyContext";
@@ -47,7 +47,8 @@ function getFirstDayOfWeek(year: number, month: number) {
 }
 
 export default function AdminAttendance() {
-  const { workdayOverrideByDate, setWorkdayOverrideByDate, excusalByInternByDate, setExcusalByInternByDate } = useAttendancePolicy();
+  const { dayConfigByDate, setDayConfigByDate, eventsByDate, setEventsByDate, excusalByInternByDate, setExcusalByInternByDate } =
+    useAttendancePolicy();
   const [selectedDate, setSelectedDate] = useState<string>("2026-03-24");
   const [currentMonth, setCurrentMonth] = useState(2); // March = 2
   const [currentYear] = useState(2026);
@@ -58,6 +59,12 @@ export default function AdminAttendance() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [displayMode, setDisplayMode] = useState<"day" | "week">("day");
   const [rightPanelMode, setRightPanelMode] = useState<"workdays" | "excusals">("workdays");
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [eventTitle, setEventTitle] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
+  const [eventInternNames, setEventInternNames] = useState<string[]>([]);
+  const [eventStartTime, setEventStartTime] = useState("09:00");
+  const [eventEndTime, setEventEndTime] = useState("18:00");
 
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -65,15 +72,32 @@ export default function AdminAttendance() {
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfWeek(currentYear, currentMonth);
 
-  const isWorkday = (dateStr: string) => {
-    const override = workdayOverrideByDate[dateStr];
-    if (override !== undefined) return override;
+  const getDayConfig = (dateStr: string) => {
+    const override = dayConfigByDate[dateStr];
+    if (override) return override;
     const [y, m, d] = dateStr.split("-").map(Number);
     const dow = new Date(y, m - 1, d).getDay();
-    return dow !== 0 && dow !== 6;
+    return {
+      type: dow === 0 || dow === 6 ? "no_work" : "workday",
+      startTime: "09:00",
+      endTime: "18:00",
+    } as const;
+  };
+  const isWorkday = (dateStr: string) => getDayConfig(dateStr).type === "workday";
+  const getCalendarHoverLabel = (dateStr: string) => {
+    const cfg = getDayConfig(dateStr);
+    const hasEvents = (eventsByDate[dateStr]?.length ?? 0) > 0;
+    if (hasEvents) {
+      return cfg.type === "workday" ? "Workday/Event" : "Event";
+    }
+    if (cfg.type === "workday") return "Workday";
+    if (cfg.type === "holiday") return "Holiday";
+    return "No Work";
   };
 
-  const selectedWorkday = isWorkday(selectedDate);
+  const selectedDayConfig = getDayConfig(selectedDate);
+  const selectedEvents = eventsByDate[selectedDate] ?? [];
+  const selectedHasEvents = selectedEvents.length > 0;
   const anyExcusalOnDate = useMemo(() => {
     for (const internMap of Object.values(excusalByInternByDate)) {
       if (internMap?.[selectedDate]?.excused) return true;
@@ -88,7 +112,7 @@ export default function AdminAttendance() {
       if (isWorkday(dateStr)) n += 1;
     }
     return n;
-  }, [currentMonth, currentYear, daysInMonth, workdayOverrideByDate]);
+  }, [currentMonth, currentYear, daysInMonth, dayConfigByDate]);
 
   const present = todayLogs.filter(l => l.status === "Present").length;
   const late = todayLogs.filter(l => l.status === "Late").length;
@@ -114,6 +138,20 @@ export default function AdminAttendance() {
     }
     return days;
   }, [weekStart]);
+
+  const dateToKey = (d: Date) => d.toISOString().slice(0, 10);
+  const weekEventsTitleByDate = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const d of weekDays) {
+      const key = dateToKey(d);
+      const events = eventsByDate[key] ?? [];
+      if (!events.length) continue;
+      map[key] = events
+        .map((e) => `${e.title} (${e.startTime}–${e.endTime}) — ${e.internNames.join(", ") || "No interns selected"}${e.description ? ` — ${e.description}` : ""}`)
+        .join("\n");
+    }
+    return map;
+  }, [eventsByDate, weekDays]);
 
   const canNextWeek = useMemo(() => {
     // don't allow navigating beyond the reference week
@@ -277,6 +315,15 @@ export default function AdminAttendance() {
                       <span className="block text-[9px] opacity-80">
                         {d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       </span>
+                      {weekEventsTitleByDate[dateToKey(d)] ? (
+                        <span
+                          className="mt-1 inline-flex items-center justify-center"
+                          title={weekEventsTitleByDate[dateToKey(d)]}
+                          aria-label="Events on this date"
+                        >
+                          <Sparkles className="h-3 w-3 text-primary" />
+                        </span>
+                      ) : null}
                     </span>
                   ))}
                 </div>
@@ -386,14 +433,17 @@ export default function AdminAttendance() {
                 const dow = new Date(currentYear, currentMonth, day).getDay();
                 const isWeekend = dow === 0 || dow === 6;
                 const isFuture = new Date(currentYear, currentMonth, day) > new Date(2026, 2, 24);
-                const workday = isWorkday(dateStr);
+                const dayConfig = getDayConfig(dateStr);
+                const workday = dayConfig.type === "workday";
                 const excused = Object.values(excusalByInternByDate).some((m) => m?.[dateStr]?.excused);
+                const hasEvents = (eventsByDate[dateStr]?.length ?? 0) > 0;
 
                 return (
                   <button
                     key={dateStr}
                     type="button"
                     onClick={() => setSelectedDate(dateStr)}
+                    title={getCalendarHoverLabel(dateStr)}
                     className={`aspect-square rounded-lg flex flex-col items-center justify-center gap-1 text-sm transition-all relative
                       ${isSelected ? "ring-2 ring-primary bg-primary/5" : ""}
                       hover:bg-muted/50
@@ -402,13 +452,18 @@ export default function AdminAttendance() {
                     aria-label={`Select ${dateStr}`}
                   >
                     <span className="font-medium text-xs">{day}</span>
-                    {excused ? (
-                      <span className="w-2 h-2 rounded-full bg-blue-500" />
-                    ) : workday ? (
-                      <span className="w-2 h-2 rounded-full bg-primary/70" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />
-                    )}
+                    <span className="flex items-center gap-1">
+                      {excused ? (
+                        <span className="w-2 h-2 rounded-full bg-blue-500" />
+                      ) : dayConfig.type === "holiday" ? (
+                        <span className="w-2 h-2 rounded-full bg-stat-orange" />
+                      ) : workday ? (
+                        <span className="w-2 h-2 rounded-full bg-primary/70" />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+                      )}
+                      {hasEvents ? <span className="w-2 h-2 rounded-full bg-primary" title="Event(s) scheduled" /> : null}
+                    </span>
                   </button>
                 );
               })}
@@ -422,30 +477,121 @@ export default function AdminAttendance() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Work day</span>
+              {!selectedHasEvents ? (
                 <button
                   type="button"
-                  onClick={() =>
-                    setWorkdayOverrideByDate((prev) => ({
+                  onClick={() => {
+                    setShowAddEvent(true);
+                    setEventTitle("");
+                    setEventDescription("");
+                    setEventInternNames([]);
+                    setEventStartTime(getDayConfig(selectedDate).startTime ?? "09:00");
+                    setEventEndTime(getDayConfig(selectedDate).endTime ?? "18:00");
+                  }}
+                  className="w-full rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2"
+                >
+                  <CalendarPlus className="h-4 w-4" />
+                  Add an event
+                </button>
+              ) : (
+                <div className="rounded-lg border border-border bg-background p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-semibold text-foreground">Assigned event</div>
+                    <div className="text-[11px] text-muted-foreground">{getCalendarHoverLabel(selectedDate)}</div>
+                  </div>
+                  <div className="mt-2 space-y-2">
+                    {selectedEvents.map((e) => (
+                      <div key={e.id} className="rounded-lg border border-border bg-card p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-sm font-semibold text-foreground">{e.title}</div>
+                            <div className="text-[11px] text-muted-foreground">
+                              {e.startTime} – {e.endTime}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-[11px] text-muted-foreground">
+                          <span className="font-medium text-foreground">Intern(s):</span>{" "}
+                          {e.internNames.length ? e.internNames.join(", ") : "—"}
+                        </div>
+                        <div className="mt-1 text-[11px] text-muted-foreground whitespace-pre-wrap">
+                          <span className="font-medium text-foreground">Description:</span> {e.description?.trim() || "—"}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-2 text-[11px] text-muted-foreground">
+                    Assigned interns must clock in on this date even if the day type is No Work / Holiday.
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Type</span>
+                <select
+                  value={selectedDayConfig.type}
+                  onChange={(e) =>
+                    setDayConfigByDate((prev) => ({
                       ...prev,
-                      [selectedDate]: !selectedWorkday,
+                      [selectedDate]: {
+                        ...getDayConfig(selectedDate),
+                        type: e.target.value as "no_work" | "workday" | "holiday",
+                      },
                     }))
                   }
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${selectedWorkday ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}
+                  className="rounded-md border border-border bg-background px-2 py-1 text-xs font-semibold text-foreground"
                 >
-                  {selectedWorkday ? "Workday" : "Off"}
-                </button>
+                  <option value="no_work">No Work</option>
+                  <option value="workday">Work Day</option>
+                  <option value="holiday">Holiday</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-foreground">Start time</label>
+                  <input
+                    type="time"
+                    value={selectedDayConfig.startTime}
+                    onChange={(e) =>
+                      setDayConfigByDate((prev) => ({
+                        ...prev,
+                        [selectedDate]: {
+                          ...getDayConfig(selectedDate),
+                          startTime: e.target.value || "09:00",
+                        },
+                      }))
+                    }
+                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-foreground">End time</label>
+                  <input
+                    type="time"
+                    value={selectedDayConfig.endTime}
+                    onChange={(e) =>
+                      setDayConfigByDate((prev) => ({
+                        ...prev,
+                        [selectedDate]: {
+                          ...getDayConfig(selectedDate),
+                          endTime: e.target.value || "18:00",
+                        },
+                      }))
+                    }
+                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                </div>
               </div>
 
               <button
                 type="button"
                 onClick={() => {
-                  setWorkdayOverrideByDate((prev) => ({ ...prev, [selectedDate]: undefined }));
+                  setDayConfigByDate((prev) => ({ ...prev, [selectedDate]: undefined }));
                 }}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
               >
-                Clear workday override for this date
+                Clear day override for this date
               </button>
             </div>
           </div>
@@ -566,6 +712,142 @@ export default function AdminAttendance() {
           )}
       </div>
       </div>
+
+      {showAddEvent ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-xl">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="font-display font-bold text-foreground">Add event</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Date:{" "}
+                  <span className="font-medium text-foreground">
+                    {new Date(selectedDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                  </span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddEvent(false)}
+                className="rounded-lg border border-border bg-background px-2 py-1 text-xs font-semibold text-foreground hover:bg-muted"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Event</label>
+                <input
+                  value={eventTitle}
+                  onChange={(e) => setEventTitle(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+                  placeholder="e.g. Company seminar"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Description</label>
+                <textarea
+                  value={eventDescription}
+                  onChange={(e) => setEventDescription(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Short details about this event."
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-foreground">Start time</label>
+                  <input
+                    type="time"
+                    value={eventStartTime}
+                    onChange={(e) => setEventStartTime(e.target.value || "09:00")}
+                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-foreground">End time</label>
+                  <input
+                    type="time"
+                    value={eventEndTime}
+                    onChange={(e) => setEventEndTime(e.target.value || "18:00")}
+                    className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Intern(s)</label>
+                <div className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-border bg-background p-2">
+                  {Array.from(new Set(todayLogs.map((l) => l.name))).map((name) => {
+                    const checked = eventInternNames.includes(name);
+                    return (
+                      <label key={name} className="flex cursor-pointer items-center justify-between rounded-md px-2 py-1 text-sm hover:bg-muted/50">
+                        <span className="text-foreground">{name}</span>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() =>
+                            setEventInternNames((prev) => (checked ? prev.filter((x) => x !== name) : [...prev, name]))
+                          }
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  Selected: {eventInternNames.length ? eventInternNames.join(", ") : "None"}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddEvent(false)}
+                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!eventTitle.trim()) return;
+                    if (eventInternNames.length === 0) return;
+                    setEventsByDate((prev) => {
+                      const next = { ...prev };
+                      const existing = [...(next[selectedDate] ?? [])];
+                      existing.push({
+                        id: `evt_${Date.now()}`,
+                        date: selectedDate,
+                        title: eventTitle.trim(),
+                        description: eventDescription.trim(),
+                        internNames: eventInternNames,
+                        startTime: eventStartTime || "09:00",
+                        endTime: eventEndTime || "18:00",
+                      });
+                      next[selectedDate] = existing;
+                      return next;
+                    });
+                    setShowAddEvent(false);
+                    toast({
+                      title: "Event added",
+                      description: `"${eventTitle.trim()}" assigned to ${eventInternNames.length} intern(s).`,
+                    });
+                  }}
+                  className="rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  Save event
+                </button>
+              </div>
+              <div className="text-[11px] text-muted-foreground">
+                Assigned interns must clock in on this date even if the day type is No Work / Holiday.
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

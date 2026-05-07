@@ -51,7 +51,7 @@ const roleSubtitle: Record<UserRole, string> = {
 
 export default function Messages() {
   const { role, user } = useRole();
-  const { groups, setGroups, messages, setMessages, pinnedIdsByGroup, setPinnedIdsByGroup } = useMessagesThread();
+  const { groups, setGroups, messages, setMessages, pinnedIdsByGroup, setPinnedIdsByGroup, ensurePrivateThread } = useMessagesThread();
   const canCreateGroup = role === "mentor" || role === "admin";
   const canCreatePrivate = true;
 
@@ -73,6 +73,7 @@ export default function Messages() {
   /** When set, floating modal shows this pinned message (by id). */
   const [pinnedDetailId, setPinnedDetailId] = useState<number | null>(null);
   const [reactionPickerForId, setReactionPickerForId] = useState<number | null>(null);
+  const [selectedNameToMessage, setSelectedNameToMessage] = useState<string | null>(null);
 
   const visibleGroups = useMemo(() => {
     const normalized = chatSearch.trim().toLowerCase();
@@ -147,28 +148,16 @@ export default function Messages() {
     const targetName = candidateNames.find((n) => n.toLowerCase() === normalized);
     if (!targetName) return;
 
-    const existing = groups.find(
-      (g) => g.isPrivate && g.members.length === 2 && g.members.includes(user.name) && g.members.includes(targetName)
-    );
-    if (existing) {
-      setSelectedGroupId(existing.id);
-      return;
-    }
+    const privateId = ensurePrivateThread(user.name, targetName, role);
+    setSelectedGroupId(privateId);
+    setDraftByGroup((prev) => ({ ...prev, [privateId]: prev[privateId] ?? "" }));
+  };
 
-    const newGroup: Group = {
-      id: Date.now(),
-      name: targetName,
-      members: [user.name, targetName],
-      createdBy: role,
-      isPrivate: true,
-      lastSender: targetName,
-      lastMessage: "Private chat started.",
-      lastAt: "Just now",
-    };
-    setGroups((prev) => [newGroup, ...prev]);
-    setSelectedGroupId(newGroup.id);
-    setDraftByGroup((prev) => ({ ...prev, [newGroup.id]: "" }));
-    setPinnedIdsByGroup((prev) => ({ ...prev, [newGroup.id]: [] }));
+  const messagePersonFromName = (name: string) => {
+    if (!name || name === user.name) return;
+    const privateId = ensurePrivateThread(user.name, name, role);
+    setSelectedGroupId(privateId);
+    setSelectedNameToMessage(null);
   };
 
   const handleSend = () => {
@@ -263,6 +252,7 @@ export default function Messages() {
     setShowGroupInfo(false);
     setShowPinnedListModal(false);
     setPinnedDetailId(null);
+    setSelectedNameToMessage(null);
   };
 
   const closePinnedOverlayAndScrollToMessage = () => {
@@ -599,6 +589,16 @@ export default function Messages() {
                   </Button>
                 </div>
               </div>
+              {selectedNameToMessage && selectedNameToMessage !== user.name && (
+                <div className="mt-2 flex items-center justify-between rounded-lg border border-border/70 bg-muted/20 px-3 py-2 text-xs">
+                  <span className="text-muted-foreground">
+                    Selected: <span className="font-medium text-foreground">{selectedNameToMessage}</span>
+                  </span>
+                  <Button type="button" size="sm" className="h-7 px-3 text-xs" onClick={() => messagePersonFromName(selectedNameToMessage)}>
+                    Message
+                  </Button>
+                </div>
+              )}
               <button
                 type="button"
                 className="mt-3 flex w-full items-center justify-between rounded-xl border border-amber-200/80 bg-amber-50/80 px-3 py-2 text-left shadow-sm transition-colors hover:bg-amber-100/80 dark:border-amber-900/50 dark:bg-amber-950/30 dark:hover:bg-amber-950/45"
@@ -664,9 +664,15 @@ export default function Messages() {
                                 Replying to #{message.replyToId}
                               </div>
                             )}
-                            <p className={cn("text-[11px] font-semibold uppercase tracking-wide", mine ? "text-primary-foreground/75" : "text-muted-foreground")}>
-                              {message.sender}
-                            </p>
+                            <div className={cn("text-[11px] font-semibold uppercase tracking-wide", mine ? "text-primary-foreground/75" : "text-muted-foreground")}>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedNameToMessage(message.sender)}
+                                className="hover:underline"
+                              >
+                                {message.sender}
+                              </button>
+                            </div>
                             <p className={cn("mt-0.5", mine ? "text-primary-foreground" : "text-foreground")}>{message.text}</p>
                             {message.attachments && message.attachments.length > 0 && (
                               <div className="mt-2 space-y-1.5">
@@ -989,17 +995,33 @@ export default function Messages() {
                           className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/15 px-3 py-2.5 text-sm text-foreground"
                         >
                           <span className="font-medium">{member}</span>
-                          {canCreateGroup && member !== user.name && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeMember(member)}
-                              className="h-8 text-xs text-muted-foreground"
-                            >
-                              Remove
-                            </Button>
-                          )}
+                          <div className="flex items-center gap-1.5">
+                            {member !== user.name && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  messagePersonFromName(member);
+                                  setShowGroupInfo(false);
+                                }}
+                                className="h-8 text-xs text-muted-foreground"
+                              >
+                                Message
+                              </Button>
+                            )}
+                            {canCreateGroup && member !== user.name && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeMember(member)}
+                                className="h-8 text-xs text-muted-foreground"
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>

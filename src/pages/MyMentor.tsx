@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Star, CheckSquare, Clock, Award } from "lucide-react";
+import { useRole } from "@/contexts/RoleContext";
+import { useMessagesThread } from "@/contexts/MessagesThreadContext";
 
 type MentorTask = {
   id: number;
@@ -59,9 +61,16 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function MyMentor() {
+  const { role, user } = useRole();
+  const { ensurePrivateThread, requestOpenFloatingChat } = useMessagesThread();
   const [selectedId, setSelectedId] = useState(mentors[0].id);
   const mentor = mentors.find((m) => m.id === selectedId) ?? mentors[0];
   const firstName = mentor.name.split(" ")[0];
+
+  const handleSendMessageToMentor = () => {
+    const chatId = ensurePrivateThread(user.name, mentor.name, role);
+    requestOpenFloatingChat(chatId);
+  };
 
   return (
     <div className="space-y-6">
@@ -126,6 +135,7 @@ export default function MyMentor() {
               </div>
               <button
                 type="button"
+                onClick={handleSendMessageToMentor}
                 className="mt-4 w-full rounded-lg bg-accent py-2.5 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 sm:w-auto sm:px-8"
               >
                 Send Message

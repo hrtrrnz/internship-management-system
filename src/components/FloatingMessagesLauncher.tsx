@@ -48,6 +48,7 @@ function FloatingChatBox({
   onSend,
   onReact,
   onTogglePin,
+  onMessagePerson,
   onClose,
 }: {
   chat: Group;
@@ -58,12 +59,14 @@ function FloatingChatBox({
   onSend: (groupId: number, text: string, replyToId: number | null) => void;
   onReact: (messageId: number, emoji: string) => void;
   onTogglePin: (groupId: number, messageId: number) => void;
+  onMessagePerson: (name: string) => void;
   onClose: () => void;
 }) {
   const navigate = useNavigate();
   const [composer, setComposer] = useState("");
   const [replyToId, setReplyToId] = useState<number | null>(null);
   const [showPinnedModal, setShowPinnedModal] = useState(false);
+  const [showMembersModal, setShowMembersModal] = useState(false);
   const [reactionPickerForId, setReactionPickerForId] = useState<number | null>(null);
   const pinSet = useMemo(() => new Set(pinnedIds), [pinnedIds]);
   const displayLines = threadMessages.length > 0 ? threadMessages : [];
@@ -99,9 +102,14 @@ function FloatingChatBox({
       className="pointer-events-auto relative flex h-[min(22rem,calc(100vh-9rem))] w-[18rem] max-w-[18rem] shrink-0 animate-in fade-in zoom-in-95 duration-150 flex-col overflow-hidden rounded-xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 dark:ring-white/10"
     >
       <div className="flex shrink-0 items-center gap-2 border-b border-border/80 bg-primary px-3 py-2 text-primary-foreground">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 font-display text-[10px] font-bold">
+        <button
+          type="button"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15 font-display text-[10px] font-bold hover:bg-primary-foreground/25"
+          onClick={() => setShowMembersModal(true)}
+          aria-label={`Open members for ${chat.name}`}
+        >
           {chatInitials(chat.name)}
-        </div>
+        </button>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display text-xs font-semibold leading-tight">{chat.name}</p>
           <p className="truncate text-[10px] opacity-80">Active · {chat.lastAt}</p>
@@ -138,7 +146,15 @@ function FloatingChatBox({
                 mine ? "rounded-br-sm bg-primary text-primary-foreground" : "rounded-bl-sm border border-border/80 bg-card text-foreground"
               )}
             >
-              {!mine && <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{line.sender}</p>}
+              {!mine && (
+                <button
+                  type="button"
+                  className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground hover:underline"
+                  onClick={() => onMessagePerson(line.sender)}
+                >
+                  {line.sender}
+                </button>
+              )}
               {line.replyToId && (
                 <p className={cn("mb-1 text-[10px]", mine ? "text-primary-foreground/80" : "text-muted-foreground")}>
                   Replying to #{line.replyToId}
@@ -231,15 +247,56 @@ function FloatingChatBox({
             <Send className="h-3.5 w-3.5" />
           </Button>
         </div>
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-medium text-primary hover:bg-muted/60"
-          onClick={() => navigate(messagesHref)}
-        >
-          <ExternalLink className="h-3 w-3" />
-          Open in Messages
-        </button>
       </div>
+
+      {showMembersModal && (
+        <div
+          className="absolute inset-0 z-30 flex items-center justify-center bg-black/45 p-2"
+          role="presentation"
+          onClick={() => setShowMembersModal(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="max-h-[85%] w-full max-w-[16.5rem] overflow-y-auto rounded-xl border border-border/80 bg-card p-2 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-semibold">{chat.isPrivate ? "Private participants" : "Group members"}</p>
+              <button type="button" className="rounded p-0.5 hover:bg-muted" onClick={() => setShowMembersModal(false)}>
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <div className="space-y-1.5">
+              {chat.members.map((member) => (
+                <div key={member} className="flex items-center justify-between gap-1 rounded-md border border-border/70 bg-muted/20 px-2 py-1.5 text-[11px]">
+                  <span className="truncate font-medium text-foreground">{member}</span>
+                  {member !== currentUserName && (
+                    <button
+                      type="button"
+                      className="rounded-md border border-border bg-background px-2 py-0.5 text-[10px] font-medium text-foreground hover:bg-muted"
+                      onClick={() => {
+                        onMessagePerson(member);
+                        setShowMembersModal(false);
+                      }}
+                    >
+                      Message
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-[11px] font-medium text-primary hover:bg-muted/60"
+              onClick={() => navigate(messagesHref)}
+            >
+              <ExternalLink className="h-3 w-3" />
+              Open in Messages
+            </button>
+          </div>
+        </div>
+      )}
 
       {showPinnedModal && (
         <div
@@ -283,7 +340,7 @@ function FloatingChatBox({
 export default function FloatingMessagesLauncher() {
   const { pathname } = useLocation();
   const { role, user } = useRole();
-  const { groups, setGroups, messages, setMessages, pinnedIdsByGroup, setPinnedIdsByGroup } = useMessagesThread();
+  const { groups, setGroups, messages, setMessages, pinnedIdsByGroup, setPinnedIdsByGroup, ensurePrivateThread, floatingChatRequestId, requestOpenFloatingChat, clearFloatingChatRequest } = useMessagesThread();
   const [launcherActive, setLauncherActive] = useState(false);
   const [openChatIds, setOpenChatIds] = useState<number[]>([]);
   /** Leftmost visible index among `openChatIds` (shows 3 panels when length > 3). */
@@ -313,6 +370,30 @@ export default function FloatingMessagesLauncher() {
   const closeChat = useCallback((id: number) => {
     setOpenChatIds((prev) => prev.filter((x) => x !== id));
   }, []);
+
+  const messagePersonFromName = useCallback(
+    (name: string) => {
+      if (!name || name === user.name) return;
+      const privateId = ensurePrivateThread(user.name, name, role);
+      requestOpenFloatingChat(privateId);
+    },
+    [ensurePrivateThread, requestOpenFloatingChat, role, user.name]
+  );
+
+  useEffect(() => {
+    if (floatingChatRequestId == null) return;
+    const id = floatingChatRequestId;
+    setLauncherActive(true);
+    setOpenChatIds((prev) => {
+      const without = prev.filter((x) => x !== id);
+      if (without.length === prev.length && prev.includes(id)) return prev;
+      const next = [...without, id].slice(-MAX_FLOATING_CONVOS_OPEN);
+      const newStart = Math.max(0, next.indexOf(id) - 0 - 2);
+      setFloatingPageStart(newStart);
+      return next;
+    });
+    clearFloatingChatRequest();
+  }, [floatingChatRequestId, clearFloatingChatRequest]);
 
   const reactToMessage = useCallback((messageId: number, emoji: string) => {
     setMessages((prev) =>
@@ -462,6 +543,7 @@ export default function FloatingMessagesLauncher() {
                           onSend={sendFloatingMessage}
                           onReact={reactToMessage}
                           onTogglePin={togglePinMessage}
+                          onMessagePerson={messagePersonFromName}
                           onClose={() => closeChat(id)}
                         />
                       </div>

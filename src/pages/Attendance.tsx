@@ -51,7 +51,7 @@ function getFirstDayOfWeek(year: number, month: number) {
 export default function Attendance() {
   const { role, user } = useRole();
   const isAdmin = role === "admin";
-  const { workdayOverrideByDate, setWorkdayOverrideByDate, excusalByInternByDate } = useAttendancePolicy();
+  const { dayConfigByDate, setDayConfigByDate, eventsByDate, excusalByInternByDate } = useAttendancePolicy();
   const [selectedDate, setSelectedDate] = useState<string | null>("2026-03-21");
   const [currentMonth, setCurrentMonth] = useState(2); // March = 2
   const [currentYear] = useState(2026);
@@ -62,13 +62,20 @@ export default function Attendance() {
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfWeek(currentYear, currentMonth);
 
-  const isWorkday = (dateStr: string) => {
-    const override = workdayOverrideByDate[dateStr];
-    if (override !== undefined) return override;
+  const getDayConfig = (dateStr: string) => {
+    const override = dayConfigByDate[dateStr];
+    if (override) return override;
     const [y, m, d] = dateStr.split("-").map(Number);
     const dow = new Date(y, m - 1, d).getDay();
-    return dow !== 0 && dow !== 6; // Mon–Fri by default
+    return {
+      type: dow === 0 || dow === 6 ? "no_work" : "workday",
+      startTime: "09:00",
+      endTime: "18:00",
+    } as const;
   };
+  const isWorkday = (dateStr: string) => getDayConfig(dateStr).type === "workday";
+  const myEventsForDate = (dateStr: string) => (eventsByDate[dateStr] ?? []).filter((e) => e.internNames.includes(user.name));
+  const isRequiredDayForIntern = (dateStr: string) => isWorkday(dateStr) || myEventsForDate(dateStr).length > 0;
 
   const effectiveRecordByDate = useMemo(() => {
     const map: Record<string, { in: string; out: string; hours: string; status: string }> = {};
@@ -79,9 +86,8 @@ export default function Attendance() {
       if (isFuture) continue;
 
       const base = records[dateStr];
-      const workday = isWorkday(dateStr);
-
-      if (!workday) continue;
+      const required = isRequiredDayForIntern(dateStr);
+      if (!required) continue;
 
       if (base && base.in !== "—") {
         map[dateStr] = base;
@@ -96,7 +102,7 @@ export default function Attendance() {
       }
     }
     return map;
-  }, [currentMonth, currentYear, daysInMonth, workdayOverrideByDate, excusalByInternByDate, user.name]);
+  }, [currentMonth, currentYear, daysInMonth, dayConfigByDate, eventsByDate, excusalByInternByDate, user.name]);
 
   const allEffectiveRecords = Object.entries(effectiveRecordByDate);
   const presentCount = allEffectiveRecords.filter(([, r]) => r.status === "Present").length;
@@ -107,6 +113,9 @@ export default function Attendance() {
   const selected = selectedDate ? effectiveRecordByDate[selectedDate] ?? null : null;
   const selectedExcusal = selectedDate ? excusalByInternByDate[user.name]?.[selectedDate] : undefined;
   const selectedWorkday = selectedDate ? isWorkday(selectedDate) : false;
+  const selectedDayConfig = selectedDate ? getDayConfig(selectedDate) : null;
+  const selectedMyEvents = selectedDate ? myEventsForDate(selectedDate) : [];
+  const selectedRequired = selectedDate ? isRequiredDayForIntern(selectedDate) : false;
 
   return (
     <div className="space-y-6">
@@ -151,7 +160,7 @@ export default function Attendance() {
               const isFuture = new Date(currentYear, currentMonth, day) > new Date(2026, 2, 24);
               const base = records[dateStr];
               const hasClockIn = Boolean(base && base.in && base.in !== "—");
-              const canSelect = !isFuture && (isAdmin ? true : hasClockIn);
+              const canSelect = true;
 
               return (
                 <button
@@ -160,7 +169,7 @@ export default function Attendance() {
                   className={`aspect-square rounded-lg flex flex-col items-center justify-center gap-1 text-sm transition-all relative
                     ${isSelected ? 'ring-2 ring-primary bg-primary/5' : ''}
                     ${(!workday || isWeekend) ? 'text-muted-foreground/50' : 'text-foreground'}
-                    ${isFuture ? 'text-muted-foreground/30' : ''}
+                    ${isFuture ? 'text-muted-foreground/40' : ''}
                     ${canSelect ? 'cursor-pointer hover:bg-muted/50' : ''}
                     ${!record && workday && !isFuture ? 'text-muted-foreground/80' : ''}
                   `}
@@ -225,12 +234,39 @@ export default function Attendance() {
           </div>
 
           {/* Selected day detail */}
-          {selected && selectedDate && (
-            <div className={`rounded-xl border p-5 ${statusBg[selected.status]}`}>
+          {selectedDate && (
+            <div className={`rounded-xl border p-5 ${selected ? statusBg[selected.status] : "bg-muted/30 border-border/70"}`}>
               <p className="text-xs text-muted-foreground mb-1">Selected Date</p>
               <p className="text-lg font-display font-bold text-foreground mb-3">
                 {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
+              {!selectedRequired ? (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                      {selectedDayConfig?.type === "holiday" ? "Holiday" : "No work"}
+                    </span>
+                  </div>
+                </div>
+              ) : selectedMyEvents.length > 0 && !selected ? (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">Event scheduled</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {selectedMyEvents.map((e) => `${e.title} (${e.startTime}–${e.endTime})`).join(" · ")}
+                  </div>
+                </div>
+              ) : !selected ? (
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">No log yet</span>
+                  </div>
+                </div>
+              ) : (
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Status</span>
@@ -253,6 +289,19 @@ export default function Attendance() {
                   <span className="text-sm text-muted-foreground">Total Hours</span>
                   <span className="text-sm font-bold text-foreground">{selected.hours}</span>
                 </div>
+                {selectedMyEvents.length > 0 && (
+                  <div className="pt-2 mt-2 border-t border-border/60 space-y-1.5">
+                    <div className="text-xs text-muted-foreground">Event(s)</div>
+                    <div className="text-sm text-foreground">
+                      {selectedMyEvents.map((e) => `${e.title} (${e.startTime}–${e.endTime})`).join(" · ")}
+                    </div>
+                    {selectedMyEvents.some((e) => e.description) ? (
+                      <div className="text-xs text-muted-foreground whitespace-pre-wrap">
+                        {selectedMyEvents.map((e) => e.description).filter(Boolean).join("\n")}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
                 {selected.status === "Excused" && (
                   <div className="pt-2 mt-2 border-t border-border/60 space-y-1.5">
                     <div className="text-xs text-muted-foreground">Excusal description</div>
@@ -264,6 +313,7 @@ export default function Attendance() {
                   </div>
                 )}
               </div>
+              )}
             </div>
           )}
           {selectedDate && isAdmin && (
@@ -271,31 +321,71 @@ export default function Attendance() {
               <h3 className="font-display font-bold text-foreground mb-3">Admin controls</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Work day</span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setWorkdayOverrideByDate((prev) => ({
+                  <span className="text-sm text-muted-foreground">Type</span>
+                  <select
+                    value={selectedDayConfig?.type ?? "workday"}
+                    onChange={(e) =>
+                      setDayConfigByDate((prev) => ({
                         ...prev,
-                        [selectedDate]: !selectedWorkday,
+                        [selectedDate]: {
+                          ...(getDayConfig(selectedDate)),
+                          type: e.target.value as "no_work" | "workday" | "holiday",
+                        },
                       }))
                     }
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      selectedWorkday ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                    }`}
+                    className="rounded-md border border-border bg-background px-2 py-1 text-xs font-semibold text-foreground"
                   >
-                    {selectedWorkday ? "Workday" : "Off"}
-                  </button>
+                    <option value="no_work">No Work</option>
+                    <option value="workday">Work Day</option>
+                    <option value="holiday">Holiday</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-[11px] text-muted-foreground">Start time</label>
+                    <input
+                      type="time"
+                      value={selectedDayConfig?.startTime ?? "09:00"}
+                      onChange={(e) =>
+                        setDayConfigByDate((prev) => ({
+                          ...prev,
+                          [selectedDate]: {
+                            ...(getDayConfig(selectedDate)),
+                            startTime: e.target.value || "09:00",
+                          },
+                        }))
+                      }
+                      className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] text-muted-foreground">End time</label>
+                    <input
+                      type="time"
+                      value={selectedDayConfig?.endTime ?? "18:00"}
+                      onChange={(e) =>
+                        setDayConfigByDate((prev) => ({
+                          ...prev,
+                          [selectedDate]: {
+                            ...(getDayConfig(selectedDate)),
+                            endTime: e.target.value || "18:00",
+                          },
+                        }))
+                      }
+                      className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                    />
+                  </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => {
-                    setWorkdayOverrideByDate((prev) => ({ ...prev, [selectedDate]: undefined }));
+                    setDayConfigByDate((prev) => ({ ...prev, [selectedDate]: undefined }));
                   }}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
                 >
-                  Clear workday override for this date
+                  Clear day override for this date
                 </button>
               </div>
             </div>
