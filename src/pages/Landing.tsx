@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,49 +44,69 @@ const unitColumns = [
   {
     title: "Creative Unit",
     stripe: "bg-[#f26e4b]",
+    gradient: "from-[#f26e4b]/45 via-background/10 to-background/90",
+    description: "Design-driven projects that shape HYT’s visual identity across campaigns, brand assets, and content.",
     items: ["Logo", "Animation", "Brand sheet", "Social media posts", "Portfolio", "Pitch deck design"],
   },
   {
     title: "Human Resources Unit",
     stripe: "bg-[#2bb2c8]",
+    gradient: "from-[#2bb2c8]/45 via-background/10 to-background/90",
+    description: "People operations work focused on recruiting, systems improvement, engagement, and learning support.",
     items: ["Recruitment", "HRMS research and development", "Employee engagement", "Assist in L&D unit"],
   },
   {
     title: "Sales & Marketing Unit",
     stripe: "bg-[#c7ca2f]",
+    gradient: "from-[#c7ca2f]/45 via-background/10 to-background/90",
+    description: "Customer-focused initiatives covering lead generation, partnerships, marketing strategy, and community growth.",
     items: ["Lead Generation", "Marketing Plan", "Partnership", "Pitch deck", "Community management"],
   },
   {
     title: "Engineering Unit",
     stripe: "bg-[#d85f75]",
+    gradient: "from-[#d85f75]/45 via-background/10 to-background/90",
+    description: "Process and production analysis with research work, planning, and improvements tied to real operations.",
     items: ["Time and Motion Study", "Cost Benefit Analysis", "Production Planning", "Research and IIOT"],
   },
   {
     title: "Technology Unit",
     stripe: "bg-[#2baec0]",
+    gradient: "from-[#2baec0]/45 via-background/10 to-background/90",
+    description: "Build and ship software solutions—web/mobile design, frontend/backend development, and applied R&D.",
     items: ["Front-end / Back-end", "Web and mobile design", "Programming", "Research and Development"],
   },
   {
     title: "Accounting Unit",
     stripe: "bg-[#f37a53]",
+    gradient: "from-[#f37a53]/45 via-background/10 to-background/90",
+    description: "Support finance workflows through administrative work, research, and accounting information systems initiatives.",
     items: ["AIS research", "Administrative", "R&D of KGC"],
   },
   {
     title: "Legal & Justice Unit",
     stripe: "bg-[#d76589]",
+    gradient: "from-[#d76589]/45 via-background/10 to-background/90",
+    description: "Legal support tasks involving research, document drafting, transcription, and contract review assistance.",
     items: ["Legal Research", "Draft legal documents", "Transcription of meetings", "Review contracts"],
   },
   {
     title: "Learning & Development Unit",
     stripe: "bg-[#d3c737]",
+    gradient: "from-[#d3c737]/45 via-background/10 to-background/90",
+    description: "Programs and enablement efforts—planning, organizational development support, and knowledge-building initiatives.",
     items: ["Lead Generation", "Strategic Plan", "Organizational Development", "Managerial delegations"],
   },
 ];
+
+const creativeUnitRef = unitColumns.find((u) => u.title === "Creative Unit") ?? unitColumns[0];
 
 const section = "py-8 sm:py-10";
 const container = "mx-auto max-w-6xl px-4 sm:px-6";
 
 export default function Landing() {
+  const [flippedUnits, setFlippedUnits] = useState<Record<string, boolean>>({});
+
   return (
     <div id="top" className="flex min-h-screen flex-col bg-background text-foreground antialiased">
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
@@ -336,25 +357,104 @@ export default function Landing() {
               </p>
             </div>
             <div className="mx-auto mt-6 grid max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
-              {unitColumns.map((unit) => (
-                <article
-                  key={unit.title}
-                  className="flex flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"
-                >
-                  <div className={cn("h-1 w-full shrink-0", unit.stripe)} aria-hidden />
-                  <div className="flex flex-1 flex-col p-4">
-                    <h3 className="text-sm font-semibold leading-snug text-foreground">{unit.title}</h3>
-                    <ul className="mt-3 flex flex-1 flex-col gap-1.5 text-xs leading-snug text-muted-foreground">
-                      {unit.items.map((item) => (
-                        <li key={item} className="flex gap-2">
-                          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/20" aria-hidden />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </article>
-              ))}
+              {unitColumns.map((unit) => {
+                const isFlipped = Boolean(flippedUnits[unit.title]);
+                return (
+                  <button
+                    key={unit.title}
+                    type="button"
+                    onClick={() => setFlippedUnits((prev) => ({ ...prev, [unit.title]: !prev[unit.title] }))}
+                    className="text-left [perspective:1200px]"
+                    aria-label={`${unit.title} — ${isFlipped ? "Show unit list" : "Show description"}`}
+                  >
+                    <div
+                      className={cn(
+                        "relative w-full rounded-xl border border-border/60 shadow-sm transition-transform duration-500 [transform-style:preserve-3d]",
+                        isFlipped ? "[transform:rotateY(180deg)]" : "[transform:rotateY(0deg)]"
+                      )}
+                    >
+                      {/* Height sizer (keeps uniform height based on longest side) */}
+                      <div className="grid opacity-0 pointer-events-none">
+                        <div className="col-start-1 row-start-1 overflow-hidden rounded-xl bg-card">
+                          <div className={cn("h-1 w-full shrink-0", creativeUnitRef.stripe)} aria-hidden />
+                          <div className="flex flex-col p-4">
+                            <h3 className="text-sm font-semibold leading-snug text-foreground">{creativeUnitRef.title}</h3>
+                            <div className="mt-4">
+                              <ul className="flex flex-col gap-1.5 text-xs leading-snug text-muted-foreground">
+                                {creativeUnitRef.items.map((item) => (
+                                  <li key={item} className="flex gap-2">
+                                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/20" aria-hidden />
+                                    <span>{item}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div className="mt-3 flex items-center justify-end">
+                              <span className="h-4 w-10" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Front */}
+                      <div className="absolute inset-0 overflow-hidden rounded-xl bg-card [backface-visibility:hidden]">
+                        <div className={cn("h-1 w-full shrink-0", unit.stripe)} aria-hidden />
+                        <div className="relative flex h-full min-h-0 flex-col p-4">
+                          <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br", unit.gradient)} aria-hidden />
+                          <div className="relative">
+                            <h3 className="text-sm font-semibold leading-snug text-foreground">{unit.title}</h3>
+                          </div>
+                          <div className="relative mt-4 flex-1 min-h-0">
+                            <ul className="flex flex-col gap-1.5 text-xs leading-snug text-muted-foreground">
+                              {unit.items.map((item) => (
+                                <li key={item} className="flex gap-2">
+                                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/20" aria-hidden />
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="mt-3 flex items-center justify-end text-muted-foreground">
+                            <svg
+                              width="40"
+                              height="14"
+                              viewBox="0 0 40 14"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              aria-hidden="true"
+                            >
+                              <path d="M1 7H33" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                              <path d="M33 2L39 7L33 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Back */}
+                      <div className="absolute inset-0 overflow-hidden rounded-xl bg-card [transform:rotateY(180deg)] [backface-visibility:hidden]">
+                        <div className={cn("h-1 w-full shrink-0", unit.stripe)} aria-hidden />
+                        <div className="flex h-full min-h-0 flex-col p-4">
+                          <h3 className="text-sm font-semibold leading-snug text-foreground">{unit.title}</h3>
+                          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{unit.description}</p>
+                          <div className="mt-4 flex-1 min-h-0 overflow-y-auto rounded-lg border border-border/60 bg-muted/20 p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                              What you’ll work on
+                            </p>
+                            <ul className="mt-2 grid grid-cols-1 gap-1.5 text-xs text-muted-foreground">
+                              {unit.items.map((item) => (
+                                <li key={item} className="flex gap-2">
+                                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/20" aria-hidden />
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>
