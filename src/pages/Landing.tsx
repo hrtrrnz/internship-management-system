@@ -17,6 +17,9 @@ import img6 from "@/assets/6.jpg";
 import why1 from "@/assets/why1.jpg";
 import why2 from "@/assets/why2.jpg";
 import train1 from "@/assets/train1.jpg";
+import aboutFoundationImg from "@/assets/About.jpg";
+import missionFoundationImg from "@/assets/Mission.jpg";
+import visionFoundationImg from "@/assets/Vision.jpg";
 import creativeUnitCardBg from "@/assets/Creative Unit.png";
 import hrUnitCardBg from "@/assets/HR Unit.png";
 import salesMarketingUnitCardBg from "@/assets/Sales and Marketing Unit.png";
@@ -233,8 +236,19 @@ export default function Landing() {
                   short: c.title === "About us" ? "About" : c.title === "Our Vision" ? "Vision" : "Mission",
                 }));
                 const activeIdx = Math.max(0, tabs.findIndex((t) => t.title === aboutCompass));
-                const canPrev = activeIdx > 0;
-                const canNext = activeIdx < tabs.length - 1;
+
+                const foundationPanelImage =
+                  active.title === "About us"
+                    ? aboutFoundationImg
+                    : active.title === "Our Vision"
+                      ? visionFoundationImg
+                      : missionFoundationImg;
+                const foundationPanelAlt =
+                  active.title === "About us"
+                    ? "HYT Foundation team"
+                    : active.title === "Our Vision"
+                      ? "Vision and future direction"
+                      : "Mission and purpose";
 
                 return (
                   <div className="rounded-3xl  bg-card/80 shadow-sm backdrop-blur-sm overflow-hidden">
@@ -283,13 +297,13 @@ export default function Landing() {
                               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{active.text}</p>
                             </div>
                           </div>
-                          <div className="overflow-hidden rounded-2xl border border-border/60 bg-background/50">
-                            <div className="flex h-full min-h-[260px] items-center justify-center bg-gradient-to-br from-muted/30 via-background/20 to-muted/20 sm:min-h-[320px]">
-                              <div className="text-center">
-                                <div className="mx-auto h-10 w-10 rounded-2xl border border-border/60 bg-background/70" />
-                                <p className="mt-3 text-xs font-semibold text-muted-foreground">Image placeholder</p>
-                              </div>
-                            </div>
+                          <div className="relative min-h-[260px] overflow-hidden rounded-2xl border border-border/60 bg-muted/30 sm:min-h-[320px]">
+                            <img
+                              key={active.title}
+                              src={foundationPanelImage}
+                              alt={foundationPanelAlt}
+                              className="h-full w-full min-h-[260px] object-cover sm:min-h-[320px]"
+                            />
                           </div>
                         </div>
                       </div>
