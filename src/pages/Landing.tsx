@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import hytLogo from "@/assets/hyt-logo.png";
+import hytFullLogo from "@/assets/hyt full logo.png";
 import landingBg from "@/assets/background.jpg";
 import hytBlackLogo from "../../logo black.png";
 import img1 from "@/assets/1.jpg";
@@ -48,8 +49,8 @@ const topCards = [
   {
     title: "Our Mission",
     text: "Guiding young and aspiring generation leaders by professionally mentoring them, developing a social responsibility and empowering them to pass it forward to future generations while growing internationally.",
-    accent: "border-l-[#c8c52a]",
-    color: "#c8c52a",
+    accent: "border-l-[#ebe01a]",
+    color: "#ebe01a",
   },
 ];
 
@@ -69,7 +70,7 @@ const unitColumns: UnitColumn[] = [
   {
     title: "Creative Unit",
     stripe: "bg-[#f26e4b]",
-    gradient: "from-[#f26e4b]/45 via-background/10 to-background/90",
+    gradient: "from-[#f26e4b]/70 via-background/25 to-background/75",
     description: "Design-driven projects that shape HYT’s visual identity across campaigns, brand assets, and content.",
     items: ["Logo", "Animation", "Brand sheet", "Social media posts", "Portfolio", "Pitch deck design"],
     cardBg: creativeUnitCardBg,
@@ -77,15 +78,15 @@ const unitColumns: UnitColumn[] = [
   {
     title: "Human Resources Unit",
     stripe: "bg-[#2bb2c8]",
-    gradient: "from-[#2bb2c8]/45 via-background/10 to-background/90",
+    gradient: "from-[#2bb2c8]/70 via-background/25 to-background/75",
     description: "People operations work focused on recruiting, systems improvement, engagement, and learning support.",
     items: ["Recruitment", "HRMS research and development", "Employee engagement", "Assist in L&D unit"],
     cardBg: hrUnitCardBg,
   },
   {
     title: "Sales & Marketing Unit",
-    stripe: "bg-[#c7ca2f]",
-    gradient: "from-[#c7ca2f]/45 via-background/10 to-background/90",
+    stripe: "bg-[#eedc18]",
+    gradient: "from-[#eedc18]/70 via-background/25 to-background/75",
     description: "Customer-focused initiatives covering lead generation, partnerships, marketing strategy, and community growth.",
     items: ["Lead Generation", "Marketing Plan", "Partnership", "Pitch deck", "Community management"],
     cardBg: salesMarketingUnitCardBg,
@@ -93,7 +94,7 @@ const unitColumns: UnitColumn[] = [
   {
     title: "Engineering Unit",
     stripe: "bg-[#d85f75]",
-    gradient: "from-[#d85f75]/45 via-background/10 to-background/90",
+    gradient: "from-[#d85f75]/70 via-background/25 to-background/75",
     description: "Process and production analysis with research work, planning, and improvements tied to real operations.",
     items: ["Time and Motion Study", "Cost Benefit Analysis", "Production Planning", "Research and IIOT"],
     cardBg: engineeringUnitCardBg,
@@ -101,7 +102,7 @@ const unitColumns: UnitColumn[] = [
   {
     title: "Technology Unit",
     stripe: "bg-[#2baec0]",
-    gradient: "from-[#2baec0]/45 via-background/10 to-background/90",
+    gradient: "from-[#2baec0]/70 via-background/25 to-background/75",
     description: "Build and ship software solutions—web/mobile design, frontend/backend development, and applied R&D.",
     items: ["Front-end / Back-end", "Web and mobile design", "Programming", "Research and Development"],
     cardBg: techUnitCardBg,
@@ -109,7 +110,7 @@ const unitColumns: UnitColumn[] = [
   {
     title: "Accounting Unit",
     stripe: "bg-[#f37a53]",
-    gradient: "from-[#f37a53]/45 via-background/10 to-background/90",
+    gradient: "from-[#f37a53]/70 via-background/25 to-background/75",
     description: "Support finance workflows through administrative work, research, and accounting information systems initiatives.",
     items: ["AIS research", "Administrative", "R&D of KGC"],
     cardBg: accountingUnitCardBg,
@@ -117,22 +118,24 @@ const unitColumns: UnitColumn[] = [
   {
     title: "Legal & Justice Unit",
     stripe: "bg-[#d76589]",
-    gradient: "from-[#d76589]/45 via-background/10 to-background/90",
+    gradient: "from-[#d76589]/70 via-background/25 to-background/75",
     description: "Legal support tasks involving research, document drafting, transcription, and contract review assistance.",
     items: ["Legal Research", "Draft legal documents", "Transcription of meetings", "Review contracts"],
     cardBg: lawAndJusticeUnitCardBg,
   },
   {
     title: "Learning & Development Unit",
-    stripe: "bg-[#d3c737]",
-    gradient: "from-[#d3c737]/45 via-background/10 to-background/90",
+    stripe: "bg-[#f2e820]",
+    gradient: "from-[#f2e820]/70 via-background/25 to-background/75",
     description: "Programs and enablement efforts—planning, organizational development support, and knowledge-building initiatives.",
     items: ["Lead Generation", "Strategic Plan", "Organizational Development", "Managerial delegations"],
     cardBg: lndUnitCardBg,
   },
 ];
 
-const creativeUnitRef = unitColumns.find((u) => u.title === "Creative Unit") ?? unitColumns[0];
+const tallestUnit = unitColumns.reduce((tallest, unit) =>
+  unit.items.length > tallest.items.length ? unit : tallest,
+);
 
 const section = "py-8 sm:py-10";
 const container = "mx-auto max-w-6xl px-4 sm:px-6";
@@ -143,39 +146,51 @@ export default function Landing() {
 
   return (
     <div id="top" className="flex min-h-screen flex-col bg-background text-foreground antialiased">
-      <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
+      {/* Hero band — shared background for header + hero */}
+      <div className="relative isolate overflow-hidden border-b border-white/10">
+        <div className="absolute inset-0">
+          <div
+            className="h-full w-full bg-cover bg-center bg-fixed bg-no-repeat"
+            style={{ backgroundImage: `url(${landingBg})` }}
+            aria-hidden
+          />
+          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/55 to-black/20" />
+        </div>
+
+        <header className="relative z-10 sticky top-0 z-50 border-b border-white/10 bg-black/25 backdrop-blur-md">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5">
           <Link to="/" className="flex min-w-0 items-center gap-2.5">
-            <img src={hytLogo} alt="HYT Foundation" width={40} height={40} className="shrink-0" />
+            <img src={hytLogo} alt="HYT Foundation" width={44} height={44} className="shrink-0 sm:h-11 sm:w-11" />
             <div className="min-w-0 leading-tight">
-              <p className="truncate text-[10px] font-semibold tracking-wide text-muted-foreground sm:text-[11px]">
+              <p className="truncate text-[11px] font-semibold tracking-wide text-white/90 sm:text-xs">
                 HELPING YOUTH TRANSCEND
               </p>
-              <p className="text-[9px] font-medium tracking-wide text-muted-foreground/80 sm:text-[10px]">FOUNDATION INC.</p>
+              <p className="text-[10px] font-medium tracking-wide text-white/70 sm:text-[11px]">FOUNDATION INC.</p>
             </div>
           </Link>
-          <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
-            <a href="#top" className="transition-colors hover:text-foreground">
+          <nav className="hidden items-center gap-5 text-sm font-medium text-white/80 md:flex">
+            <a href="#top" className="transition-colors hover:text-white">
               Home
             </a>
-            <a href="#about" className="transition-colors hover:text-foreground">
+            <a href="#about" className="transition-colors hover:text-white">
               About Us
             </a>
-            <a href="#join" className="transition-colors hover:text-foreground">
+            <a href="#join" className="transition-colors hover:text-white">
               Why Join Us?
             </a>
-            <a href="#dream-academy" className="transition-colors hover:text-foreground">
+            <a href="#dream-academy" className="transition-colors hover:text-white">
               Dream Academy
             </a>
-            <a href="#units" className="transition-colors hover:text-foreground">
+            <a href="#units" className="transition-colors hover:text-white">
               Units
             </a>
-            <a href="#contact" className="transition-colors hover:text-foreground">
+            <a href="#contact" className="transition-colors hover:text-white">
               Contact Us
             </a>
           </nav>
           <div className="flex shrink-0 items-center gap-2.5 sm:gap-4">
-            <span className="cursor-default text-[10px] text-muted-foreground sm:text-sm">Donate</span>
+            <span className="cursor-default text-xs text-white/75 sm:text-sm">Donate</span>
             <Button
               asChild
               size="sm"
@@ -190,34 +205,27 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Hero — shorter viewport */}
-      <section className="relative border-b border-border/50">
-        <div className="absolute inset-0">
-          <img src={landingBg} alt="" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-black/55" />
-          <div className="absolute inset-0 bg-gradient-to-br from-black/65 via-black/35 to-transparent" />
-        </div>
-        <div className={`relative ${container} flex min-h-[36vh] flex-col justify-center py-10 text-center sm:min-h-[40vh] sm:py-12`}>
+        <section className={`relative z-10 ${container} flex min-h-[58vh] flex-col justify-center py-16 text-center sm:min-h-[64vh] sm:py-20 md:min-h-[68vh] md:py-24`}>
           <h1
-            className="text-3xl font-extrabold uppercase leading-[1.1] tracking-tight sm:text-4xl md:text-5xl"
+            className="text-4xl font-extrabold uppercase leading-[1.08] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
             style={{ fontFamily: '"Happy Monkey", system-ui' }}
           >
             <span className="block text-[#ff4a2f]">Bringing the</span>
             <span className="block text-[#00d2ff]">Next Generation</span>
-            <span className="block text-[#d6e63a]">Forward</span>
+            <span className="block text-[#f5ec24]">Forward</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-white/85 sm:mt-5 sm:text-[15px]">
+          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/90 sm:mt-7 sm:text-lg md:text-xl">
             We are the foundation for future generation leaders in which we support to enlighten and hone the youth in
             acquiring an adept set of business skills, professionally mentoring young adults and directing them to pursue what
             they aspire to become.
           </p>
-          <div className="mt-6 flex justify-center">
-            <Button asChild size="default" className="rounded-full px-8 font-medium">
+          <div className="mt-8 flex justify-center sm:mt-10">
+            <Button asChild size="lg" className="rounded-full px-10 text-base font-semibold">
               <a href="#about">ABOUT US</a>
             </Button>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <main className="flex-1">
         {/* Foundation */}
@@ -255,7 +263,7 @@ export default function Landing() {
                     <div
                       className="relative p-5 sm:p-6"
                       style={{
-                        backgroundImage: `radial-gradient(900px circle at 30% 0%, ${activeColor}20 0%, transparent 55%), radial-gradient(700px circle at 100% 30%, ${activeColor}12 0%, transparent 60%)`,
+                        backgroundImage: `radial-gradient(900px circle at 30% 0%, ${activeColor}40 0%, transparent 50%), radial-gradient(700px circle at 100% 30%, ${activeColor}28 0%, transparent 55%)`,
                       }}
                     >
                       <div className="mx-auto max-w-4xl">
@@ -399,25 +407,25 @@ export default function Landing() {
         {/* Dream Academy — single slab */}
         <section id="dream-academy" className={cn("scroll-mt-16 border-b border-border/40", section)}>
           <div className={container}>
-            <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card to-muted/30 shadow-sm">
+            <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-muted/50 to-muted/70 shadow-sm">
               {/* accent bar */}
               <div
                 className="h-1.5 w-full"
                 style={{
                   background:
-                    "linear-gradient(90deg, rgba(255,74,47,0.95) 0%, rgba(0,210,255,0.95) 50%, rgba(214,230,58,0.95) 100%)",
+                    "linear-gradient(90deg, rgba(255,74,47,0.95) 0%, rgba(0,210,255,0.95) 50%, rgba(245,236,36,0.95) 100%)",
                 }}
                 aria-hidden
               />
               {/* glow */}
               <div
-                className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full blur-3xl opacity-35"
-                style={{ background: "radial-gradient(circle, rgba(0,210,255,0.55) 0%, transparent 60%)" }}
+                className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full blur-3xl opacity-55"
+                style={{ background: "radial-gradient(circle, rgba(0,210,255,0.75) 0%, transparent 55%)" }}
                 aria-hidden
               />
               <div
-                className="pointer-events-none absolute -bottom-24 left-0 h-72 w-72 rounded-full blur-3xl opacity-30"
-                style={{ background: "radial-gradient(circle, rgba(255,74,47,0.55) 0%, transparent 60%)" }}
+                className="pointer-events-none absolute -bottom-24 left-0 h-72 w-72 rounded-full blur-3xl opacity-50"
+                style={{ background: "radial-gradient(circle, rgba(255,74,47,0.75) 0%, transparent 55%)" }}
                 aria-hidden
               />
 
@@ -431,7 +439,7 @@ export default function Landing() {
                     <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">
                     <span className="text-[#ff4a2f]">Dream</span>{" "}
                     <span className="text-[#00d2ff]">Academy</span>
-                    <span className="ml-2 align-middle text-[#d6e63a]">•</span>
+                    <span className="ml-2 align-middle text-[#f5ec24]">•</span>
                     </h2>
                     <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
                       A hands-on training experience built to help young people grow skills, gain real work exposure, and prepare for future careers.
@@ -449,7 +457,7 @@ export default function Landing() {
                     className="hidden h-2 w-32 rounded-full sm:block"
                     style={{
                       background:
-                        "linear-gradient(90deg, rgba(255,74,47,0.9) 0%, rgba(0,210,255,0.9) 50%, rgba(214,230,58,0.9) 100%)",
+                        "linear-gradient(90deg, rgba(255,74,47,0.9) 0%, rgba(0,210,255,0.9) 50%, rgba(245,236,36,0.9) 100%)",
                     }}
                     aria-hidden
                   />
@@ -467,7 +475,7 @@ export default function Landing() {
                       Multi-industry exposure
                     </div>
                     <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1.5 text-xs font-semibold text-foreground">
-                      <Sparkles className="h-4 w-4 text-[#d6e63a]" />
+                      <Sparkles className="h-4 w-4 text-[#f5ec24]" />
                       Hands-on learning
                     </div>
                   </div>
@@ -544,7 +552,7 @@ export default function Landing() {
                     type="button"
                     onClick={() => setFlippedUnits((prev) => ({ ...prev, [unit.title]: !prev[unit.title] }))}
                     className="text-left [perspective:1200px]"
-                    aria-label={`${unit.title} — ${isFlipped ? "Show unit list" : "Show description"}`}
+                    aria-label={`${unit.title} — ${isFlipped ? "Show description" : "Show unit list"}`}
                   >
                     <div
                       className={cn(
@@ -552,140 +560,92 @@ export default function Landing() {
                         hasPhotoBg
                           ? "rounded-2xl border border-white/10 shadow-2xl shadow-black/35 ring-1 ring-black/30"
                           : "rounded-xl border border-border/60 shadow-sm",
-                        isFlipped ? "[transform:rotateY(180deg)]" : "[transform:rotateY(0deg)]"
+                        isFlipped ? "[transform:rotateY(180deg)]" : "[transform:rotateY(0deg)]",
                       )}
                     >
-                      {/* Height sizer — match Creative Unit front (tallest card) so content is not clipped */}
-                      <div className="grid opacity-0 pointer-events-none">
-                        <div className="col-start-1 row-start-1 overflow-hidden rounded-2xl bg-card">
-                          <div className="flex flex-col p-5">
-                            <h3 className="text-sm font-semibold leading-snug text-foreground">{creativeUnitRef.title}</h3>
-                            <div className="mt-auto min-h-0 pt-2">
-                              <ul className="flex flex-col gap-2 text-sm leading-relaxed text-muted-foreground">
-                                {creativeUnitRef.items.map((item) => (
-                                  <li key={item} className="flex gap-2.5">
-                                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/30" aria-hidden />
-                                    <span>{item}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                              <div className="mt-3 flex justify-end">
-                                <span className="h-4 w-10" aria-hidden />
-                              </div>
-                            </div>
+                      <div
+                        className={cn(
+                          "pointer-events-none flex flex-col overflow-hidden opacity-0",
+                          hasPhotoBg ? "rounded-2xl" : "rounded-xl",
+                        )}
+                        aria-hidden
+                      >
+                        <div className="h-20 shrink-0 sm:h-24" />
+                        <div className="p-3 sm:p-4">
+                          <h3 className="text-center text-sm font-semibold leading-snug">{tallestUnit.title}</h3>
+                          <ul className="mt-2 flex flex-col gap-1.5 text-justify text-xs leading-relaxed">
+                            {tallestUnit.items.map((item) => (
+                              <li key={item} className="flex gap-2">
+                                <span className="shrink-0 text-muted-foreground" aria-hidden>
+                                  —
+                                </span>
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div
+                        className={cn(
+                          "absolute inset-0 flex flex-col overflow-hidden bg-card [backface-visibility:hidden]",
+                          hasPhotoBg ? "rounded-2xl" : "rounded-xl",
+                        )}
+                      >
+                        {hasPhotoBg ? (
+                          <div className="relative h-20 w-full shrink-0 overflow-hidden sm:h-24">
+                            <div
+                              className="absolute inset-0 bg-cover bg-center"
+                              style={{ backgroundImage: `url(${photoBg})` }}
+                              aria-hidden
+                            />
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/40" aria-hidden />
+                          </div>
+                        ) : (
+                          <div className={cn("h-1 w-full shrink-0", unit.stripe)} aria-hidden />
+                        )}
+                        <div className="flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+                          <h3 className="text-center text-sm font-semibold leading-snug text-foreground">{unit.title}</h3>
+                          <p className="mt-2 flex-1 text-justify text-xs leading-relaxed text-muted-foreground">{unit.description}</p>
+                          <div className="mt-auto flex justify-start pt-2 text-xs font-medium text-muted-foreground">
+                            &gt; View Details
                           </div>
                         </div>
                       </div>
 
-                      {/* Front */}
                       <div
                         className={cn(
-                          "absolute inset-0 overflow-hidden bg-card [backface-visibility:hidden]",
-                          hasPhotoBg ? "rounded-2xl" : "rounded-xl"
+                          "absolute inset-0 flex flex-col overflow-hidden bg-card [transform:rotateY(180deg)] [backface-visibility:hidden]",
+                          hasPhotoBg ? "rounded-2xl" : "rounded-xl",
                         )}
                       >
                         {hasPhotoBg ? (
-                          <>
+                          <div className="relative h-20 w-full shrink-0 overflow-hidden sm:h-24">
                             <div
-                              className="pointer-events-none absolute inset-0 bg-cover bg-center"
+                              className="absolute inset-0 bg-cover bg-center"
                               style={{ backgroundImage: `url(${photoBg})` }}
                               aria-hidden
                             />
-                            <div
-                              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_32%,rgba(0,0,0,0.5)_100%)]"
-                              aria-hidden
-                            />
-                            <div
-                              className="pointer-events-none absolute inset-0"
-                              style={{
-                                background:
-                                  "linear-gradient(to top, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.82) 28%, rgba(0,0,0,0.45) 52%, rgba(0,0,0,0.2) 72%, rgba(0,0,0,0.12) 100%)",
-                              }}
-                              aria-hidden
-                            />
-                          </>
-                        ) : null}
-                        {!hasPhotoBg ? <div className={cn("h-1 w-full shrink-0", unit.stripe)} aria-hidden /> : null}
-                        <div className={cn("relative flex h-full min-h-0 flex-col overflow-y-auto", hasPhotoBg ? "p-5" : "p-4")}>
-                          {!hasPhotoBg ? (
-                            <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br", unit.gradient)} aria-hidden />
-                          ) : null}
-                          {hasPhotoBg ? (
-                            <>
-                              <div className="relative shrink-0">
-                                <h3 className="text-sm font-semibold leading-snug text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.9)]">
-                                  {unit.title}
-                                </h3>
-                              </div>
-                              <div className="relative mt-auto min-h-0 flex flex-col justify-end pt-2">
-                                <ul className="flex flex-col gap-2 text-sm leading-relaxed text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.95)]">
-                                  {unit.items.map((item) => (
-                                    <li key={item} className="flex gap-2.5">
-                                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-white" aria-hidden />
-                                      <span>{item}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                                <div className="mt-3 flex items-center justify-end text-white">
-                                  <svg
-                                    width="40"
-                                    height="14"
-                                    viewBox="0 0 40 14"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    aria-hidden="true"
-                                  >
-                                    <path d="M1 7H33" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                    <path d="M33 2L39 7L33 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                  </svg>
-                                </div>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="relative">
-                                <h3 className="text-sm font-semibold leading-snug text-foreground">{unit.title}</h3>
-                              </div>
-                              <div className="relative mt-4 flex-1 min-h-0">
-                                <ul className="flex flex-col gap-1.5 text-xs leading-snug text-muted-foreground">
-                                  {unit.items.map((item) => (
-                                    <li key={item} className="flex gap-2">
-                                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/20" aria-hidden />
-                                      <span>{item}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                              <div className="mt-3 flex items-center justify-end text-muted-foreground">
-                                <svg
-                                  width="40"
-                                  height="14"
-                                  viewBox="0 0 40 14"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  aria-hidden="true"
-                                >
-                                  <path d="M1 7H33" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                  <path d="M33 2L39 7L33 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Back — unit tint overlay (no image), same gradient as non-photo fronts */}
-                      <div
-                        className={cn(
-                          "absolute inset-0 overflow-hidden bg-card [transform:rotateY(180deg)] [backface-visibility:hidden]",
-                          hasPhotoBg ? "rounded-2xl" : "rounded-xl"
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/40" aria-hidden />
+                          </div>
+                        ) : (
+                          <div className={cn("h-1 w-full shrink-0", unit.stripe)} aria-hidden />
                         )}
-                      >
-                        <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br", unit.gradient)} aria-hidden />
-                        {!hasPhotoBg ? <div className={cn("relative z-[1] h-1 w-full shrink-0", unit.stripe)} aria-hidden /> : null}
-                        <div className="relative z-[1] flex h-full min-h-0 flex-col overflow-y-auto p-4">
-                          <h3 className="text-sm font-semibold leading-snug text-foreground">{unit.title}</h3>
-                          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{unit.description}</p>
+                        <div className="relative flex min-h-0 flex-1 flex-col">
+                          <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br", unit.gradient)} aria-hidden />
+                          <div className="relative z-[1] flex min-h-0 flex-1 flex-col p-3 sm:p-4">
+                            <h3 className="text-center text-sm font-semibold leading-snug text-foreground">{unit.title}</h3>
+                            <ul className="mt-2 flex flex-1 flex-col gap-1.5 text-justify text-xs leading-relaxed text-muted-foreground">
+                              {unit.items.map((item) => (
+                                <li key={item} className="flex gap-2">
+                                  <span className="shrink-0 text-foreground/40" aria-hidden>
+                                    —
+                                  </span>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -699,14 +659,14 @@ export default function Landing() {
         {/* Contact + aside */}
         <section id="contact" className={cn("scroll-mt-16", section)}>
           <div className={container}>
-            <div className="mx-auto max-w-lg">
+            <div className="mx-auto w-full max-w-5xl">
               <h2 className="text-center text-xl font-semibold tracking-tight sm:text-2xl">Contact Us</h2>
-              <p className="mt-2 text-center text-sm text-muted-foreground">
+              <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-muted-foreground">
                 Need to get in touch with us? Either fill out the form with your inquiry or find the department email
                 you&apos;d like to contact below.
               </p>
               <form
-                className="mt-5 space-y-3 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm sm:p-5"
+                className="mt-6 space-y-4 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm sm:p-7"
                 onSubmit={(e) => {
                   e.preventDefault();
                   const data = new FormData(e.currentTarget);
@@ -742,63 +702,36 @@ export default function Landing() {
       </main>
 
       <footer className="border-t border-border/60 bg-[#0f121a] text-white">
-        <div className={cn(container, "flex flex-col gap-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:py-10")}>
-          <div className="flex items-center gap-3">
-            <img src={hytLogo} alt="HYT logo" className="h-12 w-12 sm:h-14 sm:w-14" />
-            <div>
-              <p className="text-xs font-semibold text-[#ff6f3b]">HELPING YOUTH</p>
-              <p className="text-xs font-semibold text-[#20d2ff] sm:text-sm">TRANSCEND FOUNDATION INC.</p>
-            </div>
+        <div
+          className={cn(
+            container,
+            "grid gap-10 py-10 sm:py-12 lg:grid-cols-[1fr_auto] lg:items-start lg:gap-14",
+          )}
+        >
+          <div className="grid items-center gap-8 sm:grid-cols-2 sm:gap-10 lg:gap-12">
+            <img
+              src={hytFullLogo}
+              alt="Helping Youth Transcend Foundation Inc."
+              className="h-auto w-full object-contain sm:max-h-36 md:max-h-44 lg:max-h-48"
+            />
+            <p className="text-sm leading-relaxed text-white/80 sm:text-base md:text-lg md:leading-relaxed">
+              We are the foundation for future generation leaders in which we support to enlighten and hone the youth in
+              acquiring an adept set of business skills.
+            </p>
           </div>
-          <p className="max-w-sm text-xs leading-relaxed text-white/75">
-            We are the foundation for future generation leaders in which we support to enlighten and hone the youth in
-            acquiring an adept set of business skills.
-          </p>
-          <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs sm:text-sm">
-            <div>
-              <p className="mb-1.5 font-semibold uppercase tracking-wide text-white/50">Quick links</p>
-              <ul className="space-y-1 text-white/90">
-                <li>
-                  <a href="#top" className="hover:text-white">
-                    Home
-                  </a>
-                </li>
-                <li>
-                  <a href="#about" className="hover:text-white">
-                    About us
-                  </a>
-                </li>
-                <li>
-                  <a href="#join" className="hover:text-white">
-                    Why join us?
-                  </a>
-                </li>
-                <li>
-                  <a href="#dream-academy" className="hover:text-white">
-                    Dream Academy
-                  </a>
-                </li>
-                <li>
-                  <a href="#units" className="hover:text-white">
-                    Units
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <p className="mb-1.5 font-semibold uppercase tracking-wide text-white/50">Contact</p>
-              <ul className="space-y-1 text-[11px] text-white/80 sm:text-xs">
-                <li>Suite 1004 Atlanta Center, San Juan City</li>
-                <li>(02) 835 90648 • (63) 961 495 8696</li>
-                <li>
-                  <a href="mailto:hello@brains.asia" className="hover:text-white">
-                    hello@brains.asia
-                  </a>
-                </li>
-              </ul>
-              <p className="mb-1.5 mt-3 font-semibold uppercase tracking-wide text-white/50">Social media</p>
-              <p className="text-[11px] text-white/45">powered by BRAINS INFINITE INNOVATIONS INC.</p>
-            </div>
+          <div className="text-sm sm:min-w-[220px] lg:text-base">
+            <p className="mb-2 font-semibold uppercase tracking-wide text-white/50">Contact</p>
+            <ul className="space-y-1.5 text-white/85">
+              <li>Suite 1004 Atlanta Center, San Juan City</li>
+              <li>(02) 835 90648 • (63) 961 495 8696</li>
+              <li>
+                <a href="mailto:hello@brains.asia" className="hover:text-white">
+                  hello@brains.asia
+                </a>
+              </li>
+            </ul>
+            <p className="mb-2 mt-5 font-semibold uppercase tracking-wide text-white/50">Social media</p>
+            <p className="text-xs text-white/45 sm:text-sm">powered by BRAINS INFINITE INNOVATIONS INC.</p>
           </div>
         </div>
       </footer>
