@@ -1,36 +1,36 @@
-import { useMemo, useState } from "react";
-import { Clock, CheckCircle, XCircle, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { AlertCircle, CalendarCheck, CheckCircle, ChevronLeft, ChevronRight, Clock, XCircle } from "lucide-react";
 import { useRole } from "@/contexts/RoleContext";
 import { useAttendancePolicy } from "@/contexts/AttendancePolicyContext";
-
-const records: Record<string, { in: string; out: string; hours: string; status: string }> = {
-  "2026-03-21": { in: "8:02 AM", out: "5:14 PM", hours: "9h 12m", status: "Present" },
-  "2026-03-20": { in: "8:15 AM", out: "5:30 PM", hours: "9h 15m", status: "Late" },
-  "2026-03-19": { in: "7:58 AM", out: "5:00 PM", hours: "9h 02m", status: "Present" },
-  "2026-03-18": { in: "8:30 AM", out: "5:45 PM", hours: "9h 15m", status: "Late" },
-  "2026-03-17": { in: "8:00 AM", out: "5:00 PM", hours: "9h 00m", status: "Present" },
-  "2026-03-14": { in: "—", out: "—", hours: "—", status: "Absent" },
-  "2026-03-13": { in: "7:55 AM", out: "5:10 PM", hours: "9h 15m", status: "Present" },
-  "2026-03-12": { in: "8:05 AM", out: "5:00 PM", hours: "8h 55m", status: "Present" },
-  "2026-03-11": { in: "8:00 AM", out: "5:05 PM", hours: "9h 05m", status: "Present" },
-  "2026-03-10": { in: "7:50 AM", out: "5:00 PM", hours: "9h 10m", status: "Present" },
-  "2026-03-07": { in: "8:00 AM", out: "5:00 PM", hours: "9h 00m", status: "Present" },
-  "2026-03-06": { in: "8:10 AM", out: "5:15 PM", hours: "9h 05m", status: "Present" },
-  "2026-03-05": { in: "8:20 AM", out: "5:30 PM", hours: "9h 10m", status: "Late" },
-  "2026-03-04": { in: "7:55 AM", out: "5:00 PM", hours: "9h 05m", status: "Present" },
-  "2026-03-03": { in: "8:00 AM", out: "5:00 PM", hours: "9h 00m", status: "Present" },
-  "2026-02-28": { in: "8:00 AM", out: "5:00 PM", hours: "9h 00m", status: "Present" },
-  "2026-02-27": { in: "8:05 AM", out: "5:10 PM", hours: "9h 05m", status: "Present" },
-  "2026-02-26": { in: "8:00 AM", out: "5:00 PM", hours: "9h 00m", status: "Present" },
-  "2026-02-25": { in: "7:55 AM", out: "5:00 PM", hours: "9h 05m", status: "Present" },
-  "2026-02-24": { in: "8:00 AM", out: "5:00 PM", hours: "9h 00m", status: "Present" },
-};
+import {
+  addDays,
+  buildPresentWeekOverrides,
+  formatTotalHours,
+  formatWeekRange,
+  getMondayOfWeek,
+  getWeekdayDates,
+  INTERNSHIP_START,
+  isSameWeek,
+  parseHours,
+  resolveInternAttendanceRecord,
+  startOfDay,
+  toDateStr,
+  type AttendanceRecord,
+} from "@/lib/internAttendance";
+import { cn } from "@/lib/utils";
 
 const statusColor: Record<string, string> = {
   Present: "bg-stat-green",
   Late: "bg-stat-orange",
   Absent: "bg-destructive",
   Excused: "bg-blue-500",
+};
+
+const statusBadge: Record<string, string> = {
+  Present: "text-stat-green bg-stat-green-bg",
+  Late: "text-stat-orange bg-stat-orange-bg",
+  Absent: "text-destructive bg-destructive/10",
+  Excused: "text-blue-700 bg-blue-100 dark:text-blue-200 dark:bg-blue-900/30",
 };
 
 const statusBg: Record<string, string> = {
@@ -40,79 +40,122 @@ const statusBg: Record<string, string> = {
   Excused: "bg-blue-50 border-blue-200/70 dark:bg-blue-950/20 dark:border-blue-900/50",
 };
 
-function getDaysInMonth(year: number, month: number) {
-  return new Date(year, month + 1, 0).getDate();
-}
-
-function getFirstDayOfWeek(year: number, month: number) {
-  return new Date(year, month, 1).getDay();
-}
-
 export default function Attendance() {
   const { role, user } = useRole();
   const isAdmin = role === "admin";
   const { dayConfigByDate, setDayConfigByDate, eventsByDate, excusalByInternByDate } = useAttendancePolicy();
-  const [selectedDate, setSelectedDate] = useState<string | null>("2026-03-21");
-  const [currentMonth, setCurrentMonth] = useState(2); // March = 2
-  const [currentYear] = useState(2026);
 
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const today = useMemo(() => startOfDay(new Date()), []);
+  const earliestWeekStart = useMemo(() => getMondayOfWeek(INTERNSHIP_START), []);
+  const latestWeekStart = useMemo(() => getMondayOfWeek(today), [today]);
 
-  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-  const firstDay = getFirstDayOfWeek(currentYear, currentMonth);
+  const [weekStart, setWeekStart] = useState(() => getMondayOfWeek(new Date()));
+  const [selectedDate, setSelectedDate] = useState<string | null>(() => toDateStr(new Date()));
+  const [presentOverrides, setPresentOverrides] = useState<Record<string, AttendanceRecord>>(() =>
+    buildPresentWeekOverrides(startOfDay(new Date())),
+  );
 
-  const getDayConfig = (dateStr: string) => {
-    const override = dayConfigByDate[dateStr];
-    if (override) return override;
-    const [y, m, d] = dateStr.split("-").map(Number);
-    const dow = new Date(y, m - 1, d).getDay();
-    return {
-      type: dow === 0 || dow === 6 ? "no_work" : "workday",
-      startTime: "09:00",
-      endTime: "18:00",
-    } as const;
-  };
-  const isWorkday = (dateStr: string) => getDayConfig(dateStr).type === "workday";
-  const myEventsForDate = (dateStr: string) => (eventsByDate[dateStr] ?? []).filter((e) => e.internNames.includes(user.name));
-  const isRequiredDayForIntern = (dateStr: string) => isWorkday(dateStr) || myEventsForDate(dateStr).length > 0;
+  const getDayConfig = useCallback(
+    (dateStr: string) => {
+      const override = dayConfigByDate[dateStr];
+      if (override) return override;
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const dow = new Date(y, m - 1, d).getDay();
+      return {
+        type: dow === 0 || dow === 6 ? "no_work" : "workday",
+        startTime: "09:00",
+        endTime: "18:00",
+      } as const;
+    },
+    [dayConfigByDate],
+  );
 
-  const effectiveRecordByDate = useMemo(() => {
-    const map: Record<string, { in: string; out: string; hours: string; status: string }> = {};
-    // Populate month view (non-future) so summary + selection work even when no explicit record exists.
-    for (let i = 1; i <= daysInMonth; i++) {
-      const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
-      const isFuture = new Date(currentYear, currentMonth, i) > new Date(2026, 2, 24);
-      if (isFuture) continue;
+  const isWorkday = useCallback((dateStr: string) => getDayConfig(dateStr).type === "workday", [getDayConfig]);
+  const myEventsForDate = useCallback(
+    (dateStr: string) => (eventsByDate[dateStr] ?? []).filter((e) => e.internNames.includes(user.name)),
+    [eventsByDate, user.name],
+  );
+  const isRequiredDayForIntern = useCallback(
+    (dateStr: string) => isWorkday(dateStr) || myEventsForDate(dateStr).length > 0,
+    [isWorkday, myEventsForDate],
+  );
 
-      const base = records[dateStr];
-      const required = isRequiredDayForIntern(dateStr);
-      if (!required) continue;
+  const policySlice = useMemo(
+    () => ({
+      dayConfigByDate,
+      eventsByDate,
+      excusalByInternByDate,
+      internName: user.name,
+    }),
+    [dayConfigByDate, eventsByDate, excusalByInternByDate, user.name],
+  );
 
-      if (base && base.in !== "—") {
-        map[dateStr] = base;
-        continue;
-      }
+  const resolveRecord = useCallback(
+    (dateStr: string): AttendanceRecord | null =>
+      resolveInternAttendanceRecord(dateStr, today, policySlice, presentOverrides),
+    [today, policySlice, presentOverrides],
+  );
 
-      const myExcusal = excusalByInternByDate[user.name]?.[dateStr];
-      if (myExcusal?.excused) {
-        map[dateStr] = { in: "—", out: "—", hours: "—", status: "Excused" };
-      } else {
-        map[dateStr] = { in: "—", out: "—", hours: "—", status: "Absent" };
-      }
+  const weekDays = useMemo(() => getWeekdayDates(weekStart), [weekStart]);
+
+  const weekEntries = useMemo(
+    () =>
+      weekDays.map((date) => {
+        const dateStr = toDateStr(date);
+        const record = resolveRecord(dateStr);
+        const required = isRequiredDayForIntern(dateStr);
+        const isFuture = date > today;
+        const beforeProgram = date < startOfDay(INTERNSHIP_START);
+        return { date, dateStr, record, required, isFuture, beforeProgram };
+      }),
+    [weekDays, resolveRecord, isRequiredDayForIntern, today],
+  );
+
+  const weekSummary = useMemo(() => {
+    let present = 0;
+    let late = 0;
+    let absent = 0;
+    let excused = 0;
+    let totalHours = 0;
+
+    for (const entry of weekEntries) {
+      if (!entry.required || entry.isFuture || entry.beforeProgram) continue;
+      if (!entry.record) continue;
+      if (entry.record.status === "Present") present++;
+      else if (entry.record.status === "Late") late++;
+      else if (entry.record.status === "Absent") absent++;
+      else if (entry.record.status === "Excused") excused++;
+      totalHours += parseHours(entry.record.hours);
     }
-    return map;
-  }, [currentMonth, currentYear, daysInMonth, dayConfigByDate, eventsByDate, excusalByInternByDate, user.name]);
 
-  const allEffectiveRecords = Object.entries(effectiveRecordByDate);
-  const presentCount = allEffectiveRecords.filter(([, r]) => r.status === "Present").length;
-  const lateCount = allEffectiveRecords.filter(([, r]) => r.status === "Late").length;
-  const absentCount = allEffectiveRecords.filter(([, r]) => r.status === "Absent").length;
-  const excusedCount = allEffectiveRecords.filter(([, r]) => r.status === "Excused").length;
+    return { present, late, absent, excused, totalHours };
+  }, [weekEntries]);
 
-  const selected = selectedDate ? effectiveRecordByDate[selectedDate] ?? null : null;
+  const canGoPrev = weekStart > earliestWeekStart;
+  const canGoNext = weekStart < latestWeekStart;
+
+  const goPrevWeek = () => {
+    if (!canGoPrev) return;
+    const next = addDays(weekStart, -7);
+    setWeekStart(next < earliestWeekStart ? earliestWeekStart : next);
+  };
+
+  const goNextWeek = () => {
+    if (!canGoNext) return;
+    const next = addDays(weekStart, 7);
+    setWeekStart(next > latestWeekStart ? latestWeekStart : next);
+  };
+
+  const goToCurrentWeek = () => {
+    setWeekStart(latestWeekStart);
+    setSelectedDate(toDateStr(today));
+    setPresentOverrides(buildPresentWeekOverrides(today));
+  };
+
+  const viewingCurrentWeek = isSameWeek(weekStart, today);
+
+  const selected = selectedDate ? resolveRecord(selectedDate) : null;
   const selectedExcusal = selectedDate ? excusalByInternByDate[user.name]?.[selectedDate] : undefined;
-  const selectedWorkday = selectedDate ? isWorkday(selectedDate) : false;
   const selectedDayConfig = selectedDate ? getDayConfig(selectedDate) : null;
   const selectedMyEvents = selectedDate ? myEventsForDate(selectedDate) : [];
   const selectedRequired = selectedDate ? isRequiredDayForIntern(selectedDate) : false;
@@ -121,204 +164,259 @@ export default function Attendance() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">Attendance</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Review your clock-ins, hours, and status week by week.</p>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={goPrevWeek}
+            disabled={!canGoPrev}
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </button>
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Week of</p>
+            <p className="font-display text-lg font-bold text-foreground">{formatWeekRange(weekStart)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={goNextWeek}
+            disabled={!canGoNext}
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="mt-3 flex justify-center border-t border-border pt-3">
+          <button
+            type="button"
+            onClick={goToCurrentWeek}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              viewingCurrentWeek
+                ? "bg-stat-green-bg text-stat-green"
+                : "bg-accent text-accent-foreground hover:opacity-90",
+            )}
+          >
+            <CalendarCheck className="h-4 w-4" />
+            Go to current week
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-        {/* Calendar */}
-        <div className="col-span-2 bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="font-display font-bold text-foreground text-lg">{monthNames[currentMonth]} {currentYear}</h3>
-            <div className="flex items-center gap-1">
-              <button onClick={() => setCurrentMonth(m => Math.max(0, m - 1))} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-                <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-              </button>
-              <button onClick={() => setCurrentMonth(m => Math.min(11, m + 1))} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </button>
+        <div className="col-span-2 space-y-4">
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-display font-bold text-foreground">Weekly log</h3>
+              <span className="text-xs text-muted-foreground">Monday – Friday</span>
+            </div>
+
+            <div className="space-y-2">
+              {weekEntries.map((entry) => {
+                const isSelected = selectedDate === entry.dateStr;
+                const dayLabel = entry.date.toLocaleDateString("en-US", { weekday: "long" });
+                const dateLabel = entry.date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+                if (entry.beforeProgram) {
+                  return (
+                    <div
+                      key={entry.dateStr}
+                      className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground"
+                    >
+                      <span className="font-medium text-foreground">{dayLabel}</span>
+                      <span className="mx-2">·</span>
+                      {dateLabel}
+                      <span className="mx-2">·</span>
+                      Before program start
+                    </div>
+                  );
+                }
+
+                if (!entry.required) {
+                  const dayConfig = getDayConfig(entry.dateStr);
+                  return (
+                    <div
+                      key={entry.dateStr}
+                      className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground"
+                    >
+                      <span className="font-medium text-foreground">{dayLabel}</span>
+                      <span className="mx-2">·</span>
+                      {dateLabel}
+                      <span className="mx-2">·</span>
+                      {dayConfig.type === "holiday" ? "Holiday" : "No work scheduled"}
+                    </div>
+                  );
+                }
+
+                return (
+                  <button
+                    key={entry.dateStr}
+                    type="button"
+                    onClick={() => setSelectedDate(entry.dateStr)}
+                    className={cn(
+                      "w-full rounded-lg border px-4 py-3 text-left transition-colors",
+                      isSelected ? "border-primary bg-primary/5 ring-1 ring-primary/30" : "border-border hover:bg-muted/40",
+                      entry.record ? statusBg[entry.record.status] : "border-border/70 bg-background",
+                    )}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-foreground">{dayLabel}</p>
+                        <p className="text-xs text-muted-foreground">{dateLabel}</p>
+                      </div>
+                      {entry.isFuture ? (
+                        <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                          Upcoming
+                        </span>
+                      ) : entry.record ? (
+                        <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", statusBadge[entry.record.status])}>
+                          {entry.record.status}
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                          No log yet
+                        </span>
+                      )}
+                    </div>
+
+                    {!entry.isFuture && entry.record && (
+                      <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+                        <div>
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Clock in</p>
+                          <p className="font-medium text-foreground">{entry.record.in}</p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Clock out</p>
+                          <p className="font-medium text-foreground">{entry.record.out}</p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Hours</p>
+                          <p className="font-medium text-foreground">{entry.record.hours}</p>
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Day headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {dayNames.map(d => (
-              <div key={d} className="text-center text-xs font-medium text-muted-foreground py-2">{d}</div>
-            ))}
-          </div>
-
-          {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-1">
-            {Array.from({ length: firstDay }).map((_, i) => (
-              <div key={`empty-${i}`} className="aspect-square" />
-            ))}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1;
-              const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-              const record = effectiveRecordByDate[dateStr];
-              const workday = isWorkday(dateStr);
-              const isWeekend = new Date(currentYear, currentMonth, day).getDay() === 0 || new Date(currentYear, currentMonth, day).getDay() === 6;
-              const isSelected = selectedDate === dateStr;
-              const isFuture = new Date(currentYear, currentMonth, day) > new Date(2026, 2, 24);
-              const base = records[dateStr];
-              const hasClockIn = Boolean(base && base.in && base.in !== "—");
-              const canSelect = true;
-
-              return (
-                <button
-                  key={day}
-                  onClick={() => canSelect && setSelectedDate(dateStr)}
-                  className={`aspect-square rounded-lg flex flex-col items-center justify-center gap-1 text-sm transition-all relative
-                    ${isSelected ? 'ring-2 ring-primary bg-primary/5' : ''}
-                    ${(!workday || isWeekend) ? 'text-muted-foreground/50' : 'text-foreground'}
-                    ${isFuture ? 'text-muted-foreground/40' : ''}
-                    ${canSelect ? 'cursor-pointer hover:bg-muted/50' : ''}
-                    ${!record && workday && !isFuture ? 'text-muted-foreground/80' : ''}
-                  `}
-                >
-                  <span className="font-medium">{day}</span>
-                  {record && (
-                    <span className={`w-2 h-2 rounded-full ${statusColor[record.status]}`} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Legend */}
-          <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border">
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-stat-green" /> Present</span>
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-stat-orange" /> Late</span>
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-destructive" /> Absent</span>
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground"><span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Excused</span>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h3 className="mb-3 font-display font-bold text-foreground">Hours this week</h3>
+            <div className="space-y-2">
+              {weekEntries.map((entry) => {
+                if (!entry.required || entry.isFuture || entry.beforeProgram) return null;
+                const hours = entry.record ? parseHours(entry.record.hours) : 0;
+                const maxH = 10;
+                const dayShort = entry.date.toLocaleDateString("en-US", { weekday: "short" });
+                return (
+                  <div key={`hours-${entry.dateStr}`} className="flex items-center gap-3">
+                    <span className="w-10 text-xs text-muted-foreground">{dayShort}</span>
+                    <div className="h-5 flex-1 overflow-hidden rounded-md bg-muted">
+                      <div
+                        className="flex h-full items-center justify-end rounded-md bg-accent pr-2 transition-all"
+                        style={{ width: hours > 0 ? `${Math.min((hours / maxH) * 100, 100)}%` : "0%" }}
+                      >
+                        {hours > 0 && (
+                          <span className="text-[10px] font-medium text-accent-foreground">{hours.toFixed(2)}h</span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="w-14 text-right text-xs text-muted-foreground">
+                      {entry.record?.hours ?? "—"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+              <span className="text-xs text-muted-foreground">Week total</span>
+              <span className="text-sm font-bold font-display text-foreground">
+                {formatTotalHours(weekSummary.totalHours)}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Right panel */}
         <div className="space-y-4">
-          {/* Summary ring */}
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground mb-4">Summary</h3>
-            <div className="flex items-center justify-center mb-4">
-              <div className="relative w-32 h-32">
-                <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--stat-green))" strokeWidth="3"
-                    strokeDasharray={`${(presentCount / (presentCount + lateCount + absentCount + excusedCount || 1)) * 97.4} 97.4`} strokeLinecap="round" />
-                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--stat-orange))" strokeWidth="3"
-                    strokeDasharray={`${(lateCount / (presentCount + lateCount + absentCount + excusedCount || 1)) * 97.4} 97.4`}
-                    strokeDashoffset={`-${(presentCount / (presentCount + lateCount + absentCount + excusedCount || 1)) * 97.4}`} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-bold font-display text-foreground">{presentCount + lateCount + absentCount + excusedCount}</span>
-                  <span className="text-[10px] text-muted-foreground">Total Days</span>
-                </div>
-              </div>
-            </div>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h3 className="mb-4 font-display font-bold text-foreground">Week summary</h3>
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-stat-green" /> Present</span>
-                <span className="font-bold text-foreground">{presentCount}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2"><AlertCircle className="w-4 h-4 text-stat-orange" /> Late</span>
-                <span className="font-bold text-foreground">{lateCount}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2"><XCircle className="w-4 h-4 text-destructive" /> Absent</span>
-                <span className="font-bold text-foreground">{absentCount}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-blue-500" /> Excused</span>
-                <span className="font-bold text-foreground">{excusedCount}</span>
-              </div>
+              <SummaryRow icon={CheckCircle} iconClass="text-stat-green" label="Present" value={weekSummary.present} />
+              <SummaryRow icon={AlertCircle} iconClass="text-stat-orange" label="Late" value={weekSummary.late} />
+              <SummaryRow icon={XCircle} iconClass="text-destructive" label="Absent" value={weekSummary.absent} />
+              <SummaryRow icon={CheckCircle} iconClass="text-blue-500" label="Excused" value={weekSummary.excused} />
+            </div>
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm">
+              <span className="flex items-center gap-2 text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                Total hours
+              </span>
+              <span className="font-bold text-foreground">{formatTotalHours(weekSummary.totalHours)}</span>
             </div>
           </div>
 
-          {/* Selected day detail */}
           {selectedDate && (
-            <div className={`rounded-xl border p-5 ${selected ? statusBg[selected.status] : "bg-muted/30 border-border/70"}`}>
-              <p className="text-xs text-muted-foreground mb-1">Selected Date</p>
-              <p className="text-lg font-display font-bold text-foreground mb-3">
-                {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            <div className={cn("rounded-xl border p-5", selected ? statusBg[selected.status] : "border-border bg-muted/30")}>
+              <p className="mb-1 text-xs text-muted-foreground">Selected day</p>
+              <p className="mb-3 font-display text-lg font-bold text-foreground">
+                {new Date(selectedDate).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
               </p>
               {!selectedRequired ? (
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Status</span>
-                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-                      {selectedDayConfig?.type === "holiday" ? "Holiday" : "No work"}
-                    </span>
-                  </div>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  {selectedDayConfig?.type === "holiday" ? "Holiday — no attendance required." : "No work scheduled."}
+                </p>
               ) : selectedMyEvents.length > 0 && !selected ? (
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Status</span>
-                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">Event scheduled</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {selectedMyEvents.map((e) => `${e.title} (${e.startTime}–${e.endTime})`).join(" · ")}
-                  </div>
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p>Event scheduled.</p>
+                  <p>{selectedMyEvents.map((e) => `${e.title} (${e.startTime}–${e.endTime})`).join(" · ")}</p>
                 </div>
               ) : !selected ? (
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Status</span>
-                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">No log yet</span>
-                  </div>
-                </div>
+                <p className="text-sm text-muted-foreground">No attendance log recorded yet.</p>
               ) : (
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                    selected.status === "Present" ? "text-stat-green bg-stat-green-bg" :
-                    selected.status === "Late" ? "text-stat-orange bg-stat-orange-bg" :
-                    selected.status === "Excused" ? "text-blue-700 bg-blue-100 dark:text-blue-200 dark:bg-blue-900/30" :
-                    "text-destructive bg-destructive/10"
-                  }`}>{selected.status}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Clock In</span>
-                  <span className="text-sm font-medium text-foreground">{selected.in}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Clock Out</span>
-                  <span className="text-sm font-medium text-foreground">{selected.out}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Total Hours</span>
-                  <span className="text-sm font-bold text-foreground">{selected.hours}</span>
-                </div>
-                {selectedMyEvents.length > 0 && (
-                  <div className="pt-2 mt-2 border-t border-border/60 space-y-1.5">
-                    <div className="text-xs text-muted-foreground">Event(s)</div>
-                    <div className="text-sm text-foreground">
-                      {selectedMyEvents.map((e) => `${e.title} (${e.startTime}–${e.endTime})`).join(" · ")}
+                <div className="space-y-2.5">
+                  <DetailRow label="Status">
+                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium", statusBadge[selected.status])}>
+                      {selected.status}
+                    </span>
+                  </DetailRow>
+                  <DetailRow label="Clock in" value={selected.in} />
+                  <DetailRow label="Clock out" value={selected.out} />
+                  <DetailRow label="Total hours" value={selected.hours} bold />
+                  {selectedMyEvents.length > 0 && (
+                    <div className="space-y-1 border-t border-border/60 pt-2">
+                      <p className="text-xs text-muted-foreground">Event(s)</p>
+                      <p className="text-sm text-foreground">
+                        {selectedMyEvents.map((e) => `${e.title} (${e.startTime}–${e.endTime})`).join(" · ")}
+                      </p>
                     </div>
-                    {selectedMyEvents.some((e) => e.description) ? (
-                      <div className="text-xs text-muted-foreground whitespace-pre-wrap">
-                        {selectedMyEvents.map((e) => e.description).filter(Boolean).join("\n")}
-                      </div>
-                    ) : null}
-                  </div>
-                )}
-                {selected.status === "Excused" && (
-                  <div className="pt-2 mt-2 border-t border-border/60 space-y-1.5">
-                    <div className="text-xs text-muted-foreground">Excusal description</div>
-                    <div className="text-sm text-foreground whitespace-pre-wrap">{selectedExcusal?.description?.trim() || "—"}</div>
-                    <div className="text-xs text-muted-foreground mt-2">Excuse letter</div>
-                    <div className="text-sm text-foreground">
-                      {selectedExcusal?.excuseLetters?.length ? selectedExcusal.excuseLetters.join(", ") : "—"}
+                  )}
+                  {selected.status === "Excused" && (
+                    <div className="space-y-1 border-t border-border/60 pt-2">
+                      <p className="text-xs text-muted-foreground">Excusal description</p>
+                      <p className="whitespace-pre-wrap text-sm text-foreground">
+                        {selectedExcusal?.description?.trim() || "—"}
+                      </p>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
               )}
             </div>
           )}
+
           {selectedDate && isAdmin && (
-            <div className="bg-card rounded-xl border border-border p-5">
-              <h3 className="font-display font-bold text-foreground mb-3">Admin controls</h3>
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h3 className="mb-3 font-display font-bold text-foreground">Admin controls</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Type</span>
@@ -328,7 +426,7 @@ export default function Attendance() {
                       setDayConfigByDate((prev) => ({
                         ...prev,
                         [selectedDate]: {
-                          ...(getDayConfig(selectedDate)),
+                          ...getDayConfig(selectedDate),
                           type: e.target.value as "no_work" | "workday" | "holiday",
                         },
                       }))
@@ -340,83 +438,82 @@ export default function Attendance() {
                     <option value="holiday">Holiday</option>
                   </select>
                 </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[11px] text-muted-foreground">Start time</label>
-                    <input
-                      type="time"
-                      value={selectedDayConfig?.startTime ?? "09:00"}
-                      onChange={(e) =>
-                        setDayConfigByDate((prev) => ({
-                          ...prev,
-                          [selectedDate]: {
-                            ...(getDayConfig(selectedDate)),
-                            startTime: e.target.value || "09:00",
-                          },
-                        }))
-                      }
-                      className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] text-muted-foreground">End time</label>
-                    <input
-                      type="time"
-                      value={selectedDayConfig?.endTime ?? "18:00"}
-                      onChange={(e) =>
-                        setDayConfigByDate((prev) => ({
-                          ...prev,
-                          [selectedDate]: {
-                            ...(getDayConfig(selectedDate)),
-                            endTime: e.target.value || "18:00",
-                          },
-                        }))
-                      }
-                      className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                    />
-                  </div>
-                </div>
-
                 <button
                   type="button"
-                  onClick={() => {
-                    setDayConfigByDate((prev) => ({ ...prev, [selectedDate]: undefined }));
-                  }}
+                  onClick={() => setDayConfigByDate((prev) => ({ ...prev, [selectedDate]: undefined }))}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
                 >
-                  Clear day override for this date
+                  Clear day override
                 </button>
               </div>
             </div>
           )}
 
-          {/* Weekly hours */}
-          <div className="bg-card rounded-xl border border-border p-5">
-            <h3 className="font-display font-bold text-foreground mb-3">This Week</h3>
-            <div className="space-y-2">
-              {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day, i) => {
-                const hours = [9, 9.25, 9.03, 9.25, 9.2];
-                const maxH = 10;
-                return (
-                  <div key={day} className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground w-8">{day}</span>
-                    <div className="flex-1 h-5 bg-muted rounded-md overflow-hidden">
-                      <div className="h-full bg-accent rounded-md flex items-center justify-end pr-2" style={{ width: `${(hours[i] / maxH) * 100}%` }}>
-                        <span className="text-[10px] font-medium text-accent-foreground">{hours[i]}h</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Total</span>
-              <span className="text-sm font-bold font-display text-foreground">45h 43m</span>
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className={cn("h-2.5 w-2.5 rounded-full", statusColor.Present)} />
+                Present
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className={cn("h-2.5 w-2.5 rounded-full", statusColor.Late)} />
+                Late
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className={cn("h-2.5 w-2.5 rounded-full", statusColor.Absent)} />
+                Absent
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className={cn("h-2.5 w-2.5 rounded-full", statusColor.Excused)} />
+                Excused
+              </span>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SummaryRow({
+  icon: Icon,
+  iconClass,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  iconClass: string;
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="flex items-center gap-2">
+        <Icon className={cn("h-4 w-4", iconClass)} />
+        {label}
+      </span>
+      <span className="font-bold text-foreground">{value}</span>
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  bold,
+  children,
+}: {
+  label: string;
+  value?: string;
+  bold?: boolean;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      {children ?? (
+        <span className={cn("text-sm text-foreground", bold && "font-bold")}>{value}</span>
+      )}
     </div>
   );
 }
