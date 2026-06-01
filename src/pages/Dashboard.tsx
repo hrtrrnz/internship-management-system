@@ -1,5 +1,115 @@
-import { Clock, CheckSquare, FileText, Users, LogIn, LogOut, ExternalLink, Building2, Smile } from "lucide-react";
-import { useState, useEffect } from "react";
+import {
+  Clock,
+  CheckSquare,
+  FileText,
+  Users,
+  LogIn,
+  LogOut,
+  ExternalLink,
+  Building2,
+  Smile,
+  Upload,
+  X,
+  ChevronDown,
+  Circle,
+} from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import { getInternTasks, type TaskItem } from "@/lib/internTasks";
+import { ASSIGNED_COMPANY_OPTIONS, loadAssignedCompany, saveAssignedCompany } from "@/lib/assignedCompanies";
+import { DEMO_STUDENT_NAME } from "@/lib/internRoster";
+
+const OFFICE_LOCATION_OPTIONS = ["HYT Business Center", "Atlanta Office"] as const;
+
+const MAX_ACCOMPLISHMENT_REPORT_BYTES = 10 * 1024 * 1024;
+
+type UploadedAccomplishmentReport = {
+  fileName: string;
+  fileSizeBytes: number;
+  uploadedAt: string;
+};
+
+function formatReportFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const dailyLogSelectTriggerClass =
+  "mt-1 h-auto min-h-[2.75rem] w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm font-normal text-muted-foreground shadow-none focus:ring-2 focus:ring-ring focus:ring-offset-0 data-[placeholder]:text-muted-foreground";
+
+const dailyLogSelectMenuClass =
+  "z-[200] max-h-60 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-md w-[var(--radix-popover-trigger-width)]";
+
+type DailyLogSelectProps = {
+  value: string;
+  onValueChange: (value: string) => void;
+  placeholder: string;
+  options: readonly string[];
+};
+
+function DailyLogSelect({ value, onValueChange, placeholder, options }: DailyLogSelectProps) {
+  const [open, setOpen] = useState(false);
+  const displayLabel = value || placeholder;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen} modal={false}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-expanded={open}
+          className={cn(
+            dailyLogSelectTriggerClass,
+            "flex items-center justify-between gap-2 text-left",
+            !value && "text-muted-foreground",
+          )}
+        >
+          <span className="truncate">{displayLabel}</span>
+          <ChevronDown
+            className={cn("h-4 w-4 shrink-0 opacity-50 transition-transform", open && "rotate-180")}
+            aria-hidden
+          />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        side="bottom"
+        sideOffset={4}
+        avoidCollisions={false}
+        className={dailyLogSelectMenuClass}
+        onOpenAutoFocus={(event) => event.preventDefault()}
+      >
+        <ul className="max-h-52 overflow-y-auto" role="listbox">
+          {options.map((option) => {
+            const selected = value === option;
+            return (
+              <li key={option} role="option" aria-selected={selected}>
+                <button
+                  type="button"
+                  className={cn(
+                    "flex w-full rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                    selected && "bg-accent/50 font-medium",
+                  )}
+                  onClick={() => {
+                    onValueChange(option);
+                    setOpen(false);
+                  }}
+                >
+                  {option}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 function StatCard({ icon: Icon, value, label, sub, colorClass }: {
   icon: React.ElementType; value: string; label: string; sub: string; colorClass: string;
@@ -61,16 +171,42 @@ const attendanceEntries = [
   { date: "Mar 17", time: "8:00 AM – 5:00 PM", status: "In" },
 ];
 
-const todayTasks = [
-  { label: "Submit morning report", time: "9:00 AM", done: true },
-  { label: "Team standup meeting", time: "10:00 AM", done: true },
-  { label: "Review client proposal", time: "11:00 AM", done: true },
-  { label: "Finish module 3 quiz", time: "Due today", done: false },
-  { label: "Upload accomplishment report", time: "5:00 PM", done: false },
-];
+const internTasks = getInternTasks();
+const pendingTasks = internTasks.filter((t) => t.status === "Pending");
+const inProgressTasks = internTasks.filter((t) => t.status === "In Progress");
 
 const INDIVIDUAL_LOGSHEET_URL = "https://docs.google.com/spreadsheets/d/1nz5LZ-USw7XH9qlRkzEa7WRXy7gzVort/edit?gid=1568030268#gid=1568030268";
 const BATCH_DAILY_ATTENDANCE_URL = "https://docs.google.com/spreadsheets/d/1Dhf9qzRfnLJq04vK5GwRdfsdqNxNjYow8MQIBB9qLLc/edit?pli=1&gid=923080193#gid=923080193";
+
+/** Scroll area fits exactly three summary rows (h-9 each). */
+const TODO_PANEL_HEIGHT_CLASS = "h-[6.75rem]";
+const TODO_ROW_CLASS = "flex h-9 shrink-0 items-center";
+
+function TodoTaskItems({ tasks, emptyMessage }: { tasks: TaskItem[]; emptyMessage: string }) {
+  if (tasks.length === 0) {
+    return (
+      <p className="flex h-full items-center justify-center px-3 text-center text-sm text-muted-foreground">
+        {emptyMessage}
+      </p>
+    );
+  }
+
+  return (
+    <ul>
+      {tasks.map((task) => (
+        <li key={task.id} className={TODO_ROW_CLASS}>
+          <Link
+            to={`/tasks?task=${task.id}`}
+            className="flex w-full items-center justify-between gap-3 rounded-md px-2 text-sm transition-colors hover:bg-muted/50"
+          >
+            <span className="min-w-0 flex-1 truncate font-medium text-foreground">{task.title}</span>
+            <span className="shrink-0 text-xs tabular-nums text-muted-foreground">Due {task.due}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function formatDateTime(value: Date | null) {
   if (!value) return "—";
@@ -87,19 +223,56 @@ export default function Dashboard() {
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [clockInTime, setClockInTime] = useState<Date | null>(null);
   const [clockOutTime, setClockOutTime] = useState<Date | null>(null);
+  const [assignedCompany, setAssignedCompany] = useState(loadAssignedCompany);
+  const [officeLocation, setOfficeLocation] = useState("");
+  const [accomplishmentReport, setAccomplishmentReport] = useState<UploadedAccomplishmentReport | null>(null);
+  const reportInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAccomplishmentReportChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const isPdf =
+      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      toast.error("Please upload a PDF file.");
+      return;
+    }
+    if (file.size > MAX_ACCOMPLISHMENT_REPORT_BYTES) {
+      toast.error("PDF must be 10 MB or smaller.");
+      return;
+    }
+
+    setAccomplishmentReport({
+      fileName: file.name,
+      fileSizeBytes: file.size,
+      uploadedAt: new Date().toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+    });
+    toast.success("Accomplishment report attached");
+  };
 
   const handleClockIn = () => {
     if (isClockedIn) return;
     setClockInTime(new Date());
     setClockOutTime(null);
+    setAccomplishmentReport(null);
     setIsClockedIn(true);
   };
 
   const handleClockOut = () => {
     if (!isClockedIn) return;
     setClockOutTime(new Date());
+    setAccomplishmentReport(null);
     setIsClockedIn(false);
   };
+
+  const isClockOutMode = isClockedIn;
 
   return (
     <div className="space-y-6">
@@ -183,7 +356,7 @@ export default function Dashboard() {
               <div>
                 <label className="text-xs font-semibold text-foreground">Full Name</label>
                 <div className="mt-1 px-3 py-2.5 rounded-lg bg-muted text-sm text-foreground flex items-center gap-2">
-                  <Users className="w-4 h-4 text-muted-foreground" /> James Aeron Borja
+                  <Users className="w-4 h-4 text-muted-foreground" /> {DEMO_STUDENT_NAME}
                 </div>
               </div>
               <div>
@@ -197,33 +370,95 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="text-xs font-semibold text-foreground">Assigned Company <span className="text-destructive">*</span></label>
-                <select className="mt-1 w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring">
-                  <option>Select company...</option>
-                </select>
+                <DailyLogSelect
+                  value={assignedCompany}
+                  onValueChange={(value) => {
+                    setAssignedCompany(value);
+                    saveAssignedCompany(value);
+                  }}
+                  placeholder="Select company..."
+                  options={ASSIGNED_COMPANY_OPTIONS}
+                />
               </div>
               <div>
                 <label className="text-xs font-semibold text-foreground">Office Location <span className="text-destructive">*</span></label>
-                <select className="mt-1 w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring">
-                  <option>Select location...</option>
-                  <option>HYT Business Center</option>
-                  <option>Atlanta Office</option>
-                </select>
+                <DailyLogSelect
+                  value={officeLocation}
+                  onValueChange={setOfficeLocation}
+                  placeholder="Select location..."
+                  options={OFFICE_LOCATION_OPTIONS}
+                />
               </div>
             </div>
 
-            <div className="mt-4">
-              <label className="text-xs font-semibold text-foreground">Accomplishment Report <span className="text-destructive">*</span></label>
-              <input
-                type="text"
-                placeholder="Paste Google Drive link here..."
-                className="mt-1 w-full px-3 py-2.5 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Share the link with talent.dreamacademy@gmail.com and hr.dreamacademy@gmail.com ·
-                {" "}
-                {isClockedIn ? "you are currently in clock-out mode." : "you are currently in clock-in mode."}
-              </p>
-            </div>
+            {isClockOutMode ? (
+              <div className="mt-4">
+                <label className="text-xs font-semibold text-foreground">
+                  Accomplishment Report <span className="text-destructive">*</span>
+                </label>
+                <input
+                  ref={reportInputRef}
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  className="sr-only"
+                  aria-label="Upload accomplishment report PDF"
+                  onChange={handleAccomplishmentReportChange}
+                />
+                {accomplishmentReport ? (
+                  <div className="mt-1 flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <FileText className="h-4 w-4 shrink-0 text-stat-blue" aria-hidden />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-foreground">{accomplishmentReport.fileName}</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {formatReportFileSize(accomplishmentReport.fileSizeBytes)} · Attached{" "}
+                          {accomplishmentReport.uploadedAt}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={() => reportInputRef.current?.click()}
+                      >
+                        Replace
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground"
+                        aria-label="Remove accomplishment report"
+                        onClick={() => {
+                          setAccomplishmentReport(null);
+                          toast.success("Accomplishment report removed");
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => reportInputRef.current?.click()}
+                    className="mt-1 flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-background px-4 py-6 text-center transition-colors hover:border-primary/40 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Upload className="h-5 w-5 text-muted-foreground" aria-hidden />
+                    <span className="text-sm font-medium text-foreground">Upload PDF</span>
+                    <span className="text-xs text-muted-foreground">
+                      Today&apos;s accomplishment report · PDF only · max 10 MB
+                    </span>
+                  </button>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">
+                  Attach your daily accomplishment report before submitting clock-out.
+                </p>
+              </div>
+            ) : null}
 
             <div className="mt-4">
               <label className="text-xs font-semibold text-foreground">How's your day today? <Smile className="w-3.5 h-3.5 inline text-stat-orange" /></label>
@@ -248,21 +483,53 @@ export default function Dashboard() {
         {/* Right column */}
         <div className="space-y-4">
           <div className="bg-card rounded-xl border border-border/80 p-5 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display font-bold text-foreground">Today's Tasks</h3>
-              <span className="text-xs text-muted-foreground">{todayTasks.filter(t => t.done).length} of {todayTasks.length} done</span>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h3 className="font-display font-bold text-foreground">To-Do</h3>
+              <Link to="/tasks" className="text-xs font-medium text-primary hover:underline">
+                View tasks
+              </Link>
             </div>
-            <ul className="space-y-2.5">
-              {todayTasks.map((t) => (
-                <li key={t.label} className={`flex items-center gap-3 text-sm px-3 py-2 rounded-lg ${t.done ? 'bg-stat-green-bg' : 'bg-muted'}`}>
-                  <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${t.done ? 'bg-stat-green' : 'border border-border'}`}>
-                    {t.done && <CheckSquare className="w-3.5 h-3.5 text-white" />}
-                  </div>
-                  <span className={`flex-1 ${t.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{t.label}</span>
-                  <span className={`text-xs shrink-0 ${t.done ? 'text-muted-foreground' : 'text-destructive font-medium'}`}>{t.time}</span>
-                </li>
-              ))}
-            </ul>
+            {pendingTasks.length === 0 && inProgressTasks.length === 0 ? (
+              <p
+                className={cn(
+                  "rounded-lg border border-dashed border-border bg-muted/10 px-3 text-center text-sm text-muted-foreground",
+                  TODO_PANEL_HEIGHT_CLASS,
+                  "flex items-center justify-center",
+                )}
+              >
+                All clear — no pending or in-progress tasks.
+              </p>
+            ) : (
+              <Tabs
+                defaultValue={pendingTasks.length > 0 ? "pending" : "in-progress"}
+                className="w-full"
+              >
+                <TabsList className="grid h-9 w-full grid-cols-2">
+                  <TabsTrigger value="pending" className="gap-1.5 text-xs">
+                    <Circle className="h-3.5 w-3.5" aria-hidden />
+                    Pending
+                    <span className="tabular-nums opacity-80">({pendingTasks.length})</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="in-progress" className="gap-1.5 text-xs">
+                    <Clock className="h-3.5 w-3.5" aria-hidden />
+                    In progress
+                    <span className="tabular-nums opacity-80">({inProgressTasks.length})</span>
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent
+                  value="pending"
+                  className={cn("mt-3 overflow-y-auto pr-0.5", TODO_PANEL_HEIGHT_CLASS)}
+                >
+                  <TodoTaskItems tasks={pendingTasks} emptyMessage="No pending tasks." />
+                </TabsContent>
+                <TabsContent
+                  value="in-progress"
+                  className={cn("mt-3 overflow-y-auto pr-0.5", TODO_PANEL_HEIGHT_CLASS)}
+                >
+                  <TodoTaskItems tasks={inProgressTasks} emptyMessage="No tasks in progress." />
+                </TabsContent>
+              </Tabs>
+            )}
           </div>
 
           <div className="bg-card rounded-xl border border-border/80 p-5 shadow-sm">

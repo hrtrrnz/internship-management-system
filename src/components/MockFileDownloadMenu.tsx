@@ -12,6 +12,8 @@ import { mockDownloadAsPdf, mockDownloadAsWord } from "@/lib/mockFileDownload";
 type MockFileDownloadMenuProps = {
   /** Display name used in the toast (e.g. file name or report title). */
   fileLabel: string;
+  /** When set, downloads or opens this asset instead of a mock file. */
+  fileUrl?: string;
   /** Ghost icon trigger (default) or labeled button. */
   variant?: "icon" | "button";
   className?: string;
@@ -19,8 +21,17 @@ type MockFileDownloadMenuProps = {
   align?: "start" | "center" | "end";
 };
 
+function downloadAsset(url: string, fileName: string) {
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.rel = "noopener noreferrer";
+  anchor.click();
+}
+
 export function MockFileDownloadMenu({
   fileLabel,
+  fileUrl,
   variant = "icon",
   className,
   triggerClassName,
@@ -46,8 +57,21 @@ export function MockFileDownloadMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} className="z-[200] min-w-[12rem]">
-        <DropdownMenuItem onClick={() => mockDownloadAsPdf(fileLabel)}>Download as PDF</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => mockDownloadAsWord(fileLabel)}>Download as Word</DropdownMenuItem>
+        {fileUrl ? (
+          <>
+            <DropdownMenuItem onClick={() => downloadAsset(fileUrl, fileLabel)}>Download PDF</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                Open in new tab
+              </a>
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem onClick={() => mockDownloadAsPdf(fileLabel)}>Download as PDF</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => mockDownloadAsWord(fileLabel)}>Download as Word</DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

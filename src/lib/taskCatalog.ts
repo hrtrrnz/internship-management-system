@@ -45,7 +45,7 @@ export const BATCH_TASK_TITLES = [
   "Business Calendar",
 ] as const;
 
-/** Hart Lawrence Binay — sole active in-progress deliverable. */
+/** Hart Lawrence Binay — primary in-progress deliverable (always in the active trio). */
 export const HART_IN_PROGRESS_TASK_TITLE = "Internship Management System: Final Revision";
 
 export const BATCH_START: Record<InternBatch, Date> = {
@@ -137,8 +137,73 @@ function categorizeTask(title: string): string {
   return "Development";
 }
 
+const TASK_DESCRIPTIONS: Record<string, string> = {
+  "Know Our Partners":
+    "Compile partner organization profiles, contact points, and collaboration history into a single reference deck for onboarding.",
+  "Visitor Management System (VMS) Slides":
+    "Draft slide narrative for visitor check-in flow, kiosk screens, and admin dashboard walkthrough for stakeholder review.",
+  "Visitor Management System (VMS)":
+    "Wireframe the end-to-end VMS journey—pre-registration, badge printing, host notifications, and exit logging.",
+  "LMS (Initial Design)":
+    "Produce low-fidelity LMS screens for course catalog, enrollment, and mentor grading with annotated UX notes.",
+  "Logo Design Options for KGC":
+    "Present three KGC logo directions with color palettes, typography pairings, and usage on light/dark backgrounds.",
+  "LMS Presentation":
+    "Build a mentor-facing LMS demo deck covering learner paths, assessment types, and reporting widgets.",
+  "LMS (Revised)":
+    "Apply feedback from the initial LMS review—tighten navigation hierarchy and clarify progress tracking visuals.",
+  "HYTFI System Proposal":
+    "Outline HYTFI module scope, integration touchpoints, timeline, and resource assumptions for leadership sign-off.",
+  "IMS Presentation":
+    "Prepare slides that map internship workflows to IMS modules: tasks, attendance, reports, and evaluations.",
+  "HRMS E GOV":
+    "Document e-government HRMS requirements for leave, payroll export, and employee self-service alignment.",
+  "Additional Burger Bite Logos":
+    "Explore alternate Burger Bite mark treatments for packaging, storefront signage, and social avatars.",
+  "Internship Management System: Final Revision":
+    "Polish IMS UI consistency, close open mentor/admin flows, and prepare deployment notes for the Dream Academy portal.",
+  "Technical Skills Development Documentation":
+    "Log weekly skill targets, training links, and competency checkpoints tied to your Tech & Innovation roadmap.",
+  "AFFI Group Posts":
+    "Design a coordinated AFFI group social carousel with shared templates and per-chapter caption variants.",
+  "AFFI Individuals":
+    "Create spotlight graphics for individual AFFI members including quotes, roles, and chapter branding.",
+  "Project HYTech System Website/Prototype":
+    "Prototype key HYTech marketing pages—hero, services grid, case studies, and contact funnel—in Figma.",
+  Quotations:
+    "Format supplier quotations with line items, VAT notes, and comparison tables for procurement review.",
+  "Wheel Supplier Quotations":
+    "Collect and normalize wheel supplier quotes; highlight lead time, MOQ, and freight for operations.",
+  "HYTFI IMS Flyer":
+    "Lay out a single-page HYTFI IMS flyer emphasizing internship tracking benefits and QR sign-up.",
+  "HYTFI IMS Brochure":
+    "Expand the flyer into a tri-fold brochure with program stats, mentor quotes, and implementation steps.",
+  "HYTFI IMS Socal Media Post":
+    "Size IMS launch creative for Facebook and LinkedIn, including safe zones and CTA button placement.",
+  "HYTFI IMS Portfolio":
+    "Assemble an IMS portfolio section with screenshots, feature captions, and before/after UI improvements.",
+  "Printed Multiflex KSI ID":
+    "Finalize print-ready Multiflex KSI ID artwork with bleed, photo placement, and lamination specs.",
+  "Printed Kalin KSI ID":
+    "Adapt the KSI ID template for Kalin branding—logo sizing, barcode zone, and back-panel guidelines.",
+  "Printed INOAC Cebu KSI ID":
+    "Localize INOAC Cebu ID cards with branch address, emergency contact block, and brand color bars.",
+  "Printed EBPI KSI ID":
+    "Proof EBPI employee ID sheets for color accuracy and sequential numbering before bulk print.",
+  "Printed  Roberts KSI ID":
+    "Deliver Roberts KSI ID variants for staff vs. contractor roles with distinct stripe colors.",
+  "HYTFI Ad Flyer 1":
+    "Concept A: HYTFI ad flyer focused on internship analytics—charts, KPI callouts, and testimonial strip.",
+  "HYTFI Ad Flyer 2":
+    "Concept B: HYTFI ad flyer highlighting mentor tools—task assignments, report review, and attendance alerts.",
+  "HYTFI Ad Flyer 3":
+    "Concept C: HYTFI ad flyer aimed at interns—mobile-friendly portal preview and application steps.",
+  "Business Calendar":
+    "Design a 2026 business calendar with key HYTFI events, holiday markers, and sponsor logo placements.",
+};
+
 function taskDescription(title: string): string {
-  return `Deliver ${title} according to unit standards, mentor review, and Dream Academy internship guidelines.`;
+  return TASK_DESCRIPTIONS[title] ?? `Complete ${title} for the Tech & Innovation unit.`;
 }
 
 function formatDueDate(date: Date): string {
@@ -166,9 +231,7 @@ function assignmentStatus(internId: string, taskId: number, taskTitle: string, d
   const h = hashString(`${internId}:${taskId}`);
 
   if (internId === DEMO_STUDENT_INTERN_ID) {
-    if (taskTitle === HART_IN_PROGRESS_TASK_TITLE) return "In Progress";
-    if (dueTime > ref) return "Pending";
-    return "Completed";
+    return hartTaskStatusFor(taskTitle);
   }
 
   if (dueTime > ref) return "Pending";
@@ -212,16 +275,72 @@ export const TASK_CATALOG: TaskCatalogEntry[] = BATCH_TASK_TITLES.map((title, in
     title === HART_IN_PROGRESS_TASK_TITLE ? 10 + (BATCH_TASK_TITLES.length - 1) * 4 : 10 + index * 4,
 }));
 
+function getHartTaskStatusMap(): Map<string, TaskStatus> {
+  const sorted = TASK_CATALOG.map((task) => ({
+    title: task.title,
+    dueDate: dueDateForBatch("B16", task.daysFromBatchStart),
+  })).sort((a, b) => b.dueDate.getTime() - a.dueDate.getTime());
+
+  const pendingTitles: string[] = [];
+  const inProgressTitles: string[] = [];
+
+  for (const entry of sorted) {
+    if (pendingTitles.length < 3) {
+      pendingTitles.push(entry.title);
+    } else if (inProgressTitles.length < 3) {
+      inProgressTitles.push(entry.title);
+    }
+  }
+
+  const imsPendingIndex = pendingTitles.indexOf(HART_IN_PROGRESS_TASK_TITLE);
+  if (imsPendingIndex !== -1 && sorted[3]) {
+    pendingTitles[imsPendingIndex] = sorted[3].title;
+    if (!inProgressTitles.includes(HART_IN_PROGRESS_TASK_TITLE)) {
+      inProgressTitles.unshift(HART_IN_PROGRESS_TASK_TITLE);
+      if (inProgressTitles.length > 3) inProgressTitles.pop();
+    }
+  }
+
+  const statusMap = new Map<string, TaskStatus>();
+  for (const task of TASK_CATALOG) {
+    if (pendingTitles.includes(task.title)) statusMap.set(task.title, "Pending");
+    else if (inProgressTitles.includes(task.title)) statusMap.set(task.title, "In Progress");
+    else statusMap.set(task.title, "Completed");
+  }
+  return statusMap;
+}
+
+let hartTaskStatusMapCache: Map<string, TaskStatus> | null = null;
+
+function hartTaskStatusFor(title: string): TaskStatus {
+  if (!hartTaskStatusMapCache) hartTaskStatusMapCache = getHartTaskStatusMap();
+  return hartTaskStatusMapCache.get(title) ?? "Completed";
+}
+
+function hartProgressFor(title: string, status: TaskStatus, taskId: number): number {
+  if (status === "Completed") return 100;
+  if (status === "Pending") return 5 + (hashString(`${title}:p`) % 20);
+  if (title === HART_IN_PROGRESS_TASK_TITLE) return 72;
+  return 38 + (hashString(`${taskId}:ip`) % 32);
+}
+
 function applyHartAssignmentOverrides(rows: InternTaskAssignment[]): InternTaskAssignment[] {
   return rows.map((row) => {
     if (row.internId !== DEMO_STUDENT_INTERN_ID) return row;
-    if (row.title === HART_IN_PROGRESS_TASK_TITLE) {
-      return { ...row, status: "In Progress", progress: 72, updatedAt: "Today, 1:08 PM" };
-    }
-    if (row.status === "In Progress") {
-      return { ...row, status: "Completed", progress: 100 };
-    }
-    return row;
+    const status = hartTaskStatusFor(row.title);
+    return {
+      ...row,
+      status,
+      progress: hartProgressFor(row.title, status, row.taskId),
+      updatedAt:
+        status === "In Progress" && row.title === HART_IN_PROGRESS_TASK_TITLE
+          ? "Today, 1:08 PM"
+          : status === "In Progress"
+            ? "Today, 10:20 AM"
+            : status === "Pending"
+              ? "Yesterday, 4:40 PM"
+              : row.updatedAt,
+    };
   });
 }
 
@@ -267,15 +386,10 @@ export function getInternAssignments(internId: string): InternTaskAssignment[] {
 }
 
 function normalizeHartTaskBoard(tasks: TaskItem[]): TaskItem[] {
-  return tasks.map((task) => {
-    if (task.title === HART_IN_PROGRESS_TASK_TITLE) {
-      return { ...task, status: "In Progress" };
-    }
-    if (task.status === "In Progress") {
-      return { ...task, status: "Completed" };
-    }
-    return task;
-  });
+  return tasks.map((task) => ({
+    ...task,
+    status: hartTaskStatusFor(task.title),
+  }));
 }
 
 export function getInternTaskBoard(internId: string): TaskItem[] {

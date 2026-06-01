@@ -95,6 +95,10 @@
     font-family: var(--font-body);
   }
 
+  html {
+    scrollbar-gutter: stable;
+  }
+
   #root {
     min-height: 100%;
     width: 100%;

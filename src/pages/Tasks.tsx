@@ -1,15 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
-import {
-  CheckSquare,
-  Circle,
-  Clock,
-  Flag,
-  X,
-  Paperclip,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CheckSquare, Circle, Clock, Flag, Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TaskDetailModal } from "@/components/tasks/TaskDetailModal";
 import type { TaskItem } from "@/lib/internTasks";
@@ -17,7 +8,7 @@ import { internTaskCategoryStyles, getInternTaskById, getInternTasks } from "@/l
 
 const tasks = getInternTasks();
 
-const activeColumns = [
+const boardColumns = [
   {
     key: "Pending",
     label: "Pending",
@@ -36,6 +27,15 @@ const activeColumns = [
     accentBg: "bg-stat-blue-bg/50",
     borderAccent: "border-l-stat-blue",
   },
+  {
+    key: "Completed",
+    label: "Completed",
+    subtitle: "Finished deliverables",
+    icon: CheckSquare,
+    accent: "hsl(var(--stat-green))",
+    accentBg: "bg-stat-green-bg/50",
+    borderAccent: "border-l-stat-green",
+  },
 ] as const;
 
 const categoryStyles = internTaskCategoryStyles;
@@ -43,7 +43,6 @@ const categoryStyles = internTaskCategoryStyles;
 export default function Tasks() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
-  const [showCompletedModal, setShowCompletedModal] = useState(false);
   const [submissionNotes, setSubmissionNotes] = useState("");
   const [submissionLink, setSubmissionLink] = useState("");
   const [stagedFiles, setStagedFiles] = useState<string[]>([]);
@@ -118,24 +117,15 @@ export default function Tasks() {
             <Clock className="h-3.5 w-3.5" />
             {inProgressCount} in progress
           </span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="gap-2 border-dashed shadow-sm"
-            onClick={() => setShowCompletedModal(true)}
-          >
-            <CheckSquare className="h-4 w-4" />
-            Completed
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
-              {completedTasks.length}
-            </span>
-          </Button>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-stat-green/25 bg-stat-green-bg/70 px-3 py-1.5 text-xs font-medium text-stat-green">
+            <CheckSquare className="h-3.5 w-3.5" />
+            {completedTasks.length} completed
+          </span>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-        {activeColumns.map((col) => {
+      <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
+        {boardColumns.map((col) => {
           const colTasks = tasks.filter((t) => t.status === col.key);
           return (
             <section
@@ -162,7 +152,7 @@ export default function Tasks() {
                 </div>
               </div>
 
-              <div className="space-y-2.5 p-3 sm:p-4">
+              <div className="max-h-[calc(100vh-14rem)] space-y-2.5 overflow-y-auto p-3 sm:p-4">
                 {colTasks.map((task) => (
                   <button
                     key={task.id}
@@ -192,8 +182,17 @@ export default function Tasks() {
                     <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{task.description}</p>
                     <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/50 pt-3">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-1 text-[11px] font-medium tabular-nums text-muted-foreground">
-                        <Clock className="h-3 w-3 shrink-0 opacity-80" />
-                        Due {task.due}
+                        {col.key === "Completed" ? (
+                          <>
+                            <CheckSquare className="h-3 w-3 shrink-0 opacity-80" />
+                            Completed · due {task.due}
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="h-3 w-3 shrink-0 opacity-80" />
+                            Due {task.due}
+                          </>
+                        )}
                       </span>
                       <span className="text-[11px] font-medium text-muted-foreground/80 transition-colors group-hover:text-primary">
                         View →
@@ -213,72 +212,6 @@ export default function Tasks() {
           );
         })}
       </div>
-
-      {showCompletedModal &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px] dark:bg-black/55"
-            role="presentation"
-            onClick={() => setShowCompletedModal(false)}
-          >
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="completed-tasks-title"
-              className="flex max-h-[min(85vh,40rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-2xl ring-1 ring-black/5 dark:ring-white/10"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex shrink-0 items-center justify-between border-b border-border/80 bg-muted/25 px-4 py-3 sm:px-5">
-                <div className="flex min-w-0 items-center gap-2">
-                  <CheckSquare className="h-4 w-4 shrink-0 text-stat-green" aria-hidden />
-                  <h3 id="completed-tasks-title" className="font-display text-sm font-semibold text-foreground">
-                    Completed tasks
-                  </h3>
-                  <span className="rounded-full bg-background px-2 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground ring-1 ring-border/60">
-                    {completedTasks.length}
-                  </span>
-                </div>
-                <Button type="button" variant="ghost" size="icon" className="shrink-0 rounded-lg" aria-label="Close" onClick={() => setShowCompletedModal(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4">
-                {completedTasks.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">No completed tasks yet.</p>
-                ) : (
-                  <ul className="space-y-2">
-                    {completedTasks.map((task) => (
-                      <li key={task.id}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            openTask(task);
-                            setShowCompletedModal(false);
-                          }}
-                          className="flex w-full items-start gap-3 rounded-xl border border-border/80 bg-background p-3 text-left shadow-sm transition-colors hover:border-primary/25 hover:bg-muted/20"
-                        >
-                          <CheckSquare className="mt-0.5 h-4 w-4 shrink-0 text-stat-green" aria-hidden />
-                          <div className="min-w-0 flex-1">
-                            <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-semibold ${categoryStyles[task.category]}`}>{task.category}</span>
-                            <p className="mt-1.5 font-display text-sm font-semibold text-foreground">{task.title}</p>
-                            <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{task.description}</p>
-                            <p className="mt-2 text-[11px] text-muted-foreground">Completed · due {task.due}</p>
-                          </div>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              <div className="shrink-0 border-t border-border/80 bg-muted/15 px-4 py-3 sm:px-5">
-                <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => setShowCompletedModal(false)}>
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
 
       <TaskDetailModal
         task={selectedTask}

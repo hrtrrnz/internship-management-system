@@ -220,8 +220,7 @@ export function buildProfileAttendanceOverrides(today: Date): Record<string, Att
 
   for (const dateStr of PROFILE_ATTENDANCE_DATES) {
     if (PROFILE_EXCUSED_DATE_SET.has(dateStr) || PROFILE_ABSENT_DATE_SET.has(dateStr)) continue;
-    const [y, m, d] = dateStr.split("-").map(Number);
-    applyOverride(dateStr, modelPresentRecord(new Date(y, m - 1, d), todayOnly));
+    applyOverride(dateStr, modelPresentRecord(new Date(dateStr), todayOnly));
   }
 
   return overrides;
