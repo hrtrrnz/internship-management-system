@@ -13,9 +13,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { TaskDetailModal } from "@/components/tasks/TaskDetailModal";
 import type { TaskItem } from "@/lib/internTasks";
-import { INTERN_TASKS, internTaskCategoryStyles, getInternTaskById } from "@/lib/internTasks";
+import { internTaskCategoryStyles, getInternTaskById, getInternTasks } from "@/lib/internTasks";
 
-const tasks = INTERN_TASKS;
+const tasks = getInternTasks();
 
 const activeColumns = [
   {

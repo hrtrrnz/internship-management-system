@@ -19,17 +19,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getInternRecentActivityRecord } from "@/lib/internAttendancePortal";
+import { getInternTaskSummariesRecord } from "@/lib/taskCatalog";
+import { getAdminInternRows } from "@/lib/internRoster";
 
-const interns = [
-  { name: "Juan dela Cruz", department: "Tech & Innovation", batch: "B16", mentor: "Maria Reyes", week: 7, progress: 78, status: "On Track" },
-  { name: "Ana Santos", department: "Tech & Innovation", batch: "B16", mentor: "Maria Reyes", week: 7, progress: 85, status: "On Track" },
-  { name: "Mark Rivera", department: "Tech & Innovation", batch: "B15", mentor: "Maria Reyes", week: 7, progress: 45, status: "At Risk" },
-  { name: "Lisa Tan", department: "Marketing", batch: "B15", mentor: "James Cruz", week: 5, progress: 62, status: "On Track" },
-  { name: "Peter Lim", department: "Operations", batch: "B15", mentor: "Elena Torres", week: 5, progress: 55, status: "On Track" },
-  { name: "Grace Yu", department: "Tech & Innovation", batch: "B14", mentor: "Roberto Lim", week: 3, progress: 30, status: "New" },
-  { name: "David Chen", department: "Data Analytics", batch: "B14", mentor: "Michael Tan", week: 3, progress: 28, status: "New" },
-  { name: "Sofia Garcia", department: "Marketing", batch: "B14", mentor: "Sarah Villanueva", week: 1, progress: 8, status: "New" },
-];
+const interns = getAdminInternRows();
 
 const statusStyles: Record<string, string> = {
   "On Track": "text-stat-green bg-stat-green-bg",
@@ -68,28 +62,19 @@ export default function AdminInterns() {
     [selectedName],
   );
 
-  const recentActivityByIntern: Record<string, { text: string; when: string; type: "report" | "attendance" | "task" }[]> = {
-    "Juan dela Cruz": [
-      { text: "Submitted daily report", when: "Today, 11:05 AM", type: "report" },
-      { text: "Clocked in", when: "Today, 7:55 AM", type: "attendance" },
-      { text: "Updated assigned task status", when: "Yesterday, 4:40 PM", type: "task" },
-    ],
-    "Ana Santos": [
-      { text: "Completed assigned task", when: "Today, 9:40 AM", type: "task" },
-      { text: "Submitted daily report", when: "Yesterday, 5:10 PM", type: "report" },
-    ],
-  };
+  const activityTypes = ["report", "attendance", "task"] as const;
+  const recentActivityByIntern: Record<string, { text: string; when: string; type: (typeof activityTypes)[number] }[]> =
+    Object.fromEntries(
+      Object.entries(getInternRecentActivityRecord()).map(([name, items]) => [
+        name,
+        items.map((item, index) => ({
+          ...item,
+          type: activityTypes[index % activityTypes.length],
+        })),
+      ]),
+    );
 
-  const tasksByIntern: Record<string, { title: string; status: "Pending" | "In Progress" | "Completed"; due: string }[]> = {
-    "Juan dela Cruz": [
-      { title: "Complete TypeScript Assessment", status: "In Progress", due: "Mar 25" },
-      { title: "Submit Weekly Progress Report", status: "Pending", due: "Mar 27" },
-    ],
-    "Ana Santos": [
-      { title: "Complete TypeScript Assessment", status: "Completed", due: "Mar 25" },
-      { title: "Submit Weekly Progress Report", status: "In Progress", due: "Mar 27" },
-    ],
-  };
+  const tasksByIntern = getInternTaskSummariesRecord();
 
   const openDetails = (name: string) => {
     setSelectedName(name);

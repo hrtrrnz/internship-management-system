@@ -3,17 +3,22 @@ import { Clock, CheckCircle, AlertCircle, Calendar, ChevronLeft, ChevronRight, C
 import { toast } from "@/hooks/use-toast";
 import { MockFileDownloadMenu } from "@/components/MockFileDownloadMenu";
 import { useAttendancePolicy } from "@/contexts/AttendancePolicyContext";
+import { getPortalTodayLogs, PORTAL_ATTENDANCE_DATE } from "@/lib/internAttendancePortal";
 
-const todayLogs = [
-  { name: "Ana Santos", dept: "Tech & Innovation", in: "7:55 AM", status: "Present" },
-  { name: "Peter Lim", dept: "Operations", in: "8:00 AM", status: "Present" },
-  { name: "Grace Yu", dept: "Tech & Innovation", in: "7:50 AM", status: "Present" },
-  { name: "Sofia Garcia", dept: "Marketing", in: "7:58 AM", status: "Present" },
-  { name: "Lisa Tan", dept: "Marketing", in: "8:10 AM", status: "Late" },
-  { name: "David Chen", dept: "Data Analytics", in: "8:20 AM", status: "Late" },
-  { name: "Juan dela Cruz", dept: "Tech & Innovation", in: "—", status: "Absent" },
-  { name: "Mark Rivera", dept: "Tech & Innovation", in: "—", status: "Absent" },
-];
+function mapPortalStatus(status: string): "Present" | "Late" | "Absent" {
+  if (status === "Late") return "Late";
+  if (status === "Present" || status === "Excused") return "Present";
+  return "Absent";
+}
+
+function buildTodayLogs() {
+  return getPortalTodayLogs(PORTAL_ATTENDANCE_DATE).map((log) => ({
+    name: log.name,
+    dept: log.dept,
+    in: log.in,
+    status: mapPortalStatus(log.status),
+  }));
+}
 
 const weeklyHeatmap = [
   { name: "Juan", mon: "P", tue: "P", wed: "P", thu: "L", fri: "P" },
@@ -47,12 +52,13 @@ function getFirstDayOfWeek(year: number, month: number) {
 }
 
 export default function AdminAttendance() {
+  const todayLogs = useMemo(() => buildTodayLogs(), []);
   const { dayConfigByDate, setDayConfigByDate, eventsByDate, setEventsByDate, excusalByInternByDate, setExcusalByInternByDate } =
     useAttendancePolicy();
   const [selectedDate, setSelectedDate] = useState<string>("2026-03-24");
   const [currentMonth, setCurrentMonth] = useState(2); // March = 2
   const [currentYear] = useState(2026);
-  const [excusalInternNames, setExcusalInternNames] = useState<string[]>([todayLogs[0]?.name ?? "Juan dela Cruz"]);
+  const [excusalInternNames, setExcusalInternNames] = useState<string[]>(["Hart Lawrence Binay"]);
   const [excusalDate, setExcusalDate] = useState<string>("2026-03-24");
   const [excusalDescription, setExcusalDescription] = useState("");
   const [excusalLetters, setExcusalLetters] = useState<string[]>([]);

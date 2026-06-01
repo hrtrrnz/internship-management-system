@@ -1,10 +1,9 @@
 import type { PrerequisiteItem } from "@/components/evaluation/evaluationShared";
 
-/** Stable roster id for the demo student — must match mentor Evaluation intern ids and form assignments. */
-export const DEMO_STUDENT_INTERN_ID = "juan";
+export { DEMO_STUDENT_INTERN_ID, DEMO_STUDENT_NAME } from "./internRoster";
 
-/** Juan dela Cruz — matches what the intern Evaluation page shows (single source for mentor/admin alignment). */
-export const demoInternJuanCompletedWorks = [
+/** Hart Lawrence Binay — matches what the intern Evaluation page shows (single source for mentor/admin alignment). */
+export const demoInternHartCompletedWorks = [
   {
     id: "cw1",
     title: "Daily reports — March cycle",
@@ -31,7 +30,8 @@ export const demoInternJuanCompletedWorks = [
   },
 ] as const;
 
-export const demoInternJuanPrerequisites: PrerequisiteItem[] = [
+export const demoInternHartPrerequisites: PrerequisiteItem[] = [
+
   {
     id: "p1",
     title: "Submit mid-internship reflection (template)",
@@ -56,15 +56,15 @@ export const demoInternJuanPrerequisites: PrerequisiteItem[] = [
   },
   {
     id: "p4",
-    title: "Sign acknowledgment · internship policies",
-    detail: "Electronic sign-off in Documents",
+    title: "Sign acknowledgment · Training Policy",
+    detail: "Electronic sign-off in Documents (Training Policy)",
     dueHint: "Required once only",
     done: false,
   },
 ];
 
-export const demoScheduleMariaReyes = {
-  evaluator: "Maria Reyes",
+export const demoScheduleJamesAeronBorja = {
+  evaluator: "James Aeron Borja",
   evaluationWindowOpens: "Apr 14, 2026",
   plannedSession: "Apr 15, 2026 · 2:00 PM",
   offboardingDate: "Apr 18, 2026",

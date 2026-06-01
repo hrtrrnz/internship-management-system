@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getAllInternNames } from "@/lib/internRoster";
+
+const allInternNames = getAllInternNames();
 
 type Department = {
   name: string;
@@ -26,56 +29,56 @@ const initialDepartments: Department[] = [
   {
     name: "Technology & Innovation",
     head: "Dr. Roberto Lim",
-    mentors: 3,
-    interns: 8,
+    mentors: 1,
+    interns: allInternNames.length,
     color: "--stat-blue",
-    mentorMembers: ["Dr. Roberto Lim", "Maria Reyes", "Noah Villanueva"],
-    internMembers: ["Juan dela Cruz", "Ana Santos", "Mark Rivera", "Grace Yu", "Alex Cruz", "Bea Santos", "Renz Castillo", "Ivy Mendoza"],
+    mentorMembers: ["James Aeron Borja"],
+    internMembers: allInternNames,
   },
   {
     name: "Marketing",
     head: "Sarah Villanueva",
-    mentors: 2,
-    interns: 6,
+    mentors: 0,
+    interns: 0,
     color: "--stat-orange",
-    mentorMembers: ["Sarah Villanueva", "James Cruz"],
-    internMembers: ["Lisa Tan", "Sofia Garcia", "Mika Sarmiento", "Lia Tan", "Noah Villanueva", "Sara Kim"],
+    mentorMembers: ["James Aeron Borja"],
+    internMembers: [],
   },
   {
     name: "Operations",
     head: "Elena Torres",
-    mentors: 1,
-    interns: 4,
+    mentors: 0,
+    interns: 0,
     color: "--stat-green",
-    mentorMembers: ["Elena Torres"],
-    internMembers: ["Peter Lim", "Marco Reyes", "Adrian Cole", "Zed Alonzo"],
+    mentorMembers: ["James Aeron Borja"],
+    internMembers: [],
   },
   {
     name: "Data Analytics",
     head: "Michael Tan",
-    mentors: 1,
-    interns: 3,
+    mentors: 0,
+    interns: 0,
     color: "--stat-emerald",
-    mentorMembers: ["Michael Tan"],
-    internMembers: ["David Chen", "Adrian Cole", "Renz Castillo"],
+    mentorMembers: ["James Aeron Borja"],
+    internMembers: [],
   },
   {
     name: "Human Resources",
     head: "Patricia Cruz",
-    mentors: 1,
-    interns: 2,
+    mentors: 0,
+    interns: 0,
     color: "--stat-blue",
-    mentorMembers: ["Patricia Cruz"],
-    internMembers: ["Sofia Garcia", "Ivy Mendoza"],
+    mentorMembers: ["James Aeron Borja"],
+    internMembers: [],
   },
   {
     name: "Finance",
     head: "Antonio Reyes",
     mentors: 0,
-    interns: 1,
+    interns: 0,
     color: "--stat-orange",
     mentorMembers: [],
-    internMembers: ["Zed Alonzo"],
+    internMembers: [],
   },
 ];
 

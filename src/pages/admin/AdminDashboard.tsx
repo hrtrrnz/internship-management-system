@@ -6,7 +6,7 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div className="grid grid-cols-4 gap-4">
         <StatCard icon={Users} value="42" label="Total Users" sub="↑4 this month" color="--stat-blue" />
-        <StatCard icon={GraduationCap} value="24" label="Active Interns" sub="3 batches" color="--stat-green" />
+        <StatCard icon={GraduationCap} value="21" label="Active Interns" sub="3 batches" color="--stat-green" />
         <StatCard icon={Star} value="8" label="Mentors" sub="All active" color="--stat-orange" />
         <StatCard icon={Building} value="6" label="Departments" sub="2 with openings" color="--stat-emerald" />
       </div>
@@ -70,8 +70,8 @@ export default function AdminDashboard() {
             <div className="space-y-3">
               {[
                 { text: "New intern Sofia Garcia registered", time: "2h ago", type: "info" },
-                { text: "Maria Reyes completed 3 evaluations", time: "4h ago", type: "success" },
-                { text: "Mark Rivera flagged for low attendance", time: "1d ago", type: "warning" },
+                { text: "James Aeron Borja completed 3 evaluations", time: "4h ago", type: "success" },
+                { text: "Batch 15 weekly reports submitted on time", time: "1d ago", type: "success" },
                 { text: "Batch 2026-Q1 internship started", time: "3d ago", type: "info" },
                 { text: "System maintenance completed", time: "5d ago", type: "info" },
               ].map((a, i) => (

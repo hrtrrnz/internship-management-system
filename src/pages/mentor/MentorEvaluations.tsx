@@ -22,13 +22,18 @@ import {
   ScheduleStatsGrid,
   type PrerequisiteItem,
 } from "@/components/evaluation/evaluationShared";
-import { demoInternJuanCompletedWorks, demoInternJuanPrerequisites, demoScheduleMariaReyes } from "@/lib/evaluationDemoData";
+import {
+  demoInternHartCompletedWorks,
+  demoInternHartPrerequisites,
+  demoScheduleJamesAeronBorja,
+} from "@/lib/evaluationDemoData";
+import { DEMO_STUDENT_INTERN_ID, DEMO_STUDENT_NAME } from "@/lib/internRoster";
 
 type InternEvalCard = {
   id: string;
   name: string;
   avatar: string;
-  schedule: typeof demoScheduleMariaReyes;
+  schedule: typeof demoScheduleJamesAeronBorja;
   completedWorks: { id: string; title: string; detail: string; completedAt: string }[];
   internPrerequisites: PrerequisiteItem[];
   mentorPrep: PrerequisiteItem[];
@@ -52,21 +57,21 @@ const mentorPrepTemplate: Omit<PrerequisiteItem, "done">[] = [
 
 const interns: InternEvalCard[] = [
   {
-    id: "juan",
-    name: "Juan dela Cruz",
-    avatar: "JD",
-    schedule: demoScheduleMariaReyes,
-    completedWorks: [...demoInternJuanCompletedWorks],
-    internPrerequisites: demoInternJuanPrerequisites,
+    id: DEMO_STUDENT_INTERN_ID,
+    name: DEMO_STUDENT_NAME,
+    avatar: "HB",
+    schedule: demoScheduleJamesAeronBorja,
+    completedWorks: [...demoInternHartCompletedWorks],
+    internPrerequisites: demoInternHartPrerequisites,
     mentorPrep: mentorPrepTemplate.map((t, i) => ({ ...t, done: i === 0 })),
     sessionStatus: "scheduled",
   },
   {
-    id: "ana",
-    name: "Ana Santos",
-    avatar: "AS",
+    id: "ian-belarmino",
+    name: "Ian Belarmino",
+    avatar: "IB",
     schedule: {
-      evaluator: "Maria Reyes",
+      evaluator: "James Aeron Borja",
       evaluationWindowOpens: "Apr 21, 2026",
       plannedSession: "Apr 22, 2026 · 10:30 AM",
       offboardingDate: "Apr 25, 2026",
@@ -86,20 +91,20 @@ const interns: InternEvalCard[] = [
       },
     ],
     internPrerequisites: [
-      { id: "p1", title: demoInternJuanPrerequisites[0].title, detail: demoInternJuanPrerequisites[0].detail, dueHint: demoInternJuanPrerequisites[0].dueHint, done: true },
-      { id: "p2", title: demoInternJuanPrerequisites[1].title, detail: demoInternJuanPrerequisites[1].detail, dueHint: demoInternJuanPrerequisites[1].dueHint, done: false },
-      { id: "p3", title: demoInternJuanPrerequisites[2].title, detail: demoInternJuanPrerequisites[2].detail, dueHint: demoInternJuanPrerequisites[2].dueHint, done: false },
-      { id: "p4", title: demoInternJuanPrerequisites[3].title, detail: demoInternJuanPrerequisites[3].detail, dueHint: demoInternJuanPrerequisites[3].dueHint, done: false },
+      { id: "p1", title: demoInternHartPrerequisites[0].title, detail: demoInternHartPrerequisites[0].detail, dueHint: demoInternHartPrerequisites[0].dueHint, done: true },
+      { id: "p2", title: demoInternHartPrerequisites[1].title, detail: demoInternHartPrerequisites[1].detail, dueHint: demoInternHartPrerequisites[1].dueHint, done: false },
+      { id: "p3", title: demoInternHartPrerequisites[2].title, detail: demoInternHartPrerequisites[2].detail, dueHint: demoInternHartPrerequisites[2].dueHint, done: false },
+      { id: "p4", title: demoInternHartPrerequisites[3].title, detail: demoInternHartPrerequisites[3].detail, dueHint: demoInternHartPrerequisites[3].dueHint, done: false },
     ],
     mentorPrep: mentorPrepTemplate.map((t) => ({ ...t, done: false })),
     sessionStatus: "scheduled",
   },
   {
-    id: "mark",
-    name: "Mark Rivera",
-    avatar: "MR",
+    id: "josephine-mission",
+    name: "Josephine Mission",
+    avatar: "JM",
     schedule: {
-      evaluator: "Maria Reyes",
+      evaluator: "James Aeron Borja",
       evaluationWindowOpens: "Apr 28, 2026",
       plannedSession: "—",
       offboardingDate: "Apr 30, 2026",
@@ -112,7 +117,7 @@ const interns: InternEvalCard[] = [
         completedAt: "Mar 29, 2026",
       },
     ],
-    internPrerequisites: demoInternJuanPrerequisites.map((p) => ({ ...p, done: false })),
+    internPrerequisites: demoInternHartPrerequisites.map((p) => ({ ...p, done: false })),
     mentorPrep: mentorPrepTemplate.map((t) => ({ ...t, done: false })),
     sessionStatus: "not_scheduled",
   },

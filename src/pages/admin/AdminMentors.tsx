@@ -18,16 +18,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getInternRecentActivityRecord } from "@/lib/internAttendancePortal";
+import { getInternTaskSummariesRecord } from "@/lib/taskCatalog";
+import { MENTOR_NAME, getAllInternNames, getMentorInternInfoRecord } from "@/lib/internRoster";
 
 const mentors = [
-  { name: "Maria Reyes", department: "Tech & Innovation", interns: 5, rating: 4.8, activities: 48, email: "maria.reyes@hytfoundation.org" },
-  { name: "James Cruz", department: "Marketing", interns: 3, rating: 4.5, activities: 32, email: "james.cruz@hytfoundation.org" },
-  { name: "Elena Torres", department: "Operations", interns: 2, rating: 4.6, activities: 28, email: "elena@hytfoundation.org" },
-  { name: "Michael Tan", department: "Data Analytics", interns: 2, rating: 4.3, activities: 22, email: "michael.tan@hytfoundation.org" },
-  { name: "Patricia Cruz", department: "Human Resources", interns: 1, rating: 4.4, activities: 18, email: "patricia@hytfoundation.org" },
-  { name: "Roberto Lim", department: "Tech & Innovation", interns: 2, rating: 4.7, activities: 35, email: "roberto@hytfoundation.org" },
-  { name: "Sarah Villanueva", department: "Marketing", interns: 3, rating: 4.2, activities: 25, email: "sarah@hytfoundation.org" },
-  { name: "Antonio Reyes", department: "Finance", interns: 1, rating: 4.0, activities: 12, email: "antonio@hytfoundation.org" },
+  {
+    name: MENTOR_NAME,
+    department: "Tech & Innovation",
+    interns: getAllInternNames().length,
+    rating: 4.8,
+    activities: 48,
+    email: "james.aeron.borja@hytfoundation.org",
+  },
 ];
 
 export default function AdminMentors() {
@@ -42,60 +45,18 @@ export default function AdminMentors() {
   );
 
   const internAssignmentsByMentor: Record<string, string[]> = {
-    "Maria Reyes": ["Juan dela Cruz", "Ana Santos", "Mark Rivera", "Alex Cruz", "Bea Santos"],
-    "James Cruz": ["Lisa Tan", "Sara Kim", "Noah Villanueva"],
-    "Elena Torres": ["Peter Lim", "Marco Reyes"],
-    "Michael Tan": ["David Chen", "Renz Castillo"],
-    "Patricia Cruz": ["Ivy Mendoza"],
-    "Roberto Lim": ["Grace Yu", "Adrian Cole"],
-    "Sarah Villanueva": ["Sofia Garcia", "Mika Sarmiento", "Lia Tan"],
-    "Antonio Reyes": ["Zed Alonzo"],
+    [MENTOR_NAME]: getAllInternNames(),
   };
 
   const recentActivityByMentor: Record<string, { text: string; when: string; type: "review" | "eval" }[]> = {
-    "Maria Reyes": [
+    [MENTOR_NAME]: [
       { text: "Reviewed 2 daily reports", when: "Today, 11:20 AM", type: "review" },
       { text: "Completed 1 evaluation", when: "Yesterday, 4:10 PM", type: "eval" },
       { text: "Reviewed assigned task statuses", when: "Yesterday, 10:05 AM", type: "review" },
     ],
-    "James Cruz": [
-      { text: "Assigned a new task", when: "Today, 9:40 AM", type: "review" },
-      { text: "Reviewed assigned task statuses", when: "Yesterday, 3:15 PM", type: "review" },
-    ],
   };
 
-  const internInfo: Record<
-    string,
-    {
-      department: string;
-      batch: string;
-      mentor: string;
-      week: number;
-      status: "On Track" | "At Risk" | "New";
-      progress: number;
-      lastUpdate: string;
-    }
-  > = {
-    "Juan dela Cruz": { department: "Tech & Innovation", batch: "B16", mentor: "Maria Reyes", week: 7, status: "On Track", progress: 78, lastUpdate: "Today, 11:05 AM" },
-    "Ana Santos": { department: "Tech & Innovation", batch: "B16", mentor: "Maria Reyes", week: 7, status: "On Track", progress: 85, lastUpdate: "Today, 9:40 AM" },
-    "Mark Rivera": { department: "Tech & Innovation", batch: "B15", mentor: "Maria Reyes", week: 7, status: "At Risk", progress: 45, lastUpdate: "Yesterday, 4:40 PM" },
-    "Alex Cruz": { department: "Tech & Innovation", batch: "B16", mentor: "Maria Reyes", week: 7, status: "On Track", progress: 72, lastUpdate: "Today, 10:12 AM" },
-    "Bea Santos": { department: "Tech & Innovation", batch: "B16", mentor: "Maria Reyes", week: 7, status: "On Track", progress: 100, lastUpdate: "Today, 9:41 AM" },
-    "Lisa Tan": { department: "Marketing", batch: "B15", mentor: "James Cruz", week: 5, status: "On Track", progress: 62, lastUpdate: "Yesterday, 5:10 PM" },
-    "Sara Kim": { department: "Marketing", batch: "B14", mentor: "James Cruz", week: 2, status: "New", progress: 22, lastUpdate: "Yesterday, 2:03 PM" },
-    "Noah Villanueva": { department: "Marketing", batch: "B16", mentor: "James Cruz", week: 6, status: "On Track", progress: 69, lastUpdate: "Today, 8:55 AM" },
-    "Peter Lim": { department: "Operations", batch: "B15", mentor: "Elena Torres", week: 5, status: "On Track", progress: 55, lastUpdate: "Today, 8:00 AM" },
-    "Marco Reyes": { department: "Operations", batch: "B15", mentor: "Elena Torres", week: 5, status: "On Track", progress: 65, lastUpdate: "Today, 1:20 PM" },
-    "David Chen": { department: "Data Analytics", batch: "B14", mentor: "Michael Tan", week: 3, status: "New", progress: 28, lastUpdate: "Today, 8:20 AM" },
-    "Renz Castillo": { department: "Data Analytics", batch: "B14", mentor: "Michael Tan", week: 4, status: "On Track", progress: 58, lastUpdate: "Yesterday, 3:22 PM" },
-    "Ivy Mendoza": { department: "Human Resources", batch: "B14", mentor: "Patricia Cruz", week: 6, status: "On Track", progress: 74, lastUpdate: "Yesterday, 1:40 PM" },
-    "Grace Yu": { department: "Tech & Innovation", batch: "B14", mentor: "Roberto Lim", week: 3, status: "New", progress: 30, lastUpdate: "Today, 7:50 AM" },
-    "Adrian Cole": { department: "Data Analytics", batch: "B14", mentor: "Roberto Lim", week: 4, status: "At Risk", progress: 41, lastUpdate: "Yesterday, 5:03 PM" },
-    "Sofia Garcia": { department: "Marketing", batch: "B14", mentor: "Sarah Villanueva", week: 1, status: "New", progress: 8, lastUpdate: "Today, 7:58 AM" },
-    "Mika Sarmiento": { department: "Marketing", batch: "B15", mentor: "Sarah Villanueva", week: 5, status: "On Track", progress: 61, lastUpdate: "Yesterday, 11:14 AM" },
-    "Lia Tan": { department: "Marketing", batch: "B15", mentor: "Sarah Villanueva", week: 5, status: "On Track", progress: 70, lastUpdate: "Today, 10:44 AM" },
-    "Zed Alonzo": { department: "Finance", batch: "B14", mentor: "Antonio Reyes", week: 6, status: "On Track", progress: 60, lastUpdate: "Yesterday, 9:27 AM" },
-  };
+  const internInfo = getMentorInternInfoRecord();
 
   const selectedIntern = selectedInternName ? internInfo[selectedInternName] : undefined;
   const internStatusStyles: Record<"On Track" | "At Risk" | "New", string> = {
@@ -104,28 +65,19 @@ export default function AdminMentors() {
     "New": "text-stat-blue bg-stat-blue-bg",
   };
 
-  const recentActivityByIntern: Record<string, { text: string; when: string; type: "report" | "attendance" | "task" }[]> = {
-    "Juan dela Cruz": [
-      { text: "Submitted daily report", when: "Today, 11:05 AM", type: "report" },
-      { text: "Clocked in", when: "Today, 7:55 AM", type: "attendance" },
-      { text: "Updated assigned task status", when: "Yesterday, 4:40 PM", type: "task" },
-    ],
-    "Ana Santos": [
-      { text: "Completed assigned task", when: "Today, 9:40 AM", type: "task" },
-      { text: "Submitted daily report", when: "Yesterday, 5:10 PM", type: "report" },
-    ],
-  };
+  const activityTypes = ["report", "attendance", "task"] as const;
+  const recentActivityByIntern: Record<string, { text: string; when: string; type: (typeof activityTypes)[number] }[]> =
+    Object.fromEntries(
+      Object.entries(getInternRecentActivityRecord()).map(([name, items]) => [
+        name,
+        items.map((item, index) => ({
+          ...item,
+          type: activityTypes[index % activityTypes.length],
+        })),
+      ]),
+    );
 
-  const tasksByIntern: Record<string, { title: string; status: "Pending" | "In Progress" | "Completed"; due: string }[]> = {
-    "Juan dela Cruz": [
-      { title: "Complete TypeScript Assessment", status: "In Progress", due: "Mar 25" },
-      { title: "Submit Weekly Progress Report", status: "Pending", due: "Mar 27" },
-    ],
-    "Ana Santos": [
-      { title: "Complete TypeScript Assessment", status: "Completed", due: "Mar 25" },
-      { title: "Submit Weekly Progress Report", status: "In Progress", due: "Mar 27" },
-    ],
-  };
+  const tasksByIntern = getInternTaskSummariesRecord();
 
   const openDetails = (name: string) => {
     setSelectedName(name);

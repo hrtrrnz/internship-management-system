@@ -32,138 +32,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { getInternRecentActivityRecord } from "@/lib/internAttendancePortal";
+import { getInternTaskSummariesRecord } from "@/lib/taskCatalog";
+import { getMentorPortalInterns } from "@/lib/internRoster";
 
-type Intern = {
-  name: string;
-  unit: string;
-  batch: string;
-  week: number;
-  progress: number;
-  tasks: number;
-  status: string;
-  avatar: string;
-  email: string;
-  phone: string;
-  school: string;
-  startDate: string;
-};
+type Intern = ReturnType<typeof getMentorPortalInterns>[number];
 
 type ModalView = "profile" | "tasks" | "evaluate" | "flag";
 
-const interns: Intern[] = [
-  {
-    name: "Juan dela Cruz",
-    unit: "Technology & Innovation",
-    batch: "B16",
-    week: 7,
-    progress: 78,
-    tasks: 18,
-    status: "On Track",
-    avatar: "JD",
-    email: "juan.delacruz@company.mail",
-    phone: "+63 917 100 0001",
-    school: "University of the Philippines",
-    startDate: "Jan 6, 2026",
-  },
-  {
-    name: "Ana Santos",
-    unit: "Technology & Innovation",
-    batch: "B16",
-    week: 7,
-    progress: 85,
-    tasks: 22,
-    status: "On Track",
-    avatar: "AS",
-    email: "ana.santos@company.mail",
-    phone: "+63 917 100 0002",
-    school: "Ateneo de Manila University",
-    startDate: "Jan 6, 2026",
-  },
-  {
-    name: "Mark Rivera",
-    unit: "Technology & Innovation",
-    batch: "B15",
-    week: 7,
-    progress: 45,
-    tasks: 10,
-    status: "Needs Attention",
-    avatar: "MR",
-    email: "mark.rivera@company.mail",
-    phone: "+63 917 100 0003",
-    school: "De La Salle University",
-    startDate: "Oct 7, 2025",
-  },
-  {
-    name: "Lisa Tan",
-    unit: "Marketing",
-    batch: "B15",
-    week: 5,
-    progress: 62,
-    tasks: 14,
-    status: "On Track",
-    avatar: "LT",
-    email: "lisa.tan@company.mail",
-    phone: "+63 917 100 0004",
-    school: "University of Santo Tomas",
-    startDate: "Oct 7, 2025",
-  },
-  {
-    name: "Peter Lim",
-    unit: "Operations",
-    batch: "B15",
-    week: 5,
-    progress: 55,
-    tasks: 12,
-    status: "On Track",
-    avatar: "PL",
-    email: "peter.lim@company.mail",
-    phone: "+63 917 100 0005",
-    school: "Mapúa University",
-    startDate: "Oct 7, 2025",
-  },
-  {
-    name: "Grace Yu",
-    unit: "Technology & Innovation",
-    batch: "B14",
-    week: 3,
-    progress: 30,
-    tasks: 6,
-    status: "New",
-    avatar: "GY",
-    email: "grace.yu@company.mail",
-    phone: "+63 917 100 0006",
-    school: "Adamson University",
-    startDate: "Jul 7, 2025",
-  },
-  {
-    name: "David Chen",
-    unit: "Data Analytics",
-    batch: "B14",
-    week: 3,
-    progress: 28,
-    tasks: 5,
-    status: "New",
-    avatar: "DC",
-    email: "david.chen@company.mail",
-    phone: "+63 917 100 0007",
-    school: "University of San Carlos",
-    startDate: "Jul 7, 2025",
-  },
-  {
-    name: "Sofia Garcia",
-    unit: "Marketing",
-    batch: "B14",
-    week: 1,
-    progress: 8,
-    tasks: 2,
-    status: "New",
-    avatar: "SG",
-    email: "sofia.garcia@company.mail",
-    phone: "+63 917 100 0008",
-    school: "Far Eastern University",
-    startDate: "Jul 7, 2025",
-  },
-];
+const interns = getMentorPortalInterns();
 
 const statusStyles: Record<string, string> = {
   "On Track": "text-stat-green bg-stat-green-bg",
@@ -171,35 +48,8 @@ const statusStyles: Record<string, string> = {
   New: "text-stat-blue bg-stat-blue-bg",
 };
 
-const tasksByIntern: Record<string, { title: string; status: "Pending" | "In Progress" | "Completed"; due: string }[]> = {
-  "Juan dela Cruz": [
-    { title: "Complete TypeScript Assessment", status: "In Progress", due: "Mar 25" },
-    { title: "Submit Weekly Progress Report", status: "Pending", due: "Mar 27" },
-  ],
-  "Ana Santos": [
-    { title: "Complete TypeScript Assessment", status: "Completed", due: "Mar 25" },
-    { title: "Submit Weekly Progress Report", status: "In Progress", due: "Mar 27" },
-  ],
-  "Mark Rivera": [
-    { title: "API Integration Exercise", status: "In Progress", due: "Mar 24" },
-    { title: "Catch-up: Daily Reports (3 missing)", status: "Pending", due: "Mar 26" },
-  ],
-};
-
-const recentActivityByIntern: Record<string, { text: string; when: string }[]> = {
-  "Juan dela Cruz": [
-    { text: "Submitted daily report", when: "Today, 11:05 AM" },
-    { text: "Clocked in", when: "Today, 7:55 AM" },
-  ],
-  "Ana Santos": [
-    { text: "Completed assigned task", when: "Today, 9:40 AM" },
-    { text: "Submitted daily report", when: "Yesterday, 5:10 PM" },
-  ],
-  "Mark Rivera": [
-    { text: "Missed daily report deadline", when: "Yesterday, 6:00 PM" },
-    { text: "Requested mentor check-in", when: "Yesterday, 2:15 PM" },
-  ],
-};
+const tasksByIntern = getInternTaskSummariesRecord();
+const recentActivityByIntern = getInternRecentActivityRecord();
 
 const batches = Array.from(new Set(interns.map((i) => i.batch))).sort((a, b) => b.localeCompare(a));
 

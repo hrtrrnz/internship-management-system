@@ -13,9 +13,9 @@ import {
 } from "@/components/evaluation/evaluationShared";
 import {
   DEMO_STUDENT_INTERN_ID,
-  demoInternJuanCompletedWorks,
-  demoInternJuanPrerequisites,
-  demoScheduleMariaReyes,
+  demoInternHartCompletedWorks,
+  demoInternHartPrerequisites,
+  demoScheduleJamesAeronBorja,
 } from "@/lib/evaluationDemoData";
 import {
   useEvaluationFormWorkflow,
@@ -37,9 +37,9 @@ export default function Evaluations() {
   const [activeTasksPage, setActiveTasksPage] = useState(0);
   const [beforeEvalPage, setBeforeEvalPage] = useState(0);
   const resolvedForm = resolveEvaluationFormForIntern(DEMO_STUDENT_INTERN_ID, submissions, internFormAssignments);
-  const prerequisites = demoInternJuanPrerequisites;
+  const prerequisites = demoInternHartPrerequisites;
   const activeInternTasks = getActiveInternTasks();
-  const completedWorks = [...demoInternJuanCompletedWorks];
+  const completedWorks = [...demoInternHartCompletedWorks];
 
   const openLinkedOrEvaluationTask = useCallback((taskId: number) => {
     const t = getInternTaskById(taskId);
@@ -49,7 +49,7 @@ export default function Evaluations() {
   const doneCount = prerequisites.filter((p) => p.done).length;
   const totalReq = prerequisites.length;
   const allReady = doneCount === totalReq;
-  const sch = demoScheduleMariaReyes;
+  const sch = demoScheduleJamesAeronBorja;
 
   const completedWorkTotalPages = Math.max(1, Math.ceil(completedWorks.length / ITEMS_PER_PAGE));
   const activeTasksTotalPages = Math.max(1, Math.ceil(activeInternTasks.length / ITEMS_PER_PAGE));

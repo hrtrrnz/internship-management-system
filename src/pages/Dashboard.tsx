@@ -105,7 +105,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <StatCard icon={Clock} value="320 / 486" label="Training Hours" sub="Rendered Hours / Required Hours" colorClass="--stat-blue" />
+        <StatCard icon={Clock} value="402 / 400" label="Training Hours" sub="Rendered Hours / Required Hours" colorClass="--stat-blue" />
         <StatCard icon={Users} value="34" label="Days Attended" sub="3 this week" colorClass="--stat-orange" />
         <StatCard icon={CheckSquare} value="18" label="Tasks Completed" sub="5 pending" colorClass="--stat-green" />
         <StatCard icon={FileText} value="78%" label="Overall Progress" sub="On track · 46 days left" colorClass="--stat-emerald" />
@@ -183,7 +183,7 @@ export default function Dashboard() {
               <div>
                 <label className="text-xs font-semibold text-foreground">Full Name</label>
                 <div className="mt-1 px-3 py-2.5 rounded-lg bg-muted text-sm text-foreground flex items-center gap-2">
-                  <Users className="w-4 h-4 text-muted-foreground" /> Juan dela Cruz
+                  <Users className="w-4 h-4 text-muted-foreground" /> James Aeron Borja
                 </div>
               </div>
               <div>

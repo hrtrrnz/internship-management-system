@@ -1,6 +1,11 @@
-import { User, Mail, Phone, MapPin, Calendar, Star } from "lucide-react";
+import { User, Calendar, Star } from "lucide-react";
+import { ProfilePhotoEditor } from "@/components/ProfilePhotoEditor";
+import { ProfileAccountSection } from "@/components/profile/ProfileAccountSection";
+import { useRole } from "@/contexts/RoleContext";
 
 export default function MentorProfile() {
+  const { user } = useRole();
+
   return (
     <div className="space-y-6">
       <div>
@@ -9,21 +14,17 @@ export default function MentorProfile() {
 
       <div className="grid grid-cols-3 gap-6">
         <div className="bg-card rounded-xl border border-border p-6 flex flex-col items-center text-center">
-          <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-3xl font-bold font-display mb-4">
-            MR
-          </div>
-          <h3 className="text-xl font-display font-bold text-foreground">Maria Reyes</h3>
-          <p className="text-sm text-muted-foreground">Mentor</p>
+          <ProfilePhotoEditor />
+          <h3 className="mt-2 text-xl font-display font-bold text-foreground">{user.name}</h3>
+          <p className="text-sm text-muted-foreground">{user.roleLabel}</p>
           <div className="flex items-center gap-1 mt-2">
-            {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 text-stat-orange fill-stat-orange" />)}
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star key={i} className="w-4 h-4 text-stat-orange fill-stat-orange" />
+            ))}
           </div>
           <p className="text-xs text-muted-foreground mt-1">4.8 avg. mentor rating</p>
 
-          <div className="mt-4 w-full space-y-3 text-left">
-            <InfoRow icon={Mail} label="Email" value="maria.reyes@hytfoundation.org" />
-            <InfoRow icon={Phone} label="Phone" value="+63 917 555 1234" />
-            <InfoRow icon={MapPin} label="Address" value="Manila, Philippines" />
-          </div>
+          <ProfileAccountSection className="mt-4 w-full text-left" />
         </div>
 
         <div className="col-span-2 space-y-4">
@@ -54,18 +55,6 @@ export default function MentorProfile() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-      <Icon className="w-4 h-4 text-muted-foreground" />
-      <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-sm text-foreground">{value}</p>
       </div>
     </div>
   );

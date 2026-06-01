@@ -6,7 +6,7 @@ const paths = [
     modules: 6,
     assigned: 5,
     description: "React, TypeScript, Tailwind CSS, testing, and deployment fundamentals.",
-    interns: ["Juan dela Cruz", "Ana Santos", "Mark Rivera", "Grace Yu", "David Chen"],
+    interns: ["Hart Lawrence Binay", "Ian Belarmino", "Kasandra Bumagat", "Kim Gamot", "Josephine Mission"],
   },
   {
     title: "Marketing & Analytics Track",

@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
-import { Calendar, CalendarDays, Clock, GraduationCap, Mail, MapPin, Phone } from "lucide-react";
+import { Calendar, CalendarDays, Clock, FileText, GraduationCap, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CvPreviewDialog } from "@/components/profile/CvPreviewDialog";
 import {
   Dialog,
   DialogContent,
@@ -7,8 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useInternAttendance } from "@/hooks/useInternAttendance";
-import { useRole } from "@/contexts/RoleContext";
 import {
   buildMonthDays,
   getMonthsInRange,
@@ -19,6 +19,11 @@ import {
   type WeekPreviewStatus,
 } from "@/lib/internAttendance";
 import { cn } from "@/lib/utils";
+import { useInternAttendance } from "@/hooks/useInternAttendance";
+import { ProfilePhotoEditor } from "@/components/ProfilePhotoEditor";
+import { ProfileAccountSection } from "@/components/profile/ProfileAccountSection";
+import { LSPU_SAN_PABLO_CAMPUS } from "@/lib/internRoster";
+import { useRole } from "@/contexts/RoleContext";
 
 type ProfileDayStatus = Exclude<DayStatus, "none" | "excused">;
 
@@ -46,18 +51,20 @@ const weekBarStyles: Record<WeekPreviewStatus, string> = {
   none: "bg-muted",
 };
 
-const PROFILE_EMAIL = "hartlawrencebinay.dreamacademy@gmail.com";
-
-const HOURS_RENDERED = 320;
-const HOURS_REQUIRED = 486;
+const HOURS_RENDERED = 402;
+const HOURS_REQUIRED = 400;
 
 export default function MyProfile() {
   const { user } = useRole();
-  const { today, policySlice, overrides, stats } = useInternAttendance();
-  const hoursPercent = Math.round((HOURS_RENDERED / HOURS_REQUIRED) * 100);
+  const [cvOpen, setCvOpen] = useState(false);
+  const { today, policySlice, overrides, stats, resolveOptions } = useInternAttendance(undefined, {
+    profileAttendance: true,
+  });
+  const hoursPercent = Math.min(100, Math.round((HOURS_RENDERED / HOURS_REQUIRED) * 100));
 
   return (
     <div className="space-y-6">
+      <CvPreviewDialog open={cvOpen} onOpenChange={setCvOpen} internName={user.name} />
       <div>
         <h2 className="text-2xl font-display font-bold text-foreground">My Profile</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -68,18 +75,23 @@ export default function MyProfile() {
       <div className="grid grid-cols-3 gap-6">
         <div className="bg-card rounded-xl border border-border p-6 h-full">
           <div className="flex flex-col items-center text-center pt-1">
-            <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-bold font-display mb-4">
-              {user.initials}
-            </div>
-            <h3 className="text-xl font-display font-bold text-foreground">{user.name}</h3>
+            <ProfilePhotoEditor />
+            <h3 className="mt-2 text-xl font-display font-bold text-foreground">{user.name}</h3>
             <p className="text-sm text-muted-foreground">{user.roleLabel}</p>
           </div>
 
-          <div className="mt-6 w-full space-y-3 text-left pb-1">
-            <InfoRow icon={Mail} label="Email" value={PROFILE_EMAIL} />
-            <InfoRow icon={Phone} label="Phone" value="+63 912 345 6789" />
-            <InfoRow icon={MapPin} label="Address" value="Manila, Philippines" />
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-5 w-full gap-2"
+            onClick={() => setCvOpen(true)}
+          >
+            <FileText className="h-4 w-4" />
+            View CV
+          </Button>
+
+          <ProfileAccountSection className="mt-6 w-full text-left pb-1" />
         </div>
 
         <div className="col-span-2">
@@ -87,6 +99,7 @@ export default function MyProfile() {
             <h3 className="font-display font-bold text-foreground mb-4">Internship Details</h3>
             <div className="grid grid-cols-2 gap-4">
               <InfoBlock icon={GraduationCap} label="Program" value="Bachelor of Science in Information Technology" />
+              <InfoBlock icon={GraduationCap} label="School" value={LSPU_SAN_PABLO_CAMPUS} />
               <InfoBlock icon={MapPin} label="Unit" value="Technology & Innovation" />
               <InfoBlock icon={GraduationCap} label="Batch" value={user.batch} />
               <InfoBlock icon={MapPin} label="Office" value="HYT Business Center" />
@@ -95,7 +108,13 @@ export default function MyProfile() {
 
             <div className="mt-6 grid gap-4 border-t border-border pt-6 md:grid-cols-2">
               <HoursRenderedSection rendered={HOURS_RENDERED} required={HOURS_REQUIRED} percent={hoursPercent} />
-              <AttendanceSection stats={stats} today={today} policySlice={policySlice} overrides={overrides} />
+              <AttendanceSection
+                stats={stats}
+                today={today}
+                policySlice={policySlice}
+                overrides={overrides}
+                resolveOptions={resolveOptions}
+              />
             </div>
           </div>
         </div>
@@ -114,6 +133,12 @@ function HoursRenderedSection({
   percent: number;
 }) {
   const remaining = required - rendered;
+  const remainingLabel =
+    remaining > 0
+      ? `${remaining} hours remaining`
+      : remaining < 0
+        ? `${Math.abs(remaining)} hours over requirement`
+        : "Requirement met";
 
   return (
     <div className="rounded-lg border border-border/60 bg-muted/20 p-4">
@@ -125,7 +150,7 @@ function HoursRenderedSection({
         {rendered}
         <span className="text-base font-semibold text-muted-foreground"> / {required}</span>
       </p>
-      <p className="mt-0.5 text-xs text-muted-foreground">{remaining} hours remaining</p>
+      <p className="mt-0.5 text-xs text-muted-foreground">{remainingLabel}</p>
       <div className="mt-4">
         <div className="relative h-3 w-full overflow-hidden rounded-full bg-muted">
           <div
@@ -148,11 +173,13 @@ function AttendanceSection({
   today,
   policySlice,
   overrides,
+  resolveOptions,
 }: {
   stats: ReturnType<typeof useInternAttendance>["stats"];
   today: Date;
   policySlice: ReturnType<typeof useInternAttendance>["policySlice"];
   overrides: ReturnType<typeof useInternAttendance>["overrides"];
+  resolveOptions: ReturnType<typeof useInternAttendance>["resolveOptions"];
 }) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const months = useMemo(() => getMonthsInRange(INTERNSHIP_START, today), [today]);
@@ -194,25 +221,11 @@ function AttendanceSection({
           ))}
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-3">
-          <div className="flex flex-wrap gap-2 text-[11px]">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-stat-green" />
-              Present
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-stat-orange" />
-              Late
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-destructive" />
-              Absent
-            </span>
-          </div>
+        <div className="mt-3 border-t border-border/60 pt-3">
           <button
             type="button"
             onClick={() => setCalendarOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted sm:w-auto"
           >
             <CalendarDays className="h-3.5 w-3.5" />
             View full history
@@ -238,6 +251,9 @@ function AttendanceSection({
               <span className="text-muted-foreground">
                 <span className="font-semibold text-destructive">{stats.absent}</span> absent
               </span>
+              <span className="text-muted-foreground">
+                <span className="font-semibold text-blue-500">{stats.excused}</span> excused
+              </span>
             </div>
           </DialogHeader>
 
@@ -251,6 +267,7 @@ function AttendanceSection({
                   today={today}
                   policySlice={policySlice}
                   overrides={overrides}
+                  resolveOptions={resolveOptions}
                 />
               ))}
             </div>
@@ -267,16 +284,18 @@ function MonthAttendanceGrid({
   today,
   policySlice,
   overrides,
+  resolveOptions,
 }: {
   year: number;
   month: number;
   today: Date;
   policySlice: ReturnType<typeof useInternAttendance>["policySlice"];
   overrides: ReturnType<typeof useInternAttendance>["overrides"];
+  resolveOptions: ReturnType<typeof useInternAttendance>["resolveOptions"];
 }) {
   const cells = useMemo(
-    () => buildMonthDays(year, month, today, policySlice, overrides),
-    [year, month, today, policySlice, overrides],
+    () => buildMonthDays(year, month, today, policySlice, overrides, resolveOptions),
+    [year, month, today, policySlice, overrides, resolveOptions],
   );
 
   return (
@@ -321,18 +340,6 @@ function MonthAttendanceGrid({
             </div>
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-      <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-sm text-foreground break-all">{value}</p>
       </div>
     </div>
   );

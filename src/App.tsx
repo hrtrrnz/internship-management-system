@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RoleProvider } from "@/contexts/RoleContext";
+import { ProfilePhotoProvider } from "@/contexts/ProfilePhotoContext";
+import { ProfileAccountProvider } from "@/contexts/ProfileAccountContext";
 import { MessagesThreadProvider } from "@/contexts/MessagesThreadContext";
 import { EvaluationFormWorkflowProvider } from "@/contexts/EvaluationFormWorkflowContext";
 import { AttendancePolicyProvider } from "@/contexts/AttendancePolicyContext";
@@ -60,14 +62,18 @@ const queryClient = new QueryClient();
 function RootLayout() {
   return (
     <RoleProvider>
-      <MessagesThreadProvider>
-        <AttendancePolicyProvider>
-          <EvaluationFormWorkflowProvider>
-            <ScrollRestoration />
-            <Outlet />
-          </EvaluationFormWorkflowProvider>
-        </AttendancePolicyProvider>
-      </MessagesThreadProvider>
+      <ProfileAccountProvider>
+        <ProfilePhotoProvider>
+          <MessagesThreadProvider>
+            <AttendancePolicyProvider>
+              <EvaluationFormWorkflowProvider>
+                <ScrollRestoration />
+                <Outlet />
+              </EvaluationFormWorkflowProvider>
+            </AttendancePolicyProvider>
+          </MessagesThreadProvider>
+        </ProfilePhotoProvider>
+      </ProfileAccountProvider>
     </RoleProvider>
   );
 }

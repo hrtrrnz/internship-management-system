@@ -1,7 +1,11 @@
-import { Mail, Phone, MapPin, Calendar, Shield } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { Calendar, Shield } from "lucide-react";
+import { ProfilePhotoEditor } from "@/components/ProfilePhotoEditor";
+import { ProfileAccountSection, ProfilePasswordLastUpdated } from "@/components/profile/ProfileAccountSection";
+import { useRole } from "@/contexts/RoleContext";
 
 export default function AdminProfile() {
+  const { user } = useRole();
+
   return (
     <div className="space-y-6">
       <div>
@@ -10,16 +14,10 @@ export default function AdminProfile() {
 
       <div className="grid grid-cols-3 gap-6">
         <div className="bg-card rounded-xl border border-border p-6 flex flex-col items-center text-center">
-          <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-3xl font-bold font-display mb-4">
-            CS
-          </div>
-          <h3 className="text-xl font-display font-bold text-foreground">Carlos Santos</h3>
-          <p className="text-sm text-muted-foreground">Admin</p>
-          <div className="mt-4 w-full space-y-3 text-left">
-            <InfoRow icon={Mail} label="Email" value="carlos@hytfoundation.org" />
-            <InfoRow icon={Phone} label="Phone" value="+63 918 200 1100" />
-            <InfoRow icon={MapPin} label="Address" value="Manila, Philippines" />
-          </div>
+          <ProfilePhotoEditor />
+          <h3 className="mt-2 text-xl font-display font-bold text-foreground">{user.name}</h3>
+          <p className="text-sm text-muted-foreground">{user.roleLabel}</p>
+          <ProfileAccountSection className="mt-4 w-full text-left" />
         </div>
 
         <div className="col-span-2 space-y-4">
@@ -29,44 +27,28 @@ export default function AdminProfile() {
               <InfoBlock icon={Shield} label="Role" value="Admin" />
               <InfoBlock icon={Shield} label="Access Level" value="Full System Access" />
               <InfoBlock icon={Calendar} label="Member Since" value="January 2025" />
-              <InfoBlock icon={Calendar} label="Last Password Update" value="March 5, 2026" />
+              <InfoBlock
+                icon={Calendar}
+                label="Last Password Update"
+                value={<ProfilePasswordLastUpdated />}
+              />
             </div>
           </div>
-
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() =>
-                toast({
-                  title: "Profile editor",
-                  description: "Edit profile form will appear here.",
-                })
-              }
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-            >
-              Edit profile
-            </button>
-          </div>
-
         </div>
       </div>
     </div>
   );
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-      <Icon className="w-4 h-4 text-muted-foreground" />
-      <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-sm text-foreground">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function InfoBlock({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function InfoBlock({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div className="flex items-start gap-3">
       <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">

@@ -1,17 +1,17 @@
 import { Calendar, Plus, Video, Clock } from "lucide-react";
 
 const upcoming = [
-  { intern: "Juan dela Cruz", date: "Mar 25, 2026", time: "2:00 PM", topic: "API Design Review", type: "1-on-1" },
-  { intern: "Ana Santos", date: "Mar 26, 2026", time: "10:00 AM", topic: "Code Review Session", type: "1-on-1" },
-  { intern: "Mark Rivera", date: "Mar 26, 2026", time: "3:00 PM", topic: "Progress Check-in", type: "1-on-1" },
+  { intern: "Hart Lawrence Binay", date: "Mar 25, 2026", time: "2:00 PM", topic: "API Design Review", type: "1-on-1" },
+  { intern: "Ian Belarmino", date: "Mar 26, 2026", time: "10:00 AM", topic: "Code Review Session", type: "1-on-1" },
+  { intern: "Josephine Mission", date: "Mar 26, 2026", time: "3:00 PM", topic: "Progress Check-in", type: "1-on-1" },
   { intern: "All Interns", date: "Mar 27, 2026", time: "9:00 AM", topic: "Weekly Team Standup", type: "Group" },
 ];
 
 const past = [
-  { intern: "Juan dela Cruz", date: "Mar 18, 2026", topic: "React Best Practices", duration: "45 min", notes: "Covered hooks, context, and performance optimization" },
-  { intern: "Ana Santos", date: "Mar 18, 2026", topic: "Testing Strategies", duration: "30 min", notes: "Discussed unit and integration testing patterns" },
+  { intern: "Hart Lawrence Binay", date: "Mar 18, 2026", topic: "React Best Practices", duration: "45 min", notes: "Covered hooks, context, and performance optimization" },
+  { intern: "Ian Belarmino", date: "Mar 18, 2026", topic: "Testing Strategies", duration: "30 min", notes: "Discussed unit and integration testing patterns" },
   { intern: "All Interns", date: "Mar 17, 2026", topic: "Sprint Planning", duration: "60 min", notes: "Assigned tasks for Week 7, reviewed blockers" },
-  { intern: "Mark Rivera", date: "Mar 14, 2026", topic: "Performance Discussion", duration: "40 min", notes: "Discussed areas for improvement, set new goals" },
+  { intern: "Josephine Mission", date: "Mar 14, 2026", topic: "Performance Discussion", duration: "40 min", notes: "Discussed areas for improvement, set new goals" },
 ];
 
 export default function MentorSessions() {

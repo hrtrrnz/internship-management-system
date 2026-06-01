@@ -18,64 +18,20 @@ import {
   ScheduleStat,
   ScheduleStatsGrid,
 } from "@/components/evaluation/evaluationShared";
+import { MENTOR_NAME, getAdminInternRows } from "@/lib/internRoster";
 
 /** Aggregated view — prerequisite counts align with the four standard items on the intern Evaluation page. */
-const cohortInterns = [
-  {
-    name: "Juan dela Cruz",
-    mentor: "Maria Reyes",
-    dept: "Tech & Innovation",
-    prereqDone: 2,
+const cohortInterns = getAdminInternRows()
+  .filter((_, index) => index < 8)
+  .map((row, index) => ({
+    name: row.name,
+    mentor: MENTOR_NAME,
+    dept: row.department,
+    prereqDone: index === 0 ? 2 : index % 4,
     prereqTotal: 4,
-    completedWorkItems: 4,
-    offboarding: "Apr 18, 2026",
-  },
-  {
-    name: "Ana Santos",
-    mentor: "Maria Reyes",
-    dept: "Tech & Innovation",
-    prereqDone: 1,
-    prereqTotal: 4,
-    completedWorkItems: 2,
-    offboarding: "Apr 25, 2026",
-  },
-  {
-    name: "Mark Rivera",
-    mentor: "Maria Reyes",
-    dept: "Tech & Innovation",
-    prereqDone: 0,
-    prereqTotal: 4,
-    completedWorkItems: 1,
-    offboarding: "Apr 30, 2026",
-  },
-  {
-    name: "Lisa Tan",
-    mentor: "James Cruz",
-    dept: "Marketing",
-    prereqDone: 4,
-    prereqTotal: 4,
-    completedWorkItems: 5,
-    offboarding: "Apr 8, 2026",
-  },
-  {
-    name: "Peter Lim",
-    mentor: "Elena Torres",
-    dept: "Operations",
-    prereqDone: 3,
-    prereqTotal: 4,
-    completedWorkItems: 3,
-    offboarding: "Apr 10, 2026",
-  },
-  {
-    name: "Sara Kim",
-    mentor: "James Cruz",
-    dept: "Marketing",
-    prereqDone: 2,
-    prereqTotal: 4,
-    completedWorkItems: 2,
-    offboarding: "May 5, 2026",
-  },
-];
+    completedWorkItems: Math.max(1, 5 - (index % 4)),
+    offboarding: row.batch === "B16" ? "Apr 18, 2026" : row.batch === "B15" ? "Apr 25, 2026" : "May 5, 2026",
+  }));
 
 const cohortSnapshot = [
   { title: "Daily reporting streaks acknowledged", detail: "Five interns at full March cycle compliance · two with gaps" },

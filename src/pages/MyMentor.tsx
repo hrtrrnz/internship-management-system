@@ -23,10 +23,10 @@ type Mentor = {
 
 const mentors: Mentor[] = [
   {
-    id: "maria",
-    initials: "MR",
-    name: "Maria Reyes",
-    title: "Senior Software Engineer",
+    id: "james-aeron-borja",
+    initials: "JAB",
+    name: "James Aeron Borja",
+    title: "Senior Mentor",
     department: "Technology & Innovation Department",
     creditHoursAwarded: 24.5,
     tasks: [
@@ -35,20 +35,6 @@ const mentors: Mentor[] = [
       { id: 3, title: "Refactor authentication module", due: "Mar 22, 2026", status: "Returned with feedback", credits: 3.0 },
       { id: 4, title: "Document REST endpoints for mobile team", due: "Mar 18, 2026", status: "Approved", credits: 2.0 },
       { id: 5, title: "Shadow senior engineer — pairing sessions (log)", due: "Mar 15, 2026", status: "Approved", credits: 6.0 },
-    ],
-  },
-  {
-    id: "james",
-    initials: "JC",
-    name: "James Chen",
-    title: "Product Design Lead",
-    department: "Creative Unit",
-    creditHoursAwarded: 12.0,
-    tasks: [
-      { id: 1, title: "Dashboard wireframe revision v2", due: "Mar 29, 2026", status: "In review", credits: 2.0 },
-      { id: 2, title: "Design system tokens — spacing audit", due: "Mar 24, 2026", status: "Submitted", credits: 3.5 },
-      { id: 3, title: "Stakeholder review deck — onboarding flow", due: "Mar 20, 2026", status: "Approved", credits: 4.0 },
-      { id: 4, title: "Icon set export for mobile handoff", due: "Mar 12, 2026", status: "Approved", credits: 2.5 },
     ],
   },
 ];

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { ADMIN_NAME, internInitials } from "@/lib/internRoster";
 
 export type UserRole = "student" | "mentor" | "admin";
 
@@ -14,8 +15,15 @@ interface RoleUser {
 
 const roleUsers: Record<UserRole, RoleUser> = {
   student: { name: "Hart Lawrence Binay", initials: "HLB", role: "student", roleLabel: "Intern", unit: "Tech & Innovation", batch: "B16" },
-  mentor: { name: "Maria Reyes", initials: "MR", role: "mentor", roleLabel: "Senior Engineer", unit: "Tech & Innovation", batch: "N/A" },
-  admin: { name: "Carlos Santos", initials: "CS", role: "admin", roleLabel: "Administrator", unit: "Administration", batch: "N/A" },
+  mentor: { name: "James Aeron Borja", initials: "JAB", role: "mentor", roleLabel: "Senior Engineer", unit: "Tech & Innovation", batch: "N/A" },
+  admin: {
+    name: ADMIN_NAME,
+    initials: internInitials(ADMIN_NAME),
+    role: "admin",
+    roleLabel: "Administrator",
+    unit: "Administration",
+    batch: "N/A",
+  },
 };
 
 interface RoleContextType {

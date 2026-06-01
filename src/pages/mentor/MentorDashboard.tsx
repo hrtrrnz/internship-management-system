@@ -1,10 +1,19 @@
 import { GraduationCap, CheckSquare, FileText, TrendingUp } from "lucide-react";
+import { activeTaskCountForIntern } from "@/lib/taskCatalog";
+import { getAdminInternRows, INTERN_ROSTER } from "@/lib/internRoster";
 
-const internSummary = [
-  { name: "Juan dela Cruz", progress: 78, tasks: 18, reports: 12, status: "On Track" },
-  { name: "Ana Santos", progress: 85, tasks: 22, reports: 15, status: "On Track" },
-  { name: "Mark Rivera", progress: 45, tasks: 10, reports: 7, status: "Needs Attention" },
-];
+const internSummary = getAdminInternRows()
+  .slice(0, 3)
+  .map((row) => {
+    const entry = INTERN_ROSTER.find((i) => i.name === row.name);
+    return {
+      name: row.name,
+      progress: row.progress,
+      tasks: entry ? activeTaskCountForIntern(entry.id) : 0,
+      reports: 7 + (row.week % 9),
+      status: row.status,
+    };
+  });
 
 export default function MentorDashboard() {
   return (

@@ -8,6 +8,7 @@ import {
 import { useRole, UserRole } from "@/contexts/RoleContext";
 import { useState, useRef, useEffect } from "react";
 import hytLogo from "@/assets/hyt-logo.png";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -56,7 +57,7 @@ const mentorNav: NavSection[] = [
     label: "MANAGEMENT",
     items: [
       { to: "/mentor/attendance-review", icon: Clock, label: "Attendance Review" },
-      { to: "/mentor/report-review", icon: FileText, label: "Report Review" },
+      { to: "/mentor/report-review", icon: FileText, label: "Intern Reports" },
       { to: "/mentor/task-assignments", icon: CheckSquare, label: "Task Assignments" },
       { to: "/mentor/evaluations", icon: ClipboardCheck, label: "Evaluation" },
       { to: "/mentor/messages", icon: MessageSquare, label: "Messages" },
@@ -339,9 +340,11 @@ export default function AppSidebar({ collapsed = false }: AppSidebarProps) {
             collapsed ? "flex justify-center" : "flex items-center gap-3"
           )}
         >
-          <div className="w-9 h-9 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground text-xs font-bold">
-            {user.initials}
-          </div>
+          <ProfileAvatar
+            size="sm"
+            className="h-9 w-9"
+            fallbackClassName="bg-sidebar-primary text-sidebar-primary-foreground"
+          />
           <div className={cn("min-w-0 flex-1", collapsed && "hidden")}>
             <p className="text-sm font-semibold text-sidebar-accent-foreground truncate">{user.name}</p>
             <p className="text-xs text-sidebar-muted truncate">{sidebarRoleLabel[role]}</p>
